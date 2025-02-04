@@ -1,0 +1,16 @@
+version: 1.0
+long_title: "Agentic Building Blocks: Creating AI Agents with MAX Serve and OpenAI Function Calling"
+short_title: "MAX Serve OpenAI function calling"
+author: "Ehsan M. Kermani"
+author_image: "path/to/author-image.jpg"
+github_repo: "https://github.com/modular/max-recipes/max-serve-openai-function-calling"
+difficulty: "basic"
+tags:
+  - max-serve
+  - openai
+  - agent
+
+tasks:
+  - magic run single_function_call
+  - magic run multi_function_calls
+  - magic run app
