@@ -1,0 +1,43 @@
+services:
+  max-openai-api:
+    image: modular/max-openai-api:nightly
+    profiles: [ "cpu" ]
+    ports:
+      - "8000:8000"
+    environment:
+      HUGGING_FACE_HUB_TOKEN: ${HUGGING_FACE_HUB_TOKEN}
+      HF_HUB_ENABLE_HF_TRANSFER: "1"
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    command: --huggingface-repo-id sentence-transformers/all-mpnet-base-v2
+    healthcheck:
+      test: [ "CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/v1/health')" ]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 60s
+
+  max-openai-api-gpu:
+    image: modular/max-openai-api:nightly
+    profiles: [ "gpu" ]
+    ports:
+      - "8000:8000"
+    environment:
+      HUGGING_FACE_HUB_TOKEN: ${HUGGING_FACE_HUB_TOKEN}
+      HF_HUB_ENABLE_HF_TRANSFER: "1"
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+    command: --huggingface-repo-id sentence-transformers/all-mpnet-base-v2
+    healthcheck:
+      test: [ "CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/v1/health')" ]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 60s
