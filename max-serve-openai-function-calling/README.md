@@ -3,7 +3,7 @@
 Building intelligent agents that interact seamlessly with users requires structured and efficient mechanisms for executing actions.
 OpenAI's function calling feature and Modular's [MAX Serve](https://docs.modular.com/max/serve) provide a powerful combination to enable dynamic and context-aware AI applications
 
-In this blog, we will:
+In this recipe, we will:
 
 - Explain what LLM function calling is and why it's useful using MAX Serve and llama3-8B which we can run in CPU and GPU.
 - Demonstrate how to use OpenAI's function calling to interact with external tools.
@@ -12,8 +12,6 @@ In this blog, we will:
 
 Note that this feature is available in [MAX nightly 25.1.0.dev2025012905](https://github.com/modular/max/commit/2f83e343a4d28a341570b2aab7131ff2da3e19d5) which corresponds to this nightly MAX Serve docker image
 [docker.modular.com/modular/max-openai-api:25.1.0.dev2025012905](https://hub.docker.com/layers/modular/max-openai-api/25.1.0.dev2025012905/images/sha256-332299d35cda7c7072df9c61b08d736781948f8f104504797200a9c7b7f599d5)
-
-The code is available in our [GitHub repository](https://github.com/modular/devrel-extras/tree/main/blogs/agentic-workflows/max-serve-openai-function-calling).
 
 To proceed, please make sure to install magic` CLI
 
