@@ -4,6 +4,7 @@ short_title: "MAX Serve OpenAI Function Calling"
 author: "Ehsan M. Kermani"
 author_image: "author/ehsan.jpg"
 github_repo: "https://github.com/modular/max-recipes/tree/main/max-serve-openai-function-calling"
+date: "30-01-2025"
 difficulty: "basic"
 tags:
   - max-serve
