@@ -10,7 +10,7 @@ In this recipe, we will:
 - Showcase how MAX Serve can facilitate local and cloud deployment of LLM-based applications.
 - Walk through a working example that you can clone and run locally.
 
-Note that this feature is available in [MAX nightly](https://github.com/modular/max/commit/2f83e343a4d28a341570b2aab7131ff2da3e19d5) and the [nigServe nightly docker image](https://hub.docker.com/layers/modular/max-openai-api/25.1.0.dev2025012905/images/sha256-332299d35cda7c7072df9c61b08d736781948f8f104504797200a9c7b7f599d5).
+Note that this feature is available in [MAX nightly](https://github.com/modular/max/commit/2f83e343a4d28a341570b2aab7131ff2da3e19d5) and the [Serve nightly docker image](https://hub.docker.com/layers/modular/max-openai-api/25.1.0.dev2025012905/images/sha256-332299d35cda7c7072df9c61b08d736781948f8f104504797200a9c7b7f599d5).
 
 To proceed, please make sure to install the `magic` CLI
 
