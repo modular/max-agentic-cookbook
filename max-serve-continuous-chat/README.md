@@ -328,12 +328,12 @@ and the [benchmarking blog](http://www.modular.com/blog/max-gpu-state-of-the-art
 
 In this recipe, we've built a functional chat application using Llama 3 and MAX Serve. We've explored:
 
-* Basic setup: Using Docker and NVIDIA GPU support to create a working environment
-* Architecture overview: Creating a three-layer system with a Gradio frontend, MAX Serve API, and Llama 3 model backend
-* Token management: Implementing rolling context windows to maintain conversation history
-* Performance basics: Understanding batch processing and concurrent request handling
-* Simple deployment: Using Docker Compose to run the application
-* Configuration options: Managing environment variables and dependencies
+* **Basic setup**: Using Docker and NVIDIA GPU support to create a working environment
+* **Architecture overview**: Creating a three-layer system with a Gradio frontend, MAX Serve API, and Llama 3 model backend
+* **Token management**: Implementing rolling context windows to maintain conversation history
+* **Performance basics**: Understanding batch processing and concurrent request handling
+* **Simple deployment**: Using Docker Compose to run the application
+* **Configuration options**: Managing environment variables and dependencies
 
 This recipe demonstrates how MAX Serving stack can be combined with Llama 3 to create interactive chat applications.
 While this implementation focuses on the basics, it provides a foundation that you can build upon for your own projects.
