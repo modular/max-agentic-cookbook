@@ -1,8 +1,8 @@
 #!/bin/bash
 
-NUM_GPUS=$(which nvidia-smi >/dev/null 2>&1 && nvidia-smi -L | wc -l || echo "0")
+NUM_GPUS=$(nvidia-smi -L 2>/dev/null | wc -l || echo "0")
 
-if [ "$NUM_GPUS" -gt 0 ]; then
+if [ "$NUM_GPUS" -gt 0 ] && nvidia-smi >/dev/null 2>&1; then
     PROFILE="gpu"
     echo "Detected $NUM_GPUS GPU(s). Using GPU profile."
 else
