@@ -18,6 +18,8 @@ case "$1" in
 "clean")
     echo "Cleaning up containers with $PROFILE ..."
     docker compose --profile $PROFILE down
+    docker rmi $(docker images -q modular/max-openai-api:${MAX_OPENAI_API_VERSION:-latest})
+    docker rmi $(docker images -q llama3-chat-ui:latest)
     ;;
 *)
     echo "Usage: $0 {app|clean}"
