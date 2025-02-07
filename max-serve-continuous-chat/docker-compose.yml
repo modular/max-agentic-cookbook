@@ -1,0 +1,59 @@
+services:
+  ui:
+    container_name: llama3-chat-ui
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    ports:
+      - "7860:7860"
+    profiles:
+      - cpu
+      - gpu
+    depends_on:
+      server-cpu:
+        condition: service_started
+        required: false
+      server-gpu:
+        condition: service_started
+        required: false
+    environment:
+      - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}
+      - BASE_URL=http://server:8000/v1
+      - MAX_CONTEXT_WINDOW=${MAX_CONTEXT_WINDOW:-4096}
+      - CONCURRENCY_LIMIT=${MAX_CACHE_BATCH_SIZE:-1}
+      - SYSTEM_PROMPT="You are a helpful AI assistant."
+      - API_KEY=${API_KEY:-local}
+
+  server-cpu:
+    image: modular/max-openai-api:latest
+    profile: cpu
+    container_name: llama3-chat-server-cpu
+    environment:
+      - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}
+      - HF_HUB_ENABLE_HF_TRANSFER=1
+    volumes:
+      - $HOME/.cache/huggingface:/root/.cache/huggingface
+    ports:
+      - "8000:8000"
+    command: "--huggingface-repo-id ${HUGGINGFACE_REPO_ID:-modularai/llama-3.1} --max-length ${MAX_CONTEXT_WINDOW:-4096} --max-cache-batch-size ${MAX_CACHE_BATCH_SIZE:-1}"
+
+  server-gpu:
+    image: modular/max-openai-api:latest
+    profile: gpu
+    container_name: llama3-chat-server-gpu
+    environment:
+      - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}
+      - HF_HUB_ENABLE_HF_TRANSFER=1
+    volumes:
+      - $HOME/.cache/huggingface:/root/.cache/huggingface
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    ipc: host
+    command: "--huggingface-repo-id ${HUGGINGFACE_REPO_ID:-modularai/llama-3.1} --max-length ${MAX_CONTEXT_WINDOW:-4096} --max-cache-batch-size ${MAX_CACHE_BATCH_SIZE:-1}"

@@ -45,11 +45,11 @@ cd "$SCRIPT_DIR" || exit 1
 # Check for GPU and set command accordingly
 if command -v nvidia-smi &>/dev/null && nvidia-smi &>/dev/null; then
     echo "GPU detected, using GPU mode..."
-    max-serve serve --use-gpu --huggingface-repo-id=modularai/llama-3.1 --use-gpu --max-length=2048 &
+    max-pipelines serve --use-gpu --huggingface-repo-id=modularai/llama-3.1 --use-gpu --max-length=2048 &
 
 else
     echo "No GPU detected, using CPU mode..."
-    max-serve serve --huggingface-repo-id=modularai/llama-3.1 --max-length=2048 &
+    max-pipelines serve --huggingface-repo-id=modularai/llama-3.1 --max-length=2048 &
 fi
 
 SERVICE_PIDS+=($!)

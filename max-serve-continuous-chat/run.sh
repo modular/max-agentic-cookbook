@@ -1,0 +1,28 @@
+#!/bin/bash
+
+NUM_GPUS=$(which nvidia-smi >/dev/null 2>&1 && nvidia-smi -L | wc -l || echo "0")
+
+if [ "$NUM_GPUS" -gt 0 ]; then
+    PROFILE="gpu"
+    echo "Detected $NUM_GPUS GPU(s). Using GPU profile."
+else
+    PROFILE="cpu"
+    echo "No GPUs detected. Using CPU profile."
+fi
+
+case "$1" in
+"app")
+    echo "Starting the app on $PROFILE ..."
+    docker compose --profile $PROFILE up
+    ;;
+"clean")
+    echo "Cleaning up containers with $PROFILE ..."
+    docker compose --profile $PROFILE down
+    ;;
+*)
+    echo "Usage: $0 {app|clean}"
+    echo "  app   - Start the application"
+    echo "  clean - Stop and remove containers"
+    exit 1
+    ;;
+esac
