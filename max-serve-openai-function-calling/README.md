@@ -12,6 +12,8 @@ In this recipe, we will:
 
 Note that this feature is available in [MAX nightly](https://github.com/modular/max/commit/2f83e343a4d28a341570b2aab7131ff2da3e19d5) and the [Serve nightly docker image](https://hub.docker.com/layers/modular/max-openai-api/25.1.0.dev2025012905/images/sha256-332299d35cda7c7072df9c61b08d736781948f8f104504797200a9c7b7f599d5).
 
+## Requirements
+
 To proceed, please make sure to install the `magic` CLI
 
 ```bash
@@ -22,6 +24,13 @@ Or update it via
 
 ```bash
 magic self-update
+```
+
+And get the code
+
+```bash
+git clone https://github.com/modular/max-recipes
+cd max-recipes/max-serve-openai-function-calling
 ```
 
 ## What is LLM function calling and why is it useful?
