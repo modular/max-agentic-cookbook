@@ -1,7 +1,5 @@
 # Generate Embeddings with MPNet
 
-[*max-recipes/max-serve-openai-embeddings*](https://github.com/modular/max-recipes/tree/billw/max-embeddings/agentic-workflows/max-serve-openai-embeddings)
-
 Embeddings are a crucial component of intelligent agents, enabling efficient search and retrieval of proprietary information. MAX supports creation of embeddings using an OpenAI-compatible API, including the ability to run the popular `sentence-transformers/all-mpnet-base-v2` model from Hugging Face. When you run MPNet on MAX, you’ll be serving a high-performance implementation of the model built by Modular engineers with the MAX Graph API.
 
 In this recipe you will:
