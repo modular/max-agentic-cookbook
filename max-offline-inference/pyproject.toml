@@ -1,0 +1,29 @@
+[project]
+authors = [{ name = "Modular", email = "hello@modular.com" }]
+dependencies = []
+description = "Run inference with MAX using a simple Python script"
+name = "max-offline-inference"
+requires-python = ">= 3.12, < 3.13"
+version = "0.1.0"
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[tool.pixi.project]
+channels = [
+    "https://conda.modular.com/max-nightly",
+    "https://conda.modular.com/max",
+    "https://repo.prefix.dev/modular-community",
+    "conda-forge",
+]
+platforms = ["osx-arm64", "linux-aarch64", "linux-64"]
+
+[tool.pixi.pypi-dependencies]
+max_offline_inference = { path = ".", editable = true }
+
+[tool.pixi.tasks]
+app = "python -m max_offline_inference"
+
+[tool.pixi.dependencies]
+max-pipelines = "*"
