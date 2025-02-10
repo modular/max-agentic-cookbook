@@ -1,6 +1,6 @@
 [project]
 authors = [{ name = "Modular", email = "hello@modular.com" }]
-description = "Run MAX Serve embeddings API with Docker"
+description = "Run MPNet on MAX Serve with Docker to generate embeddings"
 name = "max-embeddings"
 requires-python = ">= 3.12, <= 3.13"
 version = "0.1.0"
@@ -22,9 +22,11 @@ platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
 max_embeddings = { path = ".", editable = true }
 
 [tool.pixi.tasks]
-app = { cmd = "bash run.sh", depends-on = ["stop"] }
-stop = "docker compose down"
-tests = "python -m max_embeddings"
+app = { cmd = "bash run.sh", depends-on = "clean" }
+clean = "docker-compose --profile cpu --profile gpu down 2>/dev/null || true"
+test = "python -m max_embeddings"
 
 [tool.pixi.dependencies]
 openai = ">=1.61.0,<2"
+docker-compose = ">=2.32.4,<3"
+bash = ">=5.2.21,<6"
