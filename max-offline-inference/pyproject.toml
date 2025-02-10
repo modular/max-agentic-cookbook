@@ -17,6 +17,7 @@ channels = [
     "https://repo.prefix.dev/modular-community",
     "conda-forge",
 ]
+
 platforms = ["osx-arm64", "linux-aarch64", "linux-64"]
 
 [tool.pixi.pypi-dependencies]
@@ -27,3 +28,4 @@ app = "python -m max_offline_inference"
 
 [tool.pixi.dependencies]
 max-pipelines = "*"
+python-dotenv = ">=1.0.1,<2"
