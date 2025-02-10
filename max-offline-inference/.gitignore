@@ -1,0 +1,7 @@
+.magic
+.pixi
+pixi.lock
+*.egg-info
+.DS_Store
+__pycache__
+.env
