@@ -1,6 +1,18 @@
-
-# pixi environments
+# Magic 
+.magic
 .pixi
 *.egg-info
-# magic environments
-.magic
+
+# Python
+__pycache__/
+
+# macOS
+.DS_Store
+
+# Open WebUI
+.webui_secret_key
+data/*
+!data/config.json
+
+# Logs
+logs/
