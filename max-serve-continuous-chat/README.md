@@ -1,5 +1,8 @@
 # Build a Continuous Chat App with MAX Serve and Llama 3
 
+> Note that this recipe works on compatible Linux machines.
+> We are actively working on enabling MAX Serve for MacOS ARM64 as well.
+
 In this recipe, we will cover:
 
 * How to set up a chat application using Llama 3 and MAX.
@@ -48,7 +51,6 @@ For running the app on GPU, ensure your system meets these GPU requirements:
 * NVIDIA Drivers: [Installation guide here](https://www.nvidia.com/download/index.aspx).
 * NVIDIA Container Toolkit: [Installation guide here](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
 
-
 ## Quick start: Running the chat app
 
 Getting started with our chat app is straightforward. Simply run:
@@ -57,10 +59,9 @@ Getting started with our chat app is straightforward. Simply run:
 magic run app
 ```
 
-Once the Llama3 server and UI server are running, open http://localhost:7860 to view the chat interface.
+Once the Llama3 server and UI server are running, open <http://localhost:7860> to view the chat interface.
 
 <img src="chat.png" alt="Chat interface" width="100%" style="max-width: 1024px;">
-
 
 And once done with the app, to clean up and remove the docker images, run:
 
