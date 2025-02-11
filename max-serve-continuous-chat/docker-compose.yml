@@ -25,7 +25,7 @@ services:
       - API_KEY=${API_KEY:-local}
 
   server-cpu:
-    image: modular/max-openai-api:${MAX_OPENAI_API_VERSION:-latest}
+    image: modular/max-openai-api:${MAX_OPENAI_API_VERSION:-nightly}
     profiles: [ cpu ]
     container_name: llama3-chat-server-cpu
     environment:
@@ -38,7 +38,7 @@ services:
     command: "--huggingface-repo-id ${HUGGINGFACE_REPO_ID:-modularai/llama-3.1} --max-length ${MAX_CONTEXT_WINDOW:-4096} --max-batch-size ${MAX_BATCH_SIZE:-1}"
 
   server-gpu:
-    image: modular/max-openai-api:${MAX_OPENAI_API_VERSION:-latest}
+    image: modular/max-openai-api:${MAX_OPENAI_API_VERSION:-nightly}
     profiles: [ gpu ]
     container_name: llama3-chat-server-gpu
     environment:

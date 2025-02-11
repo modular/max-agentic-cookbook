@@ -1209,7 +1209,7 @@ packages:
 - pypi: .
   name: max-serve-continuous-chat
   version: 0.0.0
-  sha256: f87fe934781a23067d6f554209feaeeaa87882b79679e29980ca7c1baaa7358e
+  sha256: c5f8394790c247b96c2de121f6d8038493ba30a3fd91931fc44a6176d11ec270
   requires_dist:
   - gradio>=5.8.0,<6
   - fastapi>=0.115.6,<0.116

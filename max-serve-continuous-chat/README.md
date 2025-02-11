@@ -26,7 +26,13 @@ To proceed, ensure you have the `magic` CLI installed:
 curl -ssL https://magic.modular.com/ | bash
 ```
 
-and a valid [Hugging Face token](https://huggingface.co/settings/tokens) is required to access the model
+or update it via:
+
+```bash
+magic self-update
+```
+
+We would also require a valid [Hugging Face token](https://huggingface.co/settings/tokens) is required to access the model
 and make it available as an environment variable:
 
 ```bash
