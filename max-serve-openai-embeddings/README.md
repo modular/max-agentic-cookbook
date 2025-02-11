@@ -1,5 +1,8 @@
 # Generate Embeddings with MPNet
 
+> Note that this recipe works on compatible Linux machines.
+> We are actively working on enabling MAX Serve for MacOS ARM64 as well.
+
 Embeddings are a crucial component of intelligent agents, enabling efficient search and retrieval of proprietary information. MAX supports creation of embeddings using an OpenAI-compatible API, including the ability to run the popular `sentence-transformers/all-mpnet-base-v2` model from Hugging Face. When you run MPNet on MAX, you'll be serving a high-performance implementation of the model built by Modular engineers with the MAX Graph API.
 
 In this recipe you will:
