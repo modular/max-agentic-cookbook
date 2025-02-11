@@ -10,6 +10,9 @@ version = "0.1.0"
 build-backend = "hatchling.build"
 requires = ["hatchling"]
 
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
 [tool.pixi.project]
 channels = [
     "https://conda.modular.com/max-nightly",
@@ -24,7 +27,7 @@ platforms = ["osx-arm64", "linux-aarch64", "linux-64"]
 max_offline_inference = { path = ".", editable = true }
 
 [tool.pixi.tasks]
-app = "python -m max_offline_inference"
+app = "python main.py"
 
 [tool.pixi.dependencies]
 max-pipelines = "*"

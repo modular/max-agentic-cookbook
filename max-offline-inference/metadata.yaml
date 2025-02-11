@@ -4,7 +4,7 @@ short_title: "Offline inference with MAX"
 author: "Bill Welense"
 author_image: "author/billw.jpg"
 author_url: "https://www.linkedin.com/in/welense/"
-github_repo: "https://github.com/modular/max-recipes/tree/main/max-serve-openai-embeddings"
+github_repo: "https://github.com/modular/max-recipes/tree/main/max-offline-inference"
 date: "13-02-2025"
 difficulty: "beginner"
 tags:

@@ -5444,7 +5444,7 @@ packages:
 - pypi: .
   name: max-offline-inference
   version: 0.1.0
-  sha256: b3630fb2e0cf85d9fb24adcab444701f34c609c399dd1e131409728b43862d77
+  sha256: a815eb309410458b110391b138325769015f7f3aecb9d70660af5981afbef7c4
   requires_python: '>=3.12,<3.13'
   editable: true
 - conda: https://conda.modular.com/max-nightly/noarch/max-pipelines-25.1.0.dev2025020905-release.conda

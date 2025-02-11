@@ -7,9 +7,9 @@ In this recipe you will:
 - Use MAX to run inference with models from Hugging Face
 - Generate text completions using the Llama 3.1 model
 
-## Install Magic
+## Requirements
 
-To proceed, please install the Magic🪄 CLI:
+To proceed, ensure you have the `magic` CLI installed:
 
 ```bash
 curl -ssL https://magic.modular.com/ | bash
@@ -21,7 +21,20 @@ Or update it via:
 magic self-update
 ```
 
-## Get the Code
+A valid [Hugging Face token](https://huggingface.co/settings/tokens) is required to access the model.
+Once you have obtained the token, include it in `.env` by:
+
+```bash
+cp .env.example .env
+```
+
+then add your token in `.env`
+
+```bash
+HUGGING_FACE_HUB_TOKEN=<YOUR_HUGGING_FACE_HUB_TOKEN_HERE>
+```
+
+## Get the code
 
 Download the code for this recipe using git:
 
@@ -30,19 +43,7 @@ git clone https://github.com/modular/max-recipes.git
 cd max-recipes/max-offline-inference
 ```
 
-## Set up Hugging Face access
-
-Before we can begin, you must obtain an access token from Hugging Face to download models hosted there. Follow the instructions in the [Hugging Face documentation](https://huggingface.co/docs/hub/en/security-tokens) to obtain one.
-
-Once you have your Hugging Face token, rename the file `.env.example` to `.env`, then open it in your code editor. It will look like this:
-
-```bash
-HUGGING_FACE_HUB_TOKEN=YOUR_TOKEN_HERE
-```
-
-Replace `YOUR_TOKEN_HERE` with the one from Hugging Face.
-
-## Run the Sample Code
+## Quick start: run inference
 
 To run the inference example:
 
@@ -50,52 +51,61 @@ To run the inference example:
 magic run app
 ```
 
-This will execute the sample script which loads the LLama 3.1 model and generates text from a single prompt.
+This will execute the sample script which loads the LLama 3.1 model and generates text from a single prompt, like so:
 
-## Understanding the Code
+```plaintext
+Loading model: modularai/llama-3.1
+Generating responses...
+
+========== Response 0 ==========
+The winner of the World Series in 2016 was
+ the Chicago Cubs. They defeated the Cleveland Indians in the series 4 games to 3. The Cubs had not won a World Series in 108 years, ending the Curse of the Billy Goat. The series was played from October 25 to November
+```
+
+## Understanding the code
 
 Let's break down the key components of the sample code.
 
 ### Configure and initialize model
 
 ```python
-# Load environment and register model architectures
+#1
 register_all_models()
 huggingface_repo_id = "modularai/llama-3.1"
 
-# Initialize the model
+#2
 pipeline_config = PipelineConfig(huggingface_repo_id)
 llm = LLM(pipeline_config)
 ```
 
 This initial block:
 
-- Registers available model architectures
-- Configures and initializes the Large Language Model
+1. Registers available model architectures
+2. Configures and initializes the Large Language Model
 
 Don't let the *Modular* name in the `huggingface_repo_id` limit you---MAX works with any PyTorch model from Hugging Face. Through the MAX Graph API, certain model architectures (like [LlamaForCausalLM](https://huggingface.co/docs/transformers/v4.48.0/en/model_doc/llama#transformers.LlamaForCausalLM)) receive automatic performance optimizations when run with MAX.
 
 ### Run inference with the model
 
 ```python
-# Define prompts
+#1
 prompts = [
     "The winner of the World Series in 2016 was",
 ]
 
-# Generate text
-responses = llm.generate(prompts, max_new_tokens=50)
+#2
+responses = llm.generate(prompts, max_new_tokens=50)  #3
 ```
 
 The inference code:
 
-- Defines one or more prompts for the model
-- Uses the `generate(...)` method to create text completions
-- Limits response length with `max_new_tokens`
+1. Defines one or more prompts for the model
+2. Uses the `generate(...)` method to create text completions
+3. Limits response length with `max_new_tokens`
 
 The complete sample code includes additional features like handling of the Hugging Face access token and formatting output for display. You can find the full implementation in: `src/max_offline_inference/__main__.py`
 
-## What's Next?
+## What's next?
 
 Now that you've run offline inference with MAX, you can explore more features and join our developer community:
 
