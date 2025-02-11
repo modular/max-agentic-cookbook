@@ -9,10 +9,8 @@ date: "10-02-2025"
 difficulty: "beginner"
 tags:
   - max-serve
-  - mpnet
-  - docker
+  - embeddings
 
 tasks:
   - magic run app
   - magic run clean
-  - magic run test

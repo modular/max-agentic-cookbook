@@ -1,18 +1,41 @@
 #!/bin/bash
 
-set -e  # Exit on any error
+NUM_GPUS=$(nvidia-smi -L 2>/dev/null | wc -l || echo "0")
 
-# Trap Ctrl+C and run cleanup
-trap 'echo "Cleaning up..."; magic run clean; exit' INT
-
-# Detect if NVIDIA GPUs are present
-NUM_GPUS=$(which nvidia-smi >/dev/null 2>&1 && nvidia-smi -L | wc -l || echo "0")
-
-# Run the docker-compose profile based on GPU availability
-if [ "$NUM_GPUS" -gt 0 ]; then
-    echo "Detected $NUM_GPUS GPU(s). Running with GPU support."
-    docker-compose --profile gpu up -d && docker-compose --profile gpu logs -f
+if [ "$NUM_GPUS" -gt 0 ] && nvidia-smi >/dev/null 2>&1; then
+    export PROFILE="gpu"
+    echo "Detected $NUM_GPUS GPU(s). Using GPU profile."
 else
-    echo "No GPUs detected. Running on CPU only."
-    docker-compose --profile cpu up -d && docker-compose --profile cpu logs -f
+    export PROFILE="cpu"
+    echo "No GPUs detected. Using CPU profile."
 fi
+
+case "$1" in
+"app")
+    echo "Starting the app on $PROFILE ..."
+    docker compose --profile $PROFILE up --abort-on-container-exit
+    ;;
+"stop")
+    echo "Stopping containers with $PROFILE ..."
+    docker compose --profile $PROFILE down
+    ;;
+"clean")
+    echo "Cleaning up containers with $PROFILE ..."
+    docker compose --profile $PROFILE down -v
+
+    if docker images -q "modular/max-openai-api:${MAX_OPENAI_API_VERSION:-nightly}" >/dev/null; then
+        docker rmi -f "modular/max-openai-api:${MAX_OPENAI_API_VERSION:-nightly}"
+    fi
+
+    if docker images -q "max-serve-openai-embeddings-embeddings" >/dev/null; then
+        docker rmi -f "max-serve-openai-embeddings-embeddings"
+    fi
+    ;;
+*)
+    echo "Usage: $0 {app|stop|clean}"
+    echo "  app   - Start the application"
+    echo "  stop  - Stop containers without removing images"
+    echo "  clean - Stop and remove containers and images"
+    exit 1
+    ;;
+esac
