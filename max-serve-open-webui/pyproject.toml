@@ -1,0 +1,41 @@
+[project]
+authors = [{name = "Modular", email = "hello@modular.com"}]
+description = "Open WebUI backed by MAX Serve"
+name = "max-serve-open-webui"
+requires-python = "== 3.11"
+version = "0.1.0"
+dependencies = []
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.pixi.project]
+channels = ["https://conda.modular.com/max-nightly", "https://conda.modular.com/max", "https://repo.prefix.dev/modular-community", "conda-forge"]
+platforms = ["osx-arm64"]
+
+[tool.pixi.pypi-dependencies]
+max_serve_open_webui = { path = ".", editable = true }
+
+[tool.pixi.tasks]
+
+[tool.pixi.dependencies]
+
+[tool.pixi.feature.max.dependencies]
+max-pipelines = "*"
+
+[tool.pixi.feature.max.tasks]
+max = "max-pipelines serve --huggingface-repo-id=modularai/llama-3.1 --max-length 16384"
+
+[tool.pixi.feature.ui.tasks]
+ui = "open-webui serve"
+
+[tool.pixi.environments]
+max = ["max"]
+ui = ["ui"]
+
+[dependency-groups]
+ui = ["open-webui"]
