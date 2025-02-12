@@ -12,9 +12,10 @@ dependencies = [
     "python-dotenv>=1.0.1,<2",
     "httpx>=0.28.1,<0.29",
     "tenacity>=9.0.0,<10",
-    "sentence-transformers>=3.4.0,<4",
     "huggingface-hub>=0.27.1,<0.28",
-    "hf-transfer>=0.1.9,<0.2", "psutil>=6.1.1,<7",
+    "hf-transfer>=0.1.9,<0.2",
+    "psutil>=6.1.1,<7",
+    "numpy>=2.2.2,<3",
 ]
 
 [build-system]
@@ -26,11 +27,12 @@ packages = ["src"]
 
 [tool.pixi.project]
 channels = [
+    "https://conda.modular.com/max-nightly",
     "conda-forge",
     "https://conda.modular.com/max",
     "https://repo.prefix.dev/modular-community",
 ]
-platforms = ["linux-64", "osx-arm64"]
+platforms = ["linux-64", "osx-arm64", "linux-aarch64"]
 
 [tool.pixi.pypi-dependencies]
 backend = { path = ".", editable = true }

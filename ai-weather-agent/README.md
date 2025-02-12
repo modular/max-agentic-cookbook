@@ -14,7 +14,7 @@ We'll create a solution that showcases:
 * Multi-stage LLM pipeline for natural interaction
 * Function calling for external API integration
 * Real-time frontend with Next.js and TypeScript
-* Production-ready optimizations:
+* Production-pattern optimizations:
   * Connection pooling for efficient API calls
   * Semantic caching with embeddings
   * Operation time tracking and monitoring
@@ -72,7 +72,12 @@ cd max-recipes/ai-weather-agent
 magic run app
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser to see the UI
+Note that it may take a few minutes for models to be downloaded and compiled.
+
+3. Open [http://localhost:3000](http://localhost:3000) in your browser to see the UI when all services below are ready:
+   * MAX Serve embedding on port `7999`
+   * MAX Serve Llama 3 on port `8000` and
+   * Backend FastAPI on port `8001`
 
 <img src="ui.png" alt="Chat interface" width="100%" style="max-width: 800px;">
 
@@ -85,17 +90,17 @@ The weather assistant uses a multi-tier architecture:
 ```mermaid
 graph TD
     A[Frontend - Next.js] -->|HTTP| B[Backend - FastAPI]
-    B -->|OpenAI API| C[MAX Serve - Llama 3]
+    B -->|OpenAI API| C1[MAX Serve - Llama 3]
+    B -->|Embeddings API| C2[MAX Serve - MPNet V2]
     B -->|HTTP| D[WeatherAPI]
     B -->|HTTP| F[Space Weather API]
-    B -->|Embeddings| E[Sentence Transformers]
     B -->|Cache| G[Semantic Cache]
 
     style A fill:#f9f,stroke:#333
     style B fill:#bbf,stroke:#333
-    style C fill:#bfb,stroke:#333
+    style C1 fill:#bfb,stroke:#333
+    style C2 fill:#bfb,stroke:#333
     style D fill:#fbb,stroke:#333
-    style E fill:#bff,stroke:#333
     style F fill:#fbb,stroke:#333
     style G fill:#bff,stroke:#333
 ```
@@ -106,7 +111,7 @@ The architecture consists of several key components:
 * **Backend (FastAPI)**: Orchestrates the entire flow, handling request routing and response generation
 * **MAX Serve**: Runs the Llama 3 model for intent detection, function calling, and response generation
 * **WeatherAPI**: External service providing current weather conditions and forecasts
-* **Sentence Transformers**: Used for generating embeddings for semantic caching
+* **Sentence Transformers**: Used `sentence-transformers/all-mpnet-base-v2` for generating embeddings for semantic caching
 * **Semantic Cache**: Stores recent query results to improve response times
 
 Each component is designed to be independently scalable and maintainable. The backend uses FastAPI's async capabilities to handle concurrent requests efficiently, while MAX Serve provides high-performance inference for the LLM components.
@@ -122,23 +127,30 @@ sequenceDiagram
     participant B as Backend
     participant C as Cache
     participant L as LLM
+    participant E as Embeddings
     participant W as WeatherAPI
     participant S as SpaceWeatherAPI
 
     U->>F: Enter query
     F->>B: POST /api/chat
-    B->>C: Check Cache
-    C-->>B: Cache Miss
     B->>L: Intent Detection
     L-->>B: WEATHER_QUERY
     B->>L: Function Calling
     L-->>B: get_weather("city")
+    B->>L: Normalize City
+    L-->>B: Standardized City Name
+    B->>E: Get Query Embedding
+    E-->>B: Query Vector
+    B->>C: Check Cache
+    C-->>B: Cache Miss
     B->>W: Fetch Weather Data
     W-->>B: Weather JSON
     B->>S: Fetch Space Weather
     S-->>B: Space Weather JSON
     B->>L: Generate Report
     L-->>B: Natural Response
+    B->>E: Get Response Embedding
+    E-->>B: Response Vector
     B->>C: Update Cache
     B-->>F: Complete Response
     F-->>U: Display Result
@@ -146,18 +158,21 @@ sequenceDiagram
 
 This sequence represents a complete query lifecycle:
 
-1. **Initial Request**: User enters a weather-related question in the chat interface
-2. **Cache Check**: Backend first checks if a similar query exists in the semantic cache
-3. **Intent Processing**:
+1. **Initial request**: User enters a weather-related question in the chat interface
+2. **Cache check**: Backend first checks if a similar query exists in the semantic cache
+3. **Intent processing**:
     * LLM determines if the query is weather-related
     * If weather-related, function calling extracts the city name
-4. **Data Gathering**:
+4. **City normalization**:
+    * LLM standardizes city names (e.g., "NYC" → "New York City")
+    * Handles variations and abbreviations consistently
+5. **Data gathering**:
     * Weather data is fetched from WeatherAPI
     * Multiple data sources are queried concurrently
-5. **Response Generation**:
+6. **Response generation**:
     * LLM generates a natural language response from the data
     * Response is cached for future similar queries
-6. **Display**: Frontend renders both the text response and weather visualization
+7. **Display**: Frontend renders both the text response and weather visualization
 
 The entire process typically completes in 2-3 seconds, with cached responses returning in under 500ms.
 
@@ -189,30 +204,63 @@ async def fetch_all_weather_data(city: str) -> dict:
 The first stage determines whether the user is asking about weather or making general conversation:
 
 ```python
-INTENT_PROMPT = """You are a comprehensive weather assistant. Your task is to:
-1. First determine if the user is asking about:
-   - Weather information (respond with exactly: "WEATHER_QUERY")
-   - General chat (respond with exactly: "GENERAL_CHAT")
-2. Only respond with one of these two options, nothing else.
-"""
+# Example queries and their classifications:
+# "What's the weather like in London?" -> "WEATHER_QUERY"
+# "How are you doing today?" -> "GENERAL_CHAT"
+# "Will it rain in Paris tomorrow?" -> "WEATHER_QUERY"
+# "Tell me a joke" -> "GENERAL_CHAT"
 
+@track_operation_time("intent_detection")
 async def detect_intent(request_message: str, timing_collector: TimingCollector):
     """Detect if the user is asking about weather or just chatting"""
-    response = await client.chat.completions.create(
+    response = await llm_client.chat.completions.create(
         model="modularai/Llama-3.1-8B-Instruct-GGUF",
         messages=[
             {"role": "system", "content": INTENT_PROMPT},
             {"role": "user", "content": request_message},
         ],
+        temperature=0,  # Use 0 for deterministic outputs
+    )
+    return response.choices[0].message.content.strip()
+```
+
+The intent classifier uses temperature=0 for consistent outputs and is wrapped with timing tracking for performance monitoring.
+
+#### 2. City name normalization
+
+After detecting weather-related intent, the backend normalizes city names using the LLM to handle variations and abbreviations:
+
+```python
+CITY_NORMALIZATION_PROMPT = """Normalize the following city name to its standard form.
+Examples:
+- "NYC" -> "New York City"
+- "SF" -> "San Francisco"
+- "LA" -> "Los Angeles"
+
+City: {city}
+
+Respond with only the normalized city name, nothing else."""
+
+async def normalize_city_name(city: str, timing_collector: TimingCollector) -> str:
+    """Standardize city names for consistent API calls and caching"""
+    response = await llm_client.chat.completions.create(
+        model="modularai/Llama-3.1-8B-Instruct-GGUF",
+        messages=[
+            {"role": "system", "content": CITY_NORMALIZATION_PROMPT.format(city=city)},
+        ],
         max_tokens=50,
         temperature=0,  # Use 0 for consistent outputs
     )
-    return response
+    return response.choices[0].message.content.strip()
 ```
 
-This stage ensures that weather-related queries are properly routed to the weather data pipeline while general queries receive appropriate chat responses.
+This normalization ensures:
 
-#### 2. Function calling for data retrieval
+* Consistent API calls for different variations of city names
+* Better cache utilization by standardizing queries
+* Improved user experience with flexible input handling
+
+#### 3. Function calling for data retrieval
 
 When a weather query is detected, the backend uses OpenAI-compatible function calling to structure the request and fetch relevant data:
 
@@ -254,7 +302,7 @@ TOOLS = [
 
 async def handle_function_calling(message: str) -> dict:
     """Extract structured data requirements from natural language"""
-    response = await client.chat.completions.create(
+    response = await llm_client.chat.completions.create(
         model="modularai/Llama-3.1-8B-Instruct-GGUF",
         messages=[{"role": "user", "content": message}],
         tools=TOOLS,
@@ -298,7 +346,7 @@ async def analyze_weather_data(request_message: str, weather_data: dict):
         user=request_message,
         weather_data=str(weather_data)
     )
-    response = await client.chat.completions.create(
+    response = await llm_client.chat.completions.create(
         model="modularai/Llama-3.1-8B-Instruct-GGUF",
         messages=[{"role": "system", "content": content}],
         max_tokens=512,
@@ -335,38 +383,31 @@ This optimization provides:
 
 #### 2. Operation time tracking
 
-A decorator-based timing system provides detailed performance metrics for each operation:
+The backend uses asyncio locks and precise timing for operation tracking:
 
 ```python
 class TimingCollector:
-    def __init__(self):
+    def __init__(self, lock: asyncio.Lock = None):
         self._timings: List[Dict[str, Union[str, float]]] = []
+        self._lock = lock or asyncio.Lock()
 
     async def add_timing(self, operation: str, duration_ms: float):
-        self._timings.append({
-            "operation": operation,
-            "duration_ms": duration_ms
-        })
+        async with self._lock:
+            self._timings.append({
+                "operation": operation,
+                "duration_ms": duration_ms
+            })
 
-def track_operation_time(operation_name: str):
-    def decorator(func):
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            timing_collector = kwargs.get('timing_collector')
-            if not timing_collector:
-                return await func(*args, **kwargs)
-
-            start_time = time.time()
-            try:
-                return await func(*args, **kwargs)
-            finally:
-                duration = (time.time() - start_time) * 1000
-                await timing_collector.add_timing(operation_name, duration)
-        return wrapper
-    return decorator
+async def get_timings(self) -> List[Dict[str, Union[str, float]]]:
+    async with self._lock:
+        return self._timings.copy()
 ```
 
-This system helps identify performance bottlenecks and track response times across different stages of the pipeline.
+This system helps:
+
+* Safely track concurrent operations with asyncio locks
+* Provide accurate timing for each pipeline stage
+* Enable real-time performance monitoring in the UI
 
 #### 3. Semantic caching
 
@@ -374,40 +415,90 @@ To reduce API calls and improve response times, the backend implements semantic 
 
 ```python
 class SemanticCache:
-    def __init__(self, embedding_model: str = "sentence-transformers/all-mpnet-base-v2"):
-        self.model = SentenceTransformer(embedding_model)
-        self.cache = {}  # query_embedding -> (result, timestamp)
-        self.ttl = 300  # 5 minutes cache TTL
+    def __init__(self, threshold=0.75, ttl_seconds=CACHE_TTL):
+        self.threshold = threshold
+        self.ttl_seconds = ttl_seconds
+        self.cache: Dict[Tuple[float, ...], Tuple[Any, datetime]] = {}
+        self._lock = Lock()
 
-    def _compute_embedding(self, query: str) -> np.ndarray:
-        """Convert query to vector representation"""
-        return self.model.encode(query, normalize_embeddings=True)
+    async def _compute_embedding(self, text: str) -> np.ndarray:
+        """Get embeddings from MAX Serve embedding endpoint"""
+        response = await embedding_client.embeddings.create(
+            model=EMBEDDING_MODEL,
+            input=text
+        )
+        embedding = np.array(response.data[0].embedding)
+        return embedding
 
-    def _find_similar(self, query_embedding: np.ndarray, threshold: float = 0.95) -> Optional[str]:
-        """Find semantically similar cached queries"""
-        for cached_embedding in self.cache:
-            similarity = np.dot(query_embedding, cached_embedding)
-            if similarity > threshold:
-                return cached_embedding
-        return None
+    def _cosine_similarity(self, a: np.ndarray, b: np.ndarray) -> float:
+        """Calculate cosine similarity between two vectors"""
+        return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
-    async def get(self, query: str) -> Optional[dict]:
-        """Retrieve cached result for semantically similar query"""
-        query_embedding = self._compute_embedding(query)
-        similar_query = self._find_similar(query_embedding)
+    async def get(self, text: str, normalized_city: str = None) -> Tuple[bool, Any]:
+        """Try to find a semantically similar cached result"""
+        async with self._lock:
+            now = datetime.now()
+            # Clean expired entries
+            expired = []
+            for embedding_tuple, (value, timestamp) in self.cache.items():
+                if (now - timestamp).total_seconds() > self.ttl_seconds:
+                    expired.append(embedding_tuple)
+            for emb in expired:
+                del self.cache[emb]
 
-        if similar_query:
-            result, timestamp = self.cache[similar_query]
-            if time.time() - timestamp < self.ttl:
-                return result
-        return None
+            # Use normalized city if provided, otherwise use original text
+            query_text = normalized_city if normalized_city else text
+            query_embedding = await self._compute_embedding(query_text)
+            query_tuple = tuple(query_embedding.tolist())
+
+            # Find most similar cached query
+            max_similarity = 0
+            best_match = None
+
+            for cached_embedding_tuple, (value, _) in self.cache.items():
+                cached_embedding = np.array(cached_embedding_tuple)
+                similarity = self._cosine_similarity(query_embedding, cached_embedding)
+                if similarity > max_similarity:
+                    max_similarity = similarity
+                    best_match = value
+
+            if max_similarity > self.threshold:
+                return True, best_match
+            return False, None
+
+# Example cache decorator usage
+@semantic_cache(threshold=0.90, ttl_seconds=CACHE_TTL)
+@track_operation_time("chat_response")
+async def generate_chat_response(request_message: str, timing_collector: TimingCollector):
+    """Generate a general chat response with caching"""
+    response = await llm_client.chat.completions.create(
+        model="modularai/Llama-3.1-8B-Instruct-GGUF",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a friendly weather assistant. Provide helpful and concise responses.",
+            },
+            {"role": "user", "content": request_message},
+        ],
+        max_tokens=256,
+        temperature=0,
+    )
+    return response.choices[0].message.content
 ```
 
-This semantic cache is particularly useful for:
+The semantic cache provides several key features:
 
-* Handling variations of similar questions (e.g., "weather in London" vs "London weather")
-* Reducing API calls to external weather services
-* Improving response times for frequent queries
+* Thread-safe operations with asyncio locks
+* Automatic cleanup of expired entries
+* Configurable similarity threshold
+* Support for normalized city names
+* Integration with timing collection
+
+Example similar queries that would hit the cache:
+
+* "What's the weather in NYC?" ↔ "Tell me the weather in New York City"
+* "Is it raining in London?" ↔ "What's the precipitation in London?"
+* "Temperature in Paris" ↔ "How hot is it in Paris?"
 
 ### Error handling and resilience
 
@@ -566,17 +657,17 @@ The following components can be directly reused:
 
 ### Example adaptations
 
-1. **Financial Reports**
+1. **Financial reports**
    * Replace weather data with market data
    * Adapt function calling for stock symbols
    * Generate natural language market analysis
 
-2. **Product Recommendations**
+2. **Product recommendations**
    * Use product catalog as data source
    * Modify functions for product queries
    * Generate personalized recommendations
 
-3. **Medical Summaries**
+3. **Medical summaries**
    * Connect to health record systems
    * Add functions for patient data retrieval
    * Generate patient friendly health reports

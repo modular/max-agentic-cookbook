@@ -1,15 +1,12 @@
 from typing import List, Optional, Dict, Any, Tuple
-import json
 import os
 import logging
-from functools import lru_cache
 from datetime import datetime, timedelta
 from contextlib import asynccontextmanager
 import asyncio
 import time
 from asyncio import Lock
 import signal
-import sys
 import socket
 import psutil
 
@@ -29,7 +26,6 @@ from tenacity import (
     retry_if_exception_type,
     retry_if_result,
 )
-from sentence_transformers import SentenceTransformer
 import numpy as np
 
 
@@ -46,10 +42,14 @@ def signal_handler(sig, frame):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if not check_port(8001):
-        print("Port 8001 is in use, cleaning up...")
-        cleanup_port(8001)
-        await asyncio.sleep(1)
+    # Ports to check and clean up
+    ports_to_check = [8000, 7999, 8001]
+
+    for port in ports_to_check:
+        if not check_port(port):
+            print(f"Port {port} is in use, cleaning up...")
+            cleanup_port(port)
+            await asyncio.sleep(1)
 
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
@@ -83,20 +83,16 @@ app.add_middleware(
     GZipMiddleware, minimum_size=1000
 )  # Only compress responses larger than 1KB
 
-# CORS for frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
-    max_age=3600,  # Cache preflight requests for 1 hour
-)
+CACHE_TTL = 3600  # 1 hour
 
 LLM_SERVER_URL = os.getenv("LLM_SERVER_URL", "http://0.0.0.0:8000/v1")
+EMBEDDING_SERVER_URL = os.getenv("EMBEDDING_SERVER_URL", "http://0.0.0.0:7999/v1")
+EMBEDDING_MODEL = os.getenv(
+    "EMBEDDING_MODEL", "sentence-transformers/all-mpnet-base-v2"
+)
 
-client = AsyncOpenAI(base_url=LLM_SERVER_URL, api_key="local")
+llm_client = AsyncOpenAI(base_url=LLM_SERVER_URL, api_key="local")
+embedding_client = AsyncOpenAI(base_url=EMBEDDING_SERVER_URL, api_key="local")
 
 # CORS for frontend
 app.add_middleware(
@@ -106,7 +102,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["*"],
-    max_age=3600,  # Cache preflight requests for 1 hour
+    max_age=CACHE_TTL,  # Cache preflight requests for 1 hour
 )
 
 load_dotenv()
@@ -374,7 +370,7 @@ async def get_air_quality(
 
 
 class ttlcache:
-    def __init__(self, seconds=3600):  # 1 hour default TTL
+    def __init__(self, seconds=CACHE_TTL):
         self.seconds = seconds
         self.cache = {}
         self.timestamps = {}
@@ -399,7 +395,7 @@ class ttlcache:
         return wrapper
 
 
-@ttlcache(seconds=3600)
+@ttlcache(seconds=CACHE_TTL)
 @create_retry_decorator()
 async def get_space_weather(timing_collector: TimingCollector) -> Dict[str, Any]:
     """Fetch solar activity and aurora forecasts from NOAA"""
@@ -439,11 +435,10 @@ async def get_space_weather(timing_collector: TimingCollector) -> Dict[str, Any]
 
 
 class SemanticCache:
-    def __init__(self, threshold=0.75, ttl_seconds=3600):
-        self.embedder = SentenceTransformer("all-MiniLM-L6-v2")
-        self.cache: Dict[Tuple[float, ...], Tuple[Any, datetime]] = {}
+    def __init__(self, threshold=0.75, ttl_seconds=CACHE_TTL):
         self.threshold = threshold
         self.ttl_seconds = ttl_seconds
+        self.cache: Dict[Tuple[float, ...], Tuple[Any, datetime]] = {}
         self._lock = Lock()
 
     def _cosine_similarity(self, a: np.ndarray, b: np.ndarray) -> float:
@@ -451,9 +446,11 @@ class SemanticCache:
         return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
     async def _compute_embedding(self, text: str) -> np.ndarray:
-        embedding = await asyncio.to_thread(
-            lambda: self.embedder.encode(text, convert_to_numpy=True)
+        response = await embedding_client.embeddings.create(
+            model=EMBEDDING_MODEL, input=text
         )
+        # OpenAI-compatible clients return embeddings in a list
+        embedding = np.array(response.data[0].embedding)
         return embedding
 
     async def get(self, text: str, normalized_city: str = None) -> Tuple[bool, Any]:
@@ -503,7 +500,7 @@ class SemanticCache:
             self.cache[embedding_tuple] = (value, datetime.now())
 
 
-def semantic_cache(threshold=0.75, ttl_seconds=3600):
+def semantic_cache(threshold=0.75, ttl_seconds=CACHE_TTL):
     cache = SemanticCache(threshold=threshold, ttl_seconds=ttl_seconds)
 
     def decorator(func):
@@ -539,7 +536,7 @@ def semantic_cache(threshold=0.75, ttl_seconds=3600):
 
 @track_operation_time("intent_detection")
 async def detect_intent(request_message: str, timing_collector: TimingCollector):
-    return await client.chat.completions.create(
+    return await llm_client.chat.completions.create(
         model="modularai/Llama-3.1-8B-Instruct-GGUF",
         messages=[
             {"role": "system", "content": INTENT_PROMPT},
@@ -554,7 +551,7 @@ async def normalize_city(
     request_message: str, timing_collector: TimingCollector
 ) -> str:
     """Normalize city name using LLM"""
-    city_response = await client.chat.completions.create(
+    city_response = await llm_client.chat.completions.create(
         model="modularai/Llama-3.1-8B-Instruct-GGUF",
         messages=[
             {"role": "system", "content": CITY_NORMALIZATION_PROMPT},
@@ -607,7 +604,7 @@ async def fetch_all_weather_data(
     }
 
 
-weather_analysis_cache = SemanticCache(threshold=0.75, ttl_seconds=3600)
+weather_analysis_cache = SemanticCache(threshold=0.75, ttl_seconds=CACHE_TTL)
 
 
 @track_operation_time("weather_analysis")
@@ -615,12 +612,14 @@ async def analyze_weather_data(
     request_message: str, weather_data: dict, timing_collector: TimingCollector
 ):
     """Generate weather analysis using normalized city name and user's question"""
-    # Combine normalized city with the user's question for context-aware caching
+    # First get the normalized city from the weather data
     normalized_city = weather_data["normalized_city"]
+
+    # Create cache key using normalized city and request
     cache_key = f"{normalized_city} | {request_message}"
     logger.info(f"Using cache key: {cache_key}")
 
-    # Use the singleton cache instance
+    # Try to get from cache using normalized city
     hit, cached_result = await weather_analysis_cache.get(cache_key)
     if hit:
         logger.info(f"Cache hit for: {cache_key}")
@@ -632,7 +631,7 @@ async def analyze_weather_data(
     )
     logger.info(f"Cache miss for {cache_key}, generating new analysis")
 
-    response = await client.chat.completions.create(
+    response = await llm_client.chat.completions.create(
         model="modularai/Llama-3.1-8B-Instruct-GGUF",
         messages=[{"role": "system", "content": content}],
         max_tokens=512,
@@ -640,18 +639,18 @@ async def analyze_weather_data(
     )
     result = response.choices[0].message.content
 
-    # Cache using combined key
+    # Cache using normalized city in the key
     await weather_analysis_cache.set(cache_key, result)
     return result
 
 
-@semantic_cache(threshold=0.90, ttl_seconds=3600)
+@semantic_cache(threshold=0.90, ttl_seconds=CACHE_TTL)
 @track_operation_time("chat_response")
 async def generate_chat_response(
     request_message: str, timing_collector: TimingCollector
 ):
     """Generate a general chat response"""
-    response = await client.chat.completions.create(
+    response = await llm_client.chat.completions.create(
         model="modularai/Llama-3.1-8B-Instruct-GGUF",
         messages=[
             {
