@@ -109,7 +109,7 @@ def health_check():
 def chat(request: ChatRequest):
     try:
         response = client.chat.completions.create(
-            model="modularai/llama-3.1",
+            model="modularai/Llama-3.1-8B-Instruct-GGUF",
             messages=[
                 {
                     "role": "system",

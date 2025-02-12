@@ -34,7 +34,7 @@ def main():
     user_message = "What's the weather like in San Francisco?"
     print(f"user_message: {user_message}")
     response = client.chat.completions.create(
-        model="modularai/llama-3.1",
+        model="modularai/Llama-3.1-8B-Instruct-GGUF",
         messages=[{"role": "user", "content": user_message}],
         tools=TOOLS,
         tool_choice="auto",

@@ -57,7 +57,7 @@ TOOLS = [
 def llm_function_call(user_message: str) -> str:
     print("User message:", user_message)
     response = client.chat.completions.create(
-        model="modularai/llama-3.1",
+        model="modularai/Llama-3.1-8B-Instruct-GGUF",
         messages=[{"role": "user", "content": user_message}],
         tools=TOOLS,
         tool_choice="auto",

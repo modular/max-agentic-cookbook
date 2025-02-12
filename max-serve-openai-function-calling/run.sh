@@ -32,7 +32,7 @@ cleanup() {
 }
 
 setup_max_serve() {
-    magic global install max-pipelines
+    magic global install max-pipelines && magic global update max-pipelines
 }
 
 trap cleanup SIGINT SIGTERM
@@ -45,11 +45,11 @@ cd "$SCRIPT_DIR" || exit 1
 # Check for GPU and set command accordingly
 if command -v nvidia-smi &>/dev/null && nvidia-smi &>/dev/null; then
     echo "GPU detected, using GPU mode..."
-    max-pipelines serve --use-gpu --huggingface-repo-id=modularai/llama-3.1 --use-gpu --max-length=2048 &
+    max-pipelines serve --huggingface-repo-id=modularai/Llama-3.1-8B-Instruct-GGUF --use-gpu --max-length=2048 &
 
 else
     echo "No GPU detected, using CPU mode..."
-    max-pipelines serve --huggingface-repo-id=modularai/llama-3.1 --max-length=2048 &
+    max-pipelines serve --huggingface-repo-id=modularai/Llama-3.1-8B-Instruct-GGUF --max-length=2048 &
 fi
 
 SERVICE_PIDS+=($!)
