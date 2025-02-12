@@ -1,0 +1,57 @@
+name: Feature Request
+description: Suggest a recipe
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest a new recipe!
+
+  - type: input
+    id: model
+    attributes:
+      label: Model Type
+      description: What type of model would this recipe use?
+      placeholder: "e.g., LLM, Embedding Model, Multi-modal Model"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this recipe solve?
+      description: A clear description of what the recipe would help users accomplish.
+      placeholder: "I need a recipe that helps me..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the recipe you'd like
+      description: A clear description of how the recipe should work and what technologies it should use.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Preferred Platform
+      description: Which platform(s) should this recipe support?
+      multiple: true
+      options:
+        - Linux
+        - MacOS ARM64
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Describe alternatives you've considered
+      description: Any alternative approaches or existing recipes you've looked at.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any other context about the recipe request here.
