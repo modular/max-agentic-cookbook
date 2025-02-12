@@ -50,18 +50,16 @@ For running the app on GPU, ensure your system meets these GPU requirements:
 
 **Docker and Docker Compose are optional. Note that this recipe works on compatible Linux machines. We are actively working on enabling MAX Serve Docker image for MacOS ARM64 as well.**
 
-## Get the code
+## Quick start
 
-Download the code for this recipe using git:
+1. Download the code for this recipe using git:
 
 ```bash
 git clone https://github.com/modular/max-recipes.git
 cd max-recipes/max-serve-continuous-chat
 ```
 
-## Quick start: Running the chat app
-
-Getting started with our chat app is straightforward. Simply run:
+2. Running the chat app:
 
 ```bash
 magic run app
@@ -71,7 +69,7 @@ Once the Llama3 server and UI server are running, open <http://localhost:7860> t
 
 <img src="chat.png" alt="Chat interface" width="100%" style="max-width: 1024px;">
 
-And once done with the app, to clean up and remove the docker images, run:
+3. And once done with the app, to clean up the resources run:
 
 ```bash
 magic run clean

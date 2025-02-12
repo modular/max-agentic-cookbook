@@ -59,7 +59,7 @@ echo "WEATHERAPI_API_KEY=your_api_key" >> backend/.env
 
 ## Quick start
 
-1. Clone the repository:
+1. Download the code for this recipe using git:
 
 ```bash
 git clone https://github.com/modular/max-recipes.git
@@ -82,6 +82,12 @@ Note that it may take a few minutes for models to be downloaded and compiled.
 <img src="ui.png" alt="Chat interface" width="100%" style="max-width: 800px;">
 
 Then you can ask weather-related questions and get detailed reports.
+
+4. And once done with the app, to clean up the resources run:
+
+```bash
+magic run clean
+```
 
 ## System architecture
 

@@ -34,24 +34,22 @@ then add your token in `.env`
 HUGGING_FACE_HUB_TOKEN=<YOUR_HUGGING_FACE_HUB_TOKEN_HERE>
 ```
 
-## Get the code
+## Quick start
 
-Download the code for this recipe using git:
+1. Download the code for this recipe using git:
 
 ```bash
 git clone https://github.com/modular/max-recipes.git
 cd max-recipes/max-offline-inference
 ```
 
-## Quick start: run inference
-
-To run the inference example:
+2. To run the offline inference example:
 
 ```bash
 magic run app
 ```
 
-This will execute the sample script which loads the LLama 3.1 model and generates text from a couple of prompts, like so:
+This will execute the sample script `main.py` which loads the LLama-3.1 8B model and generates text from a few prompts, like so:
 
 ```txt
 ========== Batch 0 ==========
