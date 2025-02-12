@@ -9036,7 +9036,7 @@ packages:
 - pypi: .
   name: max-serve-open-webui
   version: 0.1.0
-  sha256: cb57924a9a983ac3d23f1066fa6c01ea05615906c385b81b6e3dde2500ae23a1
+  sha256: eab99778a193ee6c2baf15548abc5b52db9dd3c617164f573936a8bb1d4dccf4
   requires_python: ==3.11
   editable: true
 - conda: https://conda.modular.com/max-nightly/noarch/mblack-25.1.0.dev2025021016-release.conda
