@@ -26,6 +26,17 @@ Or update it via
 magic self-update
 ```
 
+You'll need:
+
+- A valid [Hugging Face token](https://huggingface.co/settings/tokens) for accessing Llama 3
+
+Set up your environment variables:
+
+```bash
+cp .env.sample .env
+echo "HUGGING_FACE_HUB_TOKEN=your_hf_token" > .env
+```
+
 ## Get the code
 
 Download the code for this recipe using git:

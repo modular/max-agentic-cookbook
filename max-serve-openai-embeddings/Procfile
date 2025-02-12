@@ -1,2 +1,2 @@
-llm: magic global install max-pipelines && magic global update max-pipelines && max-pipelines serve --huggingface-repo-id sentence-transformers/all-mpnet-base-v2
+llm: (magic global install max-pipelines && magic global update max-pipelines) || true; MAX_SERVE_PORT=8000 MAX_SERVE_HOST=127.0.0.1 HUGGING_FACE_HUB_TOKEN=$(cat .env | grep HUGGING_FACE_HUB_TOKEN | cut -d '=' -f2) && max-pipelines serve --huggingface-repo-id sentence-transformers/all-mpnet-base-v2
 main: magic run python main.py

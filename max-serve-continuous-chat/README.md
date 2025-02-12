@@ -32,11 +32,16 @@ or update it via:
 magic self-update
 ```
 
-We would also require a valid [Hugging Face token](https://huggingface.co/settings/tokens) is required to access the model
-and make it available as an environment variable:
+You'll need:
+
+* A valid [Hugging Face token](https://huggingface.co/settings/tokens) for accessing Llama 3
+* Access to [meta-llama/Llama-3.1-8B-Instruct](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) model
+
+Set up your environment variables:
 
 ```bash
-export HUGGING_FACE_HUB_TOKEN="<YOUR-HUGGING-FACE-HUB-TOKEN>"
+cp .env.sample .env
+echo "HUGGING_FACE_HUB_TOKEN=your_hf_token" > .env
 ```
 
 ### GPU requirements

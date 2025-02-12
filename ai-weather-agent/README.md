@@ -53,7 +53,7 @@ Set up your environment variables:
 
 ```bash
 cp backend/.env.sample backend/.env
-echo "HUGGING_FACE_HUB_TOKEN=your_hf_token" >> backend/.env
+echo "HUGGING_FACE_HUB_TOKEN=your_hf_token" > backend/.env
 echo "WEATHERAPI_API_KEY=your_api_key" >> backend/.env
 ```
 
