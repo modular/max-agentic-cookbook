@@ -5,40 +5,46 @@ from max.pipelines import PipelineConfig
 from max.pipelines.architectures import register_all_models
 
 
-def main():
-    # Load environment variables from .env file
+def setup():
     load_dotenv()
     
-    # Get the Hugging Face token from .env
-    hf_token = os.getenv('HUGGING_FACE_HUB_TOKEN')
-    if not hf_token:
+    if not os.getenv('HUGGING_FACE_HUB_TOKEN'):
         raise ValueError("HUGGING_FACE_HUB_TOKEN not found in .env file")
-
-    # Register all available model architectures
+    
     register_all_models()
 
-    # Specify which model to use from Hugging Face
-    huggingface_repo_id = "modularai/llama-3.1"
-    print(f"Loading model: {huggingface_repo_id}")
-    
-    # Initialize the model with basic configuration
-    pipeline_config = PipelineConfig(huggingface_repo_id)
-    llm = LLM(pipeline_config)
 
-    # Define the list of prompts to send to the model
+def load_model() -> LLM:
+    huggingface_repo_id = "modularai/Llama-3.1-8B-Instruct-GGUF"
+    print(f"Loading model: '{huggingface_repo_id}'... ", end='')
+    
+    pipeline_config = PipelineConfig(huggingface_repo_id)
+    return LLM(pipeline_config)
+
+
+def generate_responses(llm: LLM, prompts: list[str]) -> list[str]:
+    return llm.generate(prompts, max_new_tokens=35)
+
+
+def print_responses(responses: list[str]):
+    for i, response in enumerate(responses):
+        print(f"========== Response {i} ==========")
+        print(f'{response}')
+        print()
+        
+
+def main():
+    setup()
+    llm = load_model()
+    
     prompts = [
-        "The winner of the World Series in 2016 was",
+        "The winner of the World Series in 2016 was: ",
+        "The winner of the World Series in 2020 was: ",
     ]
 
-    # Generate responses for all prompts
-    print("Generating responses...")
-    responses = llm.generate(prompts, max_new_tokens=50)  # Limit response length to 250 tokens
+    responses = generate_responses(llm, prompts)
+    print_responses(responses)
 
-    # Print each prompt and its corresponding response
-    for i, (prompt, response) in enumerate(zip(prompts, responses)):
-        print(f"========== Response {i} ==========")
-        print(f'{prompt}\n{response}')
-        print()
 
 if __name__ == "__main__":
     main()
