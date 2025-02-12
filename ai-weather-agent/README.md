@@ -1,4 +1,4 @@
-# Agentic Workflows: Build your own Weather Agent with MAX serve, FastAPI and NextJS
+# Agentic Workflows: Build your own Weather Agent with MAX Serve, FastAPI and NextJS
 
 This recipe demonstrates how to build an intelligent weather assistant that combines:
 
@@ -76,11 +76,11 @@ magic run app
 
 <img src="ui.png" alt="Chat interface" width="100%" style="max-width: 800px;">
 
-Then you can ask your weather related questions and get the report.
+Then you can ask weather-related questions and get detailed reports.
 
 ## System architecture
 
-The Weather Assistant uses a multi-tier architecture:
+The weather assistant uses a multi-tier architecture:
 
 ```mermaid
 graph TD
@@ -525,7 +525,7 @@ const operationLabels: Record<string, string> = {
 
 Common issues and solutions:
 
-1. **LLM Server Connection Issues**
+1. **LLM server connection issues**
    * Ensure MAX Serve is running (`magic run app`)
    * Check logs for any GPU-related errors
    * Verify Hugging Face token is set correctly
@@ -579,7 +579,7 @@ The following components can be directly reused:
 3. **Medical Summaries**
    * Connect to health record systems
    * Add functions for patient data retrieval
-   * Generate patient-friendly health reports
+   * Generate patient friendly health reports
 
 The multi-stage LLM pipeline pattern, combined with efficient data handling and caching, provides a robust foundation for building various domain-specific AI assistants.
 
