@@ -1,0 +1,18 @@
+version: 1.0
+long_title: "Agentic Workflows: Build your own Weather Agent with MAX Serve, FastAPI and NextJS"
+short_title: "Build your own AI Weather Agent"
+author: "Ehsan M. Kermani"
+author_image: "author/ehsan.jpg"
+author_url: "https://www.linkedin.com/in/ehsanmkermani/"
+github_repo: "https://github.com/modular/max-recipes/tree/main/weather-agent"
+date: "12-02-2025"
+difficulty: "advance"
+tags:
+  - max-serve
+  - agent
+  - embeddings
+  - semantic-cache
+
+tasks:
+  - magic run app
+  - magic run clean

@@ -1,0 +1,15 @@
+
+# pixi environments
+.pixi
+*.egg-info
+# magic environments
+.magic
+
+# node_modules
+node_modules
+.next
+
+# env
+.env
+
+
