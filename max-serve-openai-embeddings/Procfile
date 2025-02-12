@@ -1,0 +1,2 @@
+llm: magic global install max-pipelines && magic global update max-pipelines && max-pipelines serve --huggingface-repo-id sentence-transformers/all-mpnet-base-v2
+main: magic run python main.py

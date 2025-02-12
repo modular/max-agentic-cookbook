@@ -1,8 +1,5 @@
 # Generate Embeddings with MPNet
 
-> Note that this recipe works on compatible Linux machines.
-> We are actively working on enabling MAX Serve for MacOS ARM64 as well.
-
 Embeddings are a crucial component of intelligent agents, enabling efficient search and retrieval of proprietary information. MAX supports creation of embeddings using an OpenAI-compatible API, including the ability to run the popular `sentence-transformers/all-mpnet-base-v2` model from Hugging Face. When you run MPNet on MAX, you'll be serving a high-performance implementation of the model built by Modular engineers with the MAX Graph API.
 
 In this recipe you will:
@@ -47,12 +44,14 @@ HUGGING_FACE_HUB_TOKEN=<YOUR_HUGGING_FACE_HUB_TOKEN_HERE>
 
 For running the app on GPU, ensure your system meets these GPU requirements:
 
-* Supported GPUs: NVIDIA A100 (optimized), A10G, L4, or L40.
-* Docker and Docker Compose: Installed with [NVIDIA GPU support](https://docs.docker.com/config/containers/resource_constraints/#gpu).
-* NVIDIA Drivers: [Installation guide here](https://www.nvidia.com/download/index.aspx).
-* NVIDIA Container Toolkit: [Installation guide here](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
+- Supported GPUs: NVIDIA A100 (optimized), A10G, L4, or L40.
+- (Optional) Docker and Docker Compose: Installed with [NVIDIA GPU support](https://docs.docker.com/config/containers/resource_constraints/#gpu).
+- NVIDIA Drivers: [Installation guide here](https://www.nvidia.com/download/index.aspx).
+- NVIDIA Container Toolkit: [Installation guide here](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
 
-## Get the Code
+**Docker and Docker Compose are optional. Note that this recipe works on compatible Linux machines. We are actively working on enabling MAX Serve Docker image for MacOS ARM64 as well.**
+
+## Get the code
 
 Download the code for this recipe using git:
 
@@ -69,8 +68,7 @@ Serving MPNet on MAX is trivial with Magic and Docker. Simply run:
 magic run app
 ```
 
-This command is defined in the `pyproject.toml` file. It will run a script (`run.sh`) to determine if your machine has an NVIDIA GPU, and
-start the MAX container with or without GPU support accordingly. The script selects between the `cpu` and `gpu` profiles found in the `docker-compose.yaml` file.
+This command is defined in the `pyproject.toml` file and invokes the `max-pipelines` CLI using `Procfile` for convenience.
 
 MAX Serve is ready once you see a line containing the following in the Docker output:
 
@@ -88,7 +86,7 @@ Embedding dimension: 768
 1st few values of 1st embedding: [0.36384445428848267, -0.7647817730903625, ...]
 ```
 
-When you are done with the app, to clean up and remove the docker images, run:
+When you are done with the app, run:
 
 ```bash
 magic run clean
