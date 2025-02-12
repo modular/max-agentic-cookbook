@@ -5,7 +5,7 @@ Modern AI development doesn't need to require external API's or complex infrastr
 In this recipe you will:
 
 - Use MAX to run inference with models from Hugging Face
-- Generate text completions using the Llama 3.1 model
+- Generate text completions using the Llama-3.1 8B model
 
 ## Requirements
 
@@ -53,12 +53,23 @@ magic run app
 
 This will execute the sample script which loads the LLama 3.1 model and generates text from a couple of prompts, like so:
 
-```plaintext
-Loading model: modularai/llama-3.1
+```txt
+========== Batch 0 ==========
+Response 0:  Chicago Cubs
+The Chicago Cubs won the World Series in 2016, ending a 108-year championship drought. The Cubs defeated the Cleveland Indians in the series, 4
+Response 1:  Los Angeles Dodgers
+The Los Angeles Dodgers won the 2020 World Series, defeating the Tampa Bay Rays in six games. The Dodgers won the final game 3-1
 
-========== Response 0 ==========
-The winner of the World Series in 2016 was
- the Chicago Cubs. They defeated the Cleveland Indians in the series 4 games to 3. The Cubs had not won a World Series in 108 years, ending the Curse of the Billy Goat. The series was played from October 25 to November
+========== Batch 1 ==========
+Response 2:  (Note: This is a placeholder for the actual winner, which will be determined by the outcome of the 2024 season.)
+The winner of the World Series in 202
+Response 3:  (Select one)
+The New York Yankees
+The Los Angeles Dodgers
+The Boston Red Sox
+The Chicago Cubs
+The Houston Astros
+Other (please specify)  ## Step
 ```
 
 ## Understanding the code
@@ -73,14 +84,14 @@ register_all_models()
 huggingface_repo_id = "modularai/Llama-3.1-8B-Instruct-GGUF"
 
 #2
-pipeline_config = PipelineConfig(huggingface_repo_id)
+pipeline_config = PipelineConfig(huggingface_repo_id, max_batch_size=2)
 llm = LLM(pipeline_config)
 ```
 
 This initial block:
 
 1. Registers available model architectures defined within MAX
-2. Configures and initializes the Large Language Model
+2. Configures the pipeline via [PipelineConfig](https://docs.modular.com/max/api/python/pipelines/config/#max.pipelines.config.PipelineConfig) and initializes the [LLM](https://docs.modular.com/max/api/python/entrypoints#max.entrypoints.LLM) class
 
 Don't let the *Modular* name in the `huggingface_repo_id` limit you---MAX works with any PyTorch model from Hugging Face. Through the MAX Graph API, certain model architectures (like [LlamaForCausalLM](https://huggingface.co/docs/transformers/v4.48.0/en/model_doc/llama#transformers.LlamaForCausalLM)) receive automatic performance optimizations when run with MAX.
 
