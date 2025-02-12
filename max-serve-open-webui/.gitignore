@@ -11,8 +11,6 @@ __pycache__/
 
 # Open WebUI
 .webui_secret_key
-data/*
-!data/config.json
 
 # Logs
 logs/

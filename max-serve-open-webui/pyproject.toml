@@ -1,5 +1,6 @@
+# PROJECT-LEVEL CONFIGURATION
 [project]
-authors = [{name = "Modular", email = "hello@modular.com"}]
+authors = [{ name = "Modular", email = "hello@modular.com" }]
 description = "Open WebUI backed by MAX Serve"
 name = "max-serve-open-webui"
 requires-python = "== 3.11"
@@ -13,41 +14,53 @@ requires = ["hatchling"]
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
+# MAGIC CONFIGURATION
 [tool.pixi.project]
-channels = ["https://conda.modular.com/max-nightly", "https://conda.modular.com/max", "https://repo.prefix.dev/modular-community", "conda-forge"]
 platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
+channels = [
+    "https://conda.modular.com/max-nightly",
+    "https://conda.modular.com/max",
+    "https://repo.prefix.dev/modular-community",
+    "conda-forge",
+]
 
 [tool.pixi.pypi-dependencies]
 max_serve_open_webui = { path = ".", editable = true }
 
-# Define separate environments for MAX and Open WebUI
+# ENVIRONMENTS
+## Open WebUI has transitive dependencies that conflict with MAX
+## So we use Magic to define separate environments for each
 [tool.pixi.environments]
 ui = ["ui"]
 max = ["max"]
 
-# OPEN WEBUI ENVIRONMENT
-## Dependencies
-[dependency-groups]
-ui = ["open-webui"]
-
-## Tasks
+## ENVIRONMENT: OPEN WEBUI
+### Tasks
 [tool.pixi.feature.ui.tasks]
 ui = { cmd = "open-webui serve", env = { DATA_DIR = "./data", WEBUI_AUTH = "false" } }
 
-# MAX ENVIRONMENT
-## Dependencies
+### Dependencies
+[dependency-groups]
+ui = ["open-webui>=0.5.10,<0.6.0"]
+#### Open WebUI is available on PyPI, not conda-forge
+#### So we use dependency groups to install it (see PEP 735)
+
+
+## ENVIRONMENT: MAX
+### Tasks
+[tool.pixi.feature.max.tasks]
+max = "max-pipelines serve --huggingface-repo-id=modularai/Llama-3.1-8B-Instruct-GGUF --max-length 16384"
+
+### Dependencies
 [tool.pixi.feature.max.dependencies]
 max-pipelines = "*"
 
-## Tasks
-[tool.pixi.feature.max.tasks]
-max = "max-pipelines serve --huggingface-repo-id=modularai/llama-3.1 --max-length 16384"
 
-# BASE ENVIRONMENT
-# Dependencies
-[tool.pixi.dependencies]
-honcho = ">=2.0.0,<3"
-
-# Tasks
+## ENVIRONMENT: BASE
+### Tasks
 [tool.pixi.tasks]
 app = "honcho start"
+
+### Dependencies
+[tool.pixi.dependencies]
+honcho = ">=2.0.0,<3"
