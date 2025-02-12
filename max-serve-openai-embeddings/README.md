@@ -51,18 +51,16 @@ For running the app on GPU, ensure your system meets these GPU requirements:
 
 **Docker and Docker Compose are optional. Note that this recipe works on compatible Linux machines. We are actively working on enabling MAX Serve Docker image for MacOS ARM64 as well.**
 
-## Get the code
+## Quick start
 
-Download the code for this recipe using git:
+1. Download the code for this recipe using git:
 
 ```bash
 git clone https://github.com/modular/max-recipes.git
 cd max-recipes/max-serve-openai-embeddings
 ```
 
-## Quick start: Run the embedding application
-
-Serving MPNet on MAX is trivial with Magic and Docker. Simply run:
+2. Run the embedding application
 
 ```bash
 magic run app
@@ -86,7 +84,7 @@ Embedding dimension: 768
 1st few values of 1st embedding: [0.36384445428848267, -0.7647817730903625, ...]
 ```
 
-When you are done with the app, run:
+3. And once done with the app, to clean up the resources run:
 
 ```bash
 magic run clean
