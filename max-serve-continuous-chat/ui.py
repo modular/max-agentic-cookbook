@@ -19,16 +19,16 @@ import click
 
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
 
 class ChatConfig:
     def __init__(self, base_url: str, max_context_window: int):
         self.base_url = base_url
         self.max_context_window = max_context_window
-        self.model_repo_id = "modularai/llama-3.1"
+        self.model_repo_id = "modularai/Llama-3.1-8B-Instruct-GGUF"
         self.tokenizer_id = "meta-llama/Meta-Llama-3.1-8B-Instruct"
         self.tokenizer = AutoTokenizer.from_pretrained(self.tokenizer_id)
 
@@ -40,8 +40,10 @@ class ChatConfig:
             num_tokens += len(self.tokenizer.encode(text))
         return num_tokens
 
+
 def is_not_healthy(response):
-        return response.status_code != 200
+    return response.status_code != 200
+
 
 def wait_for_healthy(base_url: str):
     @retry(
@@ -60,9 +62,14 @@ def wait_for_healthy(base_url: str):
 
     return _check_health()
 
-def create_interface(config: ChatConfig, client, system_prompt, concurrency_limit: int = 1):
+
+def create_interface(
+    config: ChatConfig, client, system_prompt, concurrency_limit: int = 1
+):
     with gr.Blocks(theme="soft") as iface:
-        gr.Markdown("# Chat with Llama 3 model\n\nPowered by Modular [MAX](https://docs.modular.com/max/) 🚀")
+        gr.Markdown(
+            "# Chat with Llama 3 model\n\nPowered by Modular [MAX](https://docs.modular.com/max/) 🚀"
+        )
 
         chatbot = gr.Chatbot(height=400)
         msg = gr.Textbox(label="Message", placeholder="Type your message here...")
@@ -72,33 +79,28 @@ def create_interface(config: ChatConfig, client, system_prompt, concurrency_limi
         token_display = gr.Markdown(initial_usage)
 
         async def respond_wrapped(message, chat_history):
-            async for response in respond(message, chat_history, config, client, system_prompt):
+            async for response in respond(
+                message, chat_history, config, client, system_prompt
+            ):
                 yield response
 
         msg.submit(
-            respond_wrapped,
-            [msg, chatbot],
-            [chatbot, token_display],
-            api_name="chat"
+            respond_wrapped, [msg, chatbot], [chatbot, token_display], api_name="chat"
         ).then(lambda: "", None, msg)
 
         def clear_fn():
             return (
                 [],
-                f"**Total Tokens Generated**: 0 | Context Window: {config.max_context_window}"
+                f"**Total Tokens Generated**: 0 | Context Window: {config.max_context_window}",
             )
 
-        clear.click(
-            clear_fn,
-            None,
-            [chatbot, token_display],
-            api_name="clear"
-        )
+        clear.click(clear_fn, None, [chatbot, token_display], api_name="clear")
 
         iface.queue(
             default_concurrency_limit=concurrency_limit,
         )
     return iface
+
 
 async def respond(message, chat_history, config: ChatConfig, client, system_prompt):
     chat_history = chat_history or []
@@ -155,13 +157,17 @@ async def respond(message, chat_history, config: ChatConfig, client, system_prom
                     )
 
         except json.JSONDecodeError as je:
-            logger.error(f"JSON decode error in streaming response: {str(je)}", exc_info=True)
+            logger.error(
+                f"JSON decode error in streaming response: {str(je)}", exc_info=True
+            )
             error_message = "Error: Invalid response format from server"
             chat_history[-1][1] = error_message
             yield chat_history, f"**Active Context**: {running_total}/{config.max_context_window}"
 
         except Exception as stream_error:
-            logger.error(f"Error during response streaming: {str(stream_error)}", exc_info=True)
+            logger.error(
+                f"Error during response streaming: {str(stream_error)}", exc_info=True
+            )
             error_message = f"Error during chat: {str(stream_error)}"
             chat_history[-1][1] = error_message
             yield chat_history, f"**Active Context**: {running_total}/{config.max_context_window}"
@@ -181,20 +187,24 @@ async def respond(message, chat_history, config: ChatConfig, client, system_prom
 
 
 @click.command()
-@click.option('--base-url', default=os.getenv('BASE_URL', 'http://0.0.0.0:8000/v1'))
-@click.option('--max-context-window', default=int(os.getenv('MAX_CONTEXT_WINDOW', 4096)))
-@click.option('--concurrency-limit', default=int(os.getenv('CONCURRENCY_LIMIT', 1)))
-@click.option('--system-prompt', default=os.getenv('SYSTEM_PROMPT', 'You are a helpful AI assistant.'))
-@click.option('--port', default=int(os.getenv('PORT', 7860)))
-@click.option('--api-key', default=os.getenv('API_KEY', 'test'))
+@click.option("--base-url", default=os.getenv("BASE_URL", "http://0.0.0.0:8000/v1"))
+@click.option(
+    "--max-context-window", default=int(os.getenv("MAX_CONTEXT_WINDOW", 4096))
+)
+@click.option("--concurrency-limit", default=int(os.getenv("CONCURRENCY_LIMIT", 1)))
+@click.option(
+    "--system-prompt",
+    default=os.getenv("SYSTEM_PROMPT", "You are a helpful AI assistant."),
+)
+@click.option("--port", default=int(os.getenv("PORT", 7860)))
+@click.option("--api-key", default=os.getenv("API_KEY", "test"))
 def main(base_url, max_context_window, concurrency_limit, system_prompt, port, api_key):
     """Launch the Llama Chat interface"""
-    logger.info(f"Initializing chat interface with base_url={base_url}, max_context_window={max_context_window}")
+    logger.info(
+        f"Initializing chat interface with base_url={base_url}, max_context_window={max_context_window}"
+    )
     config = ChatConfig(base_url, max_context_window)
-    system_prompt = {
-        "role": "system",
-        "content": system_prompt
-    }
+    system_prompt = {"role": "system", "content": system_prompt}
     wait_for_healthy(base_url)
     logger.info("MAX server is healthy and ready to process requests")
 
@@ -206,7 +216,8 @@ def main(base_url, max_context_window, concurrency_limit, system_prompt, port, a
     mount_gradio_app(app=app, blocks=iface, path="/")
     logger.info(f"Starting Gradio interface on port {port}")
 
-    iface.launch(server_port=port, server_name="0.0.0.0")
+    iface.launch(server_port=port, server_name="0.0.0.0", show_error=True)
+
 
 if __name__ == "__main__":
     main()

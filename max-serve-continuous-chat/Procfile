@@ -1,0 +1,2 @@
+llm: magic global install max-pipelines && magic global update max-pipelines && max-pipelines serve --huggingface-repo-id=modularai/Llama-3.1-8B-Instruct-GGUF --max-length 4096
+ui: TOKENIZERS_PARALLELISM=false PORT=7860 magic run python ui.py

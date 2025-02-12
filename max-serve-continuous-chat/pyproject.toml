@@ -34,10 +34,10 @@ platforms = ["linux-64", "osx-arm64", "linux-aarch64"]
 max-serve-continuous-chat = { path = ".", editable = true }
 
 [tool.pixi.tasks]
-app = "bash run.sh app"
-stop = "bash run.sh stop"
-clean = "bash run.sh clean"
+app = "honcho start"
+clean = "honcho -f Procfile.clean start"
 
 [tool.pixi.dependencies]
 docker-compose = ">=2.32.4,<3"
 bash = ">=5.2.21,<6"
+honcho = ">=2.0.0,<3"

@@ -1,8 +1,5 @@
 # Build a Continuous Chat App with MAX Serve and Llama 3
 
-> Note that this recipe works on compatible Linux machines.
-> We are actively working on enabling MAX Serve for MacOS ARM64 as well.
-
 In this recipe, we will cover:
 
 * How to set up a chat application using Llama 3 and MAX.
@@ -47,9 +44,20 @@ export HUGGING_FACE_HUB_TOKEN="<YOUR-HUGGING-FACE-HUB-TOKEN>"
 For running the app on GPU, ensure your system meets these GPU requirements:
 
 * Supported GPUs: NVIDIA A100 (optimized), A10G, L4, or L40.
-* Docker and Docker Compose: Installed with [NVIDIA GPU support](https://docs.docker.com/config/containers/resource_constraints/#gpu).
+* (Optional) Docker and Docker Compose: Installed with [NVIDIA GPU support](https://docs.docker.com/config/containers/resource_constraints/#gpu).
 * NVIDIA Drivers: [Installation guide here](https://www.nvidia.com/download/index.aspx).
 * NVIDIA Container Toolkit: [Installation guide here](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
+
+**Docker and Docker Compose are optional. Note that this recipe works on compatible Linux machines. We are actively working on enabling MAX Serve Docker image for MacOS ARM64 as well.**
+
+## Get the code
+
+Download the code for this recipe using git:
+
+```bash
+git clone https://github.com/modular/max-recipes.git
+cd max-recipes/max-serve-continuous-chat
+```
 
 ## Quick start: Running the chat app
 
@@ -69,7 +77,7 @@ And once done with the app, to clean up and remove the docker images, run:
 magic run clean
 ```
 
-### Attaching to a remote endpoint
+### (Optional) Attaching to a remote endpoint
 
 If you don't have access to the supported NVIDIA GPU locally, you can instead follow our tutorials
 on deploying Llama 3 on GPU with MAX Serve to [AWS, GCP or Azure](https://docs.modular.com/max/tutorials/max-serve-local-to-cloud/)
