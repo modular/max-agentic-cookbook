@@ -26,10 +26,12 @@ Or update it via
 magic self-update
 ```
 
-And get the code
+## Get the code
+
+Download the code for this recipe using git:
 
 ```bash
-git clone https://github.com/modular/max-recipes
+git clone https://github.com/modular/max-recipes.git
 cd max-recipes/max-serve-openai-function-calling
 ```
 
@@ -56,7 +58,7 @@ First things first, you can run the MAX Serve easily on both CPU and GPU as foll
 
 ```bash
 magic global install max-pipelines
-max-serve serve --huggingface-repo-id=modularai/llama-3.1
+max-serve serve --huggingface-repo-id=modularai/Llama-3.1-8B-Instruct-GGUF
 ```
 
 Then to illustrate function calling, let's start with a simple example where an AI retrieves the weather using a mock function.
@@ -93,7 +95,7 @@ def main():
     user_message = "What's the weather like in San Francisco?"
 
     response = client.chat.completions.create(
-        model="modularai/llama-3.1",
+        model="modularai/Llama-3.1-8B-Instruct-GGUF",
         messages=[{"role": "user", "content": user_message}],
         tools=TOOLS,
         tool_choice="auto",
@@ -114,7 +116,7 @@ if __name__ == "__main__":
     main()
 ```
 
-Run the example via:
+Run the example with the following with runs MAX Serve as well:
 
 ```bash
 magic run single_function_call
@@ -360,7 +362,7 @@ def health_check():
 def chat(request: ChatRequest):
     try:
         response = client.chat.completions.create(
-            model="modularai/llama-3.1",
+            model="modularai/Llama-3.1-8B-Instruct-GGUF",
             messages=[
                 {
                     "role": "system",
