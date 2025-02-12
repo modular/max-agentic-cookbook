@@ -51,11 +51,10 @@ To run the inference example:
 magic run app
 ```
 
-This will execute the sample script which loads the LLama 3.1 model and generates text from a single prompt, like so:
+This will execute the sample script which loads the LLama 3.1 model and generates text from a couple of prompts, like so:
 
 ```plaintext
 Loading model: modularai/llama-3.1
-Generating responses...
 
 ========== Response 0 ==========
 The winner of the World Series in 2016 was
@@ -71,7 +70,7 @@ Let's break down the key components of the sample code.
 ```python
 #1
 register_all_models()
-huggingface_repo_id = "modularai/llama-3.1"
+huggingface_repo_id = "modularai/Llama-3.1-8B-Instruct-GGUF"
 
 #2
 pipeline_config = PipelineConfig(huggingface_repo_id)
@@ -80,7 +79,7 @@ llm = LLM(pipeline_config)
 
 This initial block:
 
-1. Registers available model architectures
+1. Registers available model architectures defined within MAX
 2. Configures and initializes the Large Language Model
 
 Don't let the *Modular* name in the `huggingface_repo_id` limit you---MAX works with any PyTorch model from Hugging Face. Through the MAX Graph API, certain model architectures (like [LlamaForCausalLM](https://huggingface.co/docs/transformers/v4.48.0/en/model_doc/llama#transformers.LlamaForCausalLM)) receive automatic performance optimizations when run with MAX.
@@ -94,7 +93,7 @@ prompts = [
 ]
 
 #2
-responses = llm.generate(prompts, max_new_tokens=50)  #3
+responses = llm.generate(prompts, max_new_tokens=35)  #3
 ```
 
 The inference code:
@@ -103,7 +102,7 @@ The inference code:
 2. Uses the `generate(...)` method to create text completions
 3. Limits response length with `max_new_tokens`
 
-The complete sample code includes additional features like handling of the Hugging Face access token and formatting output for display. You can find the full implementation in: `src/max_offline_inference/__main__.py`
+The complete sample code includes additional features like handling of the Hugging Face access token and formatting output for display. You can find the full implementation in: `main.py`
 
 ## What's next?
 
