@@ -1,5 +1,5 @@
 version: 1.0
-long_title: "Run inference with MAX using a simple Python script"
+long_title: "Learn How to Run Offline Inference with MAX Pipelines"
 short_title: "Offline inference with MAX"
 author: "Bill Welense"
 author_image: "author/billw.jpg"
@@ -8,8 +8,8 @@ github_repo: "https://github.com/modular/max-recipes/tree/main/max-offline-infer
 date: "13-02-2025"
 difficulty: "beginner"
 tags:
-  - max
-  - llama
+  - max-pipelines
+  - llama3
 
 tasks:
   - magic run app

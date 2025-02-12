@@ -1,6 +1,6 @@
 version: 1.0
-long_title: "Run MPNet on MAX Serve with Docker to generate embeddings"
-short_title: "Generate Embeddings with MPNet"
+long_title: "Learn How to Generate Embeddings with MAX Serve"
+short_title: "Generate Embeddings with MAX Serve"
 author: "Bill Welense"
 author_image: "author/billw.jpg"
 author_url: "https://www.linkedin.com/in/welense/"

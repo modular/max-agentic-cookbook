@@ -1,4 +1,4 @@
-# Offline Inference with MAX
+# Learn How to Run Offline Inference with MAX Pipelines
 
 Modern AI development doesn't need to require external API's or complex infrastructure. With MAX, you can run state of the art AI models using only a few lines of Python code. This recipe shows you how to pair MAX with Hugging Face, the leading platform for open-source AI models, to perform inference locally and efficiently. Whether you're a developer experimenting with AI or an enterprise running offline batch inference jobs, MAX provides a simple path to get up and running.
 
