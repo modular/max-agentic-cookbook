@@ -9,8 +9,8 @@ __pycache__/
 # macOS
 .DS_Store
 
-# Open WebUI
+# Secrets
+.env
 .webui_secret_key
 
-# Logs
-logs/
+
