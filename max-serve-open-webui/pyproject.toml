@@ -1,7 +1,7 @@
 # PROJECT-LEVEL CONFIGURATION
 [project]
 authors = [{ name = "Modular", email = "hello@modular.com" }]
-description = "Open WebUI backed by MAX Serve"
+description = "Run Open WebUI with MAX Serve for RAG and Web Search"
 name = "max-serve-open-webui"
 requires-python = "== 3.11"
 version = "0.1.0"
