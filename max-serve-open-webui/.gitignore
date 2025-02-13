@@ -2,6 +2,7 @@
 .magic
 .pixi
 *.egg-info
+pixi.lock
 
 # Python
 __pycache__/
