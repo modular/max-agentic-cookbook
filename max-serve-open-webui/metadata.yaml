@@ -1,7 +1,7 @@
 version: 1.0
 long_title: "Use Open WebUI with MAX Serve for RAG and Web Search"
 short_title: "Use Open WebUI with MAX Serve"
-author: "Ehsan M. Kermani"
+author: "Bill Welense"
 author_image: "author/billw.jpg"
 author_url: "https://www.linkedin.com/in/welense/"
 github_repo: "https://github.com/modular/max-recipes/tree/main/max-serve-open-webui"
@@ -14,3 +14,4 @@ tags:
 
 tasks:
   - magic run app
+  - magic run clean

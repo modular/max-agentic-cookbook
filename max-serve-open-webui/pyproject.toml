@@ -49,8 +49,8 @@ ui = ["open-webui>=0.5.10,<0.6.0"]
 ## ENVIRONMENT: MAX
 ### Tasks
 [tool.pixi.feature.max.tasks]
-max = "max-pipelines serve --huggingface-repo-id=modularai/Llama-3.1-8B-Instruct-GGUF --max-length 16384"
 set-env = "source .env 2>/dev/null || true"
+max = "max-pipelines serve --huggingface-repo-id=modularai/Llama-3.1-8B-Instruct-GGUF --max-length 16384"
 
 ### Dependencies
 [tool.pixi.feature.max.dependencies]
@@ -61,6 +61,7 @@ max-pipelines = "*"
 ### Tasks
 [tool.pixi.tasks]
 app = { cmd = "honcho start", depends-on = "set-env" }
+clean = "honcho -f Procfile.clean start"
 
 ### Dependencies
 [tool.pixi.dependencies]
