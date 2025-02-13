@@ -7,6 +7,7 @@ In this recipe you will:
 - Use MAX Serve to provide an OpenAI-compatible endpoint for [Llama 3.1](https://ai.meta.com/blog/meta-llama-3-1/)
 - Set up [Open WebUI](https://github.com/open-webui/open-webui) to provide a robust chat interface
 - Learn how Open WebUI's RAG and Web search functionality works
+- Learn how to reconfigure this recipe for use with multiple users
 
 ## About Open WebUI
 
@@ -22,20 +23,20 @@ To proceed, ensure you have the `magic` CLI installed:
 curl -ssL https://magic.modular.com/ | bash
 ```
 
-or update it via:
+...and updated to the latest version:
 
 ```bash
 magic self-update
 ```
 
 A valid [Hugging Face token](https://huggingface.co/settings/tokens) is required to access the model.
-Once you have obtained the token, include it in `.env` by:
+Once you have obtained the token, include it in `.env` by running:
 
 ```bash
 cp .env.example .env
 ```
 
-then add your token in the `.env` file:
+...then add your token in the `.env` file:
 
 ```bash
 HUGGING_FACE_HUB_TOKEN=
@@ -94,9 +95,9 @@ To chat with the custom model, start a new chat, then choose *DevRel Pets* from 
 
 ### Web search
 
-Web search is a pattern for providing a model with up-to-date world knowledge that's publicly available.
+Web search is another pattern for providing a model with new information, in this case up-to-date world knowledge from the public Web.
 
-This recipe is pre-configured to use [DuckDuckGo](https://duckduckgo.com/) for web search. To use a different web search service, navigate to *Admin Panel > Settings > Web Search*. Some services require an API key and providing payment information, while using DuckDuckGo's API is open and free.
+This recipe is pre-configured to use [DuckDuckGo](https://duckduckgo.com/) for web search. To use a different web search service, navigate to *Admin Panel > Settings > Web Search*. Some services require you provide an API key and payment information, while using DuckDuckGo's API is open and free.
 
 To chat with real-time access to information from the Web, simply start a new chat, and enable *Web Search* in the message input box.
 
