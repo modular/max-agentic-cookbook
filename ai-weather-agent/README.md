@@ -93,23 +93,7 @@ magic run clean
 
 The weather assistant uses a multi-tier architecture:
 
-```mermaid
-graph TD
-    A[Frontend - Next.js] -->|HTTP| B[Backend - FastAPI]
-    B -->|OpenAI API| C1[MAX Serve - Llama 3]
-    B -->|Embeddings API| C2[MAX Serve - MPNet V2]
-    B -->|HTTP| D[WeatherAPI]
-    B -->|HTTP| F[Space Weather API]
-    B -->|Cache| G[Semantic Cache]
-
-    style A fill:#f9f,stroke:#333
-    style B fill:#bbf,stroke:#333
-    style C1 fill:#bfb,stroke:#333
-    style C2 fill:#bfb,stroke:#333
-    style D fill:#fbb,stroke:#333
-    style F fill:#fbb,stroke:#333
-    style G fill:#bff,stroke:#333
-```
+<img src="architecture.png" alt="Chat interface" width="100%" style="max-width: 1024px;">
 
 The architecture consists of several key components:
 
@@ -126,41 +110,7 @@ Each component is designed to be independently scalable and maintainable. The ba
 
 Here's how a typical weather query flows through the system:
 
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant F as Frontend
-    participant B as Backend
-    participant C as Cache
-    participant L as LLM
-    participant E as Embeddings
-    participant W as WeatherAPI
-    participant S as SpaceWeatherAPI
-
-    U->>F: Enter query
-    F->>B: POST /api/chat
-    B->>L: Intent Detection
-    L-->>B: WEATHER_QUERY
-    B->>L: Function Calling
-    L-->>B: get_weather("city")
-    B->>L: Normalize City
-    L-->>B: Standardized City Name
-    B->>E: Get Query Embedding
-    E-->>B: Query Vector
-    B->>C: Check Cache
-    C-->>B: Cache Miss
-    B->>W: Fetch Weather Data
-    W-->>B: Weather JSON
-    B->>S: Fetch Space Weather
-    S-->>B: Space Weather JSON
-    B->>L: Generate Report
-    L-->>B: Natural Response
-    B->>E: Get Response Embedding
-    E-->>B: Response Vector
-    B->>C: Update Cache
-    B-->>F: Complete Response
-    F-->>U: Display Result
-```
+<img src="requestflow.png" alt="Chat interface" width="100%" style="max-width: 1024px;">
 
 This sequence represents a complete query lifecycle:
 
