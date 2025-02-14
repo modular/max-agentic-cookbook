@@ -5,9 +5,25 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.png'
+      - '**/*.jpg'
+      - '**/*.jpeg'
+      - '**/*.gif'
+      - 'LICENSE'
+      - 'CODE_OF_CONDUCT.md'
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.png'
+      - '**/*.jpg'
+      - '**/*.jpeg'
+      - '**/*.gif'
+      - 'LICENSE'
+      - 'CODE_OF_CONDUCT.md'
 
 jobs:
   lint:
