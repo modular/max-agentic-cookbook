@@ -1,0 +1,68 @@
+# PROJECT-LEVEL CONFIGURATION
+[project]
+authors = [{ name = "Modular", email = "hello@modular.com" }]
+description = "Run Open WebUI with MAX Serve for RAG and Web Search"
+name = "max-serve-open-webui"
+requires-python = "== 3.11"
+version = "0.1.0"
+dependencies = []
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+# MAGIC CONFIGURATION
+[tool.pixi.project]
+platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
+channels = [
+    "https://conda.modular.com/max-nightly",
+    "https://conda.modular.com/max",
+    "https://repo.prefix.dev/modular-community",
+    "conda-forge",
+]
+
+[tool.pixi.pypi-dependencies]
+max_serve_open_webui = { path = ".", editable = true }
+
+# ENVIRONMENTS
+## Open WebUI has transitive dependencies that conflict with MAX
+## So we use Magic to define separate environments for each
+[tool.pixi.environments]
+ui = ["ui"]
+max = ["max"]
+
+## ENVIRONMENT: OPEN WEBUI
+### Tasks
+[tool.pixi.feature.ui.tasks]
+ui = { cmd = "open-webui serve", env = { DATA_DIR = "./data", WEBUI_AUTH = "false" } }
+
+### Dependencies
+[dependency-groups]
+ui = ["open-webui>=0.5.10,<0.6.0"]
+#### Open WebUI is available on PyPI, not conda-forge
+#### So we use dependency groups to install it (see PEP 735)
+
+
+## ENVIRONMENT: MAX
+### Tasks
+[tool.pixi.feature.max.tasks]
+set-env = "source .env 2>/dev/null || true"
+max = "max-pipelines serve --huggingface-repo-id=modularai/Llama-3.1-8B-Instruct-GGUF --max-length 16384"
+
+### Dependencies
+[tool.pixi.feature.max.dependencies]
+max-pipelines = "*"
+
+
+## ENVIRONMENT: BASE
+### Tasks
+[tool.pixi.tasks]
+app = { cmd = "honcho start", depends-on = "set-env" }
+clean = "honcho -f Procfile.clean start"
+
+### Dependencies
+[tool.pixi.dependencies]
+honcho = ">=2.0.0,<3"

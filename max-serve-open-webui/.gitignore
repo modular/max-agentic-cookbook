@@ -1,0 +1,17 @@
+# Magic 
+.magic
+.pixi
+*.egg-info
+pixi.lock
+
+# Python
+__pycache__/
+
+# macOS
+.DS_Store
+
+# Secrets
+.env
+.webui_secret_key
+
+
