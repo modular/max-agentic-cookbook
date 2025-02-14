@@ -1,5 +1,7 @@
 # MAX Recipes
 
+[![CI](https://github.com/modular/max-recipes/actions/workflows/ci.yml/badge.svg)](https://github.com/modular/max-recipes/actions/workflows/ci.yml)
+
 This repository contains the accompanying code for [MAX Recipes](https://builds.modular.com/?category=recipes) featured on [MAX Builds](https://builds.modular.com/).
 
 Each recipe is self-contained and demonstrates how to build and deploy AI applications using [MAX](https://docs.modular.com/max/).
