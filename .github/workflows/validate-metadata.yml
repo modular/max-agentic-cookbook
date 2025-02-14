@@ -1,6 +1,7 @@
 name: Validate Recipe Metadata
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - '**/metadata.yaml'
