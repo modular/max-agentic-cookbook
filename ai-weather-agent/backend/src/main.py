@@ -42,15 +42,6 @@ def signal_handler(sig, frame):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Ports to check and clean up
-    ports_to_check = [8000, 7999, 8001]
-
-    for port in ports_to_check:
-        if not check_port(port):
-            print(f"Port {port} is in use, cleaning up...")
-            cleanup_port(port)
-            await asyncio.sleep(1)
-
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
 

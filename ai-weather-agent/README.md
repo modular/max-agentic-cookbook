@@ -492,12 +492,10 @@ def wait_for_llm_server(base_url: str):
     return _check_health()
 ```
 
-The system includes several resilience features:
+The system includes features such as:
 
-* Automatic retries for transient failures
 * Graceful degradation when services are unavailable
-* Comprehensive error logging and monitoring
-* Rate limiting for external API calls
+* Error logging and monitoring
 
 ### Frontend implementation
 
