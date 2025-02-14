@@ -8,6 +8,15 @@ This recipe demonstrates how to build an intelligent weather assistant that comb
 * Modern React frontend with real-time updates
 * Advanced performance optimizations and monitoring
 
+While this recipe focuses on weather data, the **patterns** demonstrated here can be adapted for various reporting and automation needs, such as:
+
+* **Financial reporting and market analysis**
+* **Product recommendations and catalog queries**
+* **Medical record summaries and health reports**
+* **Customer service automation**
+* **Real estate property analysis**
+* And many other domain-specific applications
+
 We'll create a solution that showcases:
 
 * MAX Serve capabilities with Llama 3
@@ -61,33 +70,42 @@ echo "WEATHERAPI_API_KEY=your_api_key" >> backend/.env
 
 1. Download the code for this recipe using git:
 
-```bash
-git clone https://github.com/modular/max-recipes.git
-cd max-recipes/ai-weather-agent
-```
+    ```bash
+    git clone https://github.com/modular/max-recipes.git
+    cd max-recipes/ai-weather-agent
+    ```
 
 2. Run the application:
 
-```bash
-magic run app
-```
+    ```bash
+    magic run app
+    ```
 
-Note that it may take a few minutes for models to be downloaded and compiled.
+    Note that it may take a few minutes for models to be downloaded and compiled.
 
 3. Open [http://localhost:3000](http://localhost:3000) in your browser to see the UI when all services below are ready:
+
    * MAX Serve embedding on port `7999`
    * MAX Serve Llama 3 on port `8000` and
    * Backend FastAPI on port `8001`
 
-<img src="ui.png" alt="Chat interface" width="100%" style="max-width: 800px;">
+    <img src="ui.png" alt="Chat interface" width="100%" style="max-width: 800px;">
 
-Then you can ask weather-related questions and get detailed reports.
+    Then you can ask weather-related questions and get detailed reports.
+
+    **Actions to take**:
+
+   * Go ahead and send a chat request with `Hi`.
+   * Then proceed with a city name like `Vancouver`. Notice that the app understands it's a city name and provides a weather report.
+   * Check the observability for each involved step in the UI.
+   * Try entering "yvr" and notice that the report is generated much faster this time. Keep reading to understand the optimizations such as semantic-cache.
+   * Try with more queries and check the results
 
 4. And once done with the app, to clean up the resources run:
 
-```bash
-magic run clean
-```
+    ```bash
+    magic run clean
+    ```
 
 ## System architecture
 
