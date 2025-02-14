@@ -1,4 +1,4 @@
-name: Validate Recipe Metadata
+name: CI
 
 on:
   workflow_dispatch:
