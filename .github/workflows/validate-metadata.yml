@@ -1,0 +1,37 @@
+name: Validate Recipe Metadata
+
+on:
+  push:
+    paths:
+      - '**/metadata.yaml'
+  pull_request:
+    paths:
+      - '**/metadata.yaml'
+
+jobs:
+  validate-metadata:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install prerequisites
+        run: |
+          apt-get update
+          apt-get install -y curl
+
+      - name: Install Magic CLI
+        run: curl -ssL https://magic.modular.com/ | bash
+
+      - name: Add Magic to PATH
+        shell: bash
+        run: |
+          source /root/.bashrc
+          echo "$HOME/.modular/bin" >> $GITHUB_PATH
+
+      - name: Run Metadata Validation
+        shell: bash
+        run: |
+          source /root/.bashrc
+          $HOME/.modular/bin/magic run lint
