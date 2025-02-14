@@ -3,14 +3,15 @@ name: CI
 on:
   workflow_dispatch:
   push:
-    paths:
-      - '**/metadata.yaml'
+    branches:
+      - main
   pull_request:
-    paths:
-      - '**/metadata.yaml'
+    branches:
+      - main
 
 jobs:
-  validate-metadata:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     container:
       image: ubuntu:latest

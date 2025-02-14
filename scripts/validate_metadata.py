@@ -4,7 +4,8 @@ import sys
 from pathlib import Path
 from jsonschema import validate, ValidationError
 
-# Define the schema
+EXCLUDED_DIRS = {"scripts", ".github", ".git"}
+
 schema = {
     "type": "object",
     "required": [
@@ -47,10 +48,30 @@ schema = {
 }
 
 
+def check_metadata_exists():
+    has_error = False
+    root = Path(".")
+    subdirs = [
+        d
+        for d in root.glob("*/")
+        if d.is_dir() and not d.name.startswith(".") and d.name not in EXCLUDED_DIRS
+    ]
+
+    for subdir in subdirs:
+        metadata_file = subdir / "metadata.yaml"
+        if not metadata_file.exists():
+            print(f"❌ {subdir} is missing metadata.yaml")
+            has_error = True
+
+    return has_error
+
+
 def validate_metadata_files():
     has_error = False
+    root = Path(".")
 
-    for metadata_file in Path(".").rglob("metadata.yaml"):
+    # Only check metadata.yaml files in depth 1 subdirectories
+    for metadata_file in root.glob("*/metadata.yaml"):
         try:
             with open(metadata_file) as f:
                 data = yaml.safe_load(f)
@@ -69,6 +90,7 @@ def validate_metadata_files():
 
 
 if __name__ == "__main__":
-    has_error = validate_metadata_files()
-    if has_error:
+    missing_metadata = check_metadata_exists()
+    invalid_metadata = validate_metadata_files()
+    if missing_metadata or invalid_metadata:
         sys.exit(1)
