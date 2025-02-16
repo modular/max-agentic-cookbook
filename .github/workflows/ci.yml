@@ -51,9 +51,9 @@ jobs:
 
       - name: Run Metadata Validation
         shell: bash
-        env:
-          PATH: "/root/.modular/bin:$PATH"
-        run: magic run lint
+        run: |
+          source /root/.bashrc
+          $HOME/.modular/bin/magic run lint
 
       - name: Get changed directories
         id: changed-dirs
@@ -69,6 +69,6 @@ jobs:
       - name: Run Tests
         if: steps.changed-dirs.outputs.dirs != ''
         shell: bash
-        env:
-          PATH: "/root/.modular/bin:$PATH"
-        run: magic run test ${{ steps.changed-dirs.outputs.dirs }}
+        run: |
+          source /root/.bashrc
+          $HOME/.modular/bin/magic run test ${{ steps.changed-dirs.outputs.dirs }}
