@@ -41,6 +41,7 @@ jobs:
         shell: bash
         run: |
           curl -ssL https://magic.modular.com/ | bash
+          . /root/.bashrc
           echo "/root/.modular/bin" >> $GITHUB_PATH
           export PATH="/root/.modular/bin:$PATH"
 
@@ -50,9 +51,9 @@ jobs:
 
       - name: Run Metadata Validation
         shell: bash
-        run: |
-          source /root/.bashrc
-          /root/.modular/bin/magic run lint
+        env:
+          PATH: "/root/.modular/bin:$PATH"
+        run: magic run lint
 
       - name: Get changed directories
         id: changed-dirs
@@ -68,6 +69,6 @@ jobs:
       - name: Run Tests
         if: steps.changed-dirs.outputs.dirs != ''
         shell: bash
-        run: |
-          source /root/.bashrc
-          /root/.modular/bin/magic run test ${{ steps.changed-dirs.outputs.dirs }}
+        env:
+          PATH: "/root/.modular/bin:$PATH"
+        run: magic run test ${{ steps.changed-dirs.outputs.dirs }}
