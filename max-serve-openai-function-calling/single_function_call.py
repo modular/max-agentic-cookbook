@@ -47,7 +47,12 @@ def main():
         for tool_call in output.tool_calls:
             if tool_call.function.name == "get_weather":
                 city = eval(tool_call.function.arguments)["city"]
+                assert city == "San Francisco"
                 weather_response = get_weather(city)
+                assert (
+                    weather_response
+                    == "The weather in San Francisco is sunny with a temperature of 72°F"
+                )
                 print("\nWeather response:", weather_response)
 
 

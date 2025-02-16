@@ -32,6 +32,7 @@ cleanup() {
 }
 
 setup_max_serve() {
+    export HF_HUB_ENABLE_HF_TRANSFER=1
     export HUGGING_FACE_HUB_TOKEN=$(cat .env | grep HUGGING_FACE_HUB_TOKEN | cut -d '=' -f2)
     magic global install max-pipelines && magic global update max-pipelines
 }

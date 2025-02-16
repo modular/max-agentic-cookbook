@@ -32,6 +32,7 @@ max_embeddings = { path = ".", editable = true }
 [tool.pixi.tasks]
 app = "honcho start"
 clean = "honcho -f Procfile.clean start"
+test = "honcho start"
 
 [tool.pixi.dependencies]
 docker-compose = ">=2.32.4,<3"

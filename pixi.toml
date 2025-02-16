@@ -8,9 +8,13 @@ version = "0.0.0"
 [dependencies]
 python = ">=3.10,<3.13"
 
+[tasks]
+test = "python scripts/run_tests.py $1"
+
 [environments]
 default = { solve-group = "default" }
 lint = { features = ["lint"], solve-group = "default" }
+test = { features = ["test"], solve-group = "default" }
 
 [feature.lint.tasks]
 lint = """
@@ -20,3 +24,6 @@ python scripts/validate_metadata.py
 [feature.lint.pypi-dependencies]
 pyyaml = "*"
 jsonschema = "*"
+
+[feature.test.pypi-dependencies]
+pyyaml = "*"

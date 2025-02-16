@@ -26,30 +26,44 @@ on:
       - 'CODE_OF_CONDUCT.md'
 
 jobs:
-  lint:
-    name: Lint
+  validate-and-test:
+    name: Validate and Test
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:latest
+      image: amd64/ubuntu:latest
     steps:
-      - uses: actions/checkout@v4
-
       - name: Install prerequisites
         run: |
           apt-get update
-          apt-get install -y curl
+          apt-get install -y curl git
 
       - name: Install Magic CLI
-        run: curl -ssL https://magic.modular.com/ | bash
-
-      - name: Add Magic to PATH
         shell: bash
         run: |
-          source /root/.bashrc
-          echo "$HOME/.modular/bin" >> $GITHUB_PATH
+          curl -ssL https://magic.modular.com/ | bash
+          echo "/root/.modular/bin" >> $GITHUB_PATH
+          export PATH="/root/.modular/bin:$PATH"
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Run Metadata Validation
         shell: bash
+        run: magic run lint
+
+      - name: Get changed directories
+        id: changed-dirs
         run: |
-          source /root/.bashrc
-          $HOME/.modular/bin/magic run lint
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            CHANGED_DIRS=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -v '^\.github/' | cut -d'/' -f1 | sort -u | tr '\n' ' ')
+          else
+            CHANGED_DIRS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -v '^\.github/' | cut -d'/' -f1 | sort -u | tr '\n' ' ')
+          fi
+          echo "Changed directories: $CHANGED_DIRS"
+          echo "dirs=$CHANGED_DIRS" >> $GITHUB_OUTPUT
+
+      - name: Run Tests
+        if: steps.changed-dirs.outputs.dirs != ''
+        shell: bash
+        run: magic run test ${{ steps.changed-dirs.outputs.dirs }}
