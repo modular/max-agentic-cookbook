@@ -76,7 +76,7 @@ app.add_middleware(
 
 CACHE_TTL = 3600  # 1 hour
 
-LLM_SERVER_URL = os.getenv("LLM_SERVER_URL", "http://0.0.0.0:8000/v1")
+LLM_SERVER_URL = os.getenv("LLM_SERVER_URL", "http://0.0.0.0:8010/v1")
 EMBEDDING_SERVER_URL = os.getenv("EMBEDDING_SERVER_URL", "http://0.0.0.0:7999/v1")
 EMBEDDING_MODEL = os.getenv(
     "EMBEDDING_MODEL", "sentence-transformers/all-mpnet-base-v2"
