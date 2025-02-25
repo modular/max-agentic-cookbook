@@ -10,7 +10,7 @@ difficulty: "beginner"
 tags:
   - max-serve
   - anythingllm
-  - llama3
+  - deepseek
 
 tasks:
   - magic run app

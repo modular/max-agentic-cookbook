@@ -1,8 +1,8 @@
 # Project files
-.pixi
-*.egg-info
 .magic
+.pixi
 pixi.lock
+*.egg-info
 
 # Python cache
 __pycache__
