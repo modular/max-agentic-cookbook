@@ -15,19 +15,27 @@ AnythingLLM is a powerful platform offering a familiar chat interface for intera
 
 Please make sure your system meets our [system requirements](https://docs.modular.com/max/get-started).
 
+### Magic 🪄
+
 To proceed, ensure you have the `magic` CLI installed:
 
 ```bash
 curl -ssL https://magic.modular.com/ | bash
 ```
 
-...or updated to the latest version:
+...or update `magic` to the latest version:
 
 ```bash
 magic self-update
 ```
 
-A valid [Hugging Face token](https://huggingface.co/settings/tokens) is required to access the model.
+### Hugging Face
+
+A valid [Hugging Face token](https://huggingface.co/settings/tokens) ensures access to the model and weights.
+
+### Docker
+
+We’ll use Docker to run the AnythingLLM container. Follow the instructions in the [Docker documentation](https://docs.docker.com/desktop/) if you need to install it.
 
 ## Get the code
 
@@ -58,7 +66,7 @@ You can start MAX and AnythingLLM with one command:
 magic run app
 ```
 
-This command is defined in the `pyproject.toml` file which we cover later.
+This command is defined in the `pyproject.toml` file which we will cover later.
 
 MAX Serve is ready once you see a line containing the following in the log output:
 
@@ -111,7 +119,7 @@ The project is configured in the `pyproject.toml` file, which defines:
    - `app`: Runs the main Python script that coordinates both services
    - `ui`: Launches the AnythingLLM Docker container
    - `llm`: Starts MAX Serve with DeepSeek R1
-   - `clean`: Terminates all running services
+   - `clean`: Cleans up network resources for both services
 
 3. **Dependencies** for running both services:
    - MAX Serve runs via the `max-pipelines` CLI
