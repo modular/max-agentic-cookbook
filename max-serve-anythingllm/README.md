@@ -9,7 +9,7 @@ In this recipe you will:
 
 ## About AnythingLLM
 
-AnythingLLM is a powerful platform offering a familiar chat interface for interacting with open-source AI models. Like MAX, AnythingLLM empowers users to maintain complete ownership of their AI infrastructure, avoiding vendor lock-in risks, and enhancing privacy. With over 30,000 stars on GitHub, AnythingLLM has become one of the most popular solutions for private AI deployment, providing robust retrieval-augmented generation (RAG) capabilities and seamless integration with many AI Engineering tools. The platform's versatility allows it to work perfectly with MAX to create a complete end-to-end AI solution.
+AnythingLLM is a powerful platform offering a familiar chat interface for interacting with open-source AI models. Like MAX, AnythingLLM empowers users to maintain complete ownership of their AI infrastructure, avoiding vendor lock-in risks, and enhancing privacy. With [over 30,000 stars on GitHub](https://github.com/Mintplex-Labs/anything-llm), AnythingLLM has become one of the most popular solutions for private AI deployment. The platform's versatility allows it to work perfectly with MAX to create a complete end-to-end AI solution.
 
 ## Requirements
 
