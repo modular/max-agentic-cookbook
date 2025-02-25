@@ -84,7 +84,7 @@ Once both servers are ready, launch AnythingLLM in your browser at [http://local
 
 ## Using AnythingLLM
 
-When you run the command `magic run app`, the Python script `main.py` will create a `data` folder if one doesn't exist. AnythingLLM uses this folder as persistent storage for your settings, chat history, etc. The location of the folder is configurable within `pyproject.toml` by changing the value of `UI_STORAGE_LOCATION`.
+When you run the command `magic run app`, the Python script `main.py` will orchestrate getting both MAX and AnythingLLM up and running. Notably, it will create a `data` folder if one doesn't exist. AnythingLLM uses this folder as persistent storage for your settings, chat history, etc. The location of the folder is configurable within `pyproject.toml` by changing the value of `UI_STORAGE_LOCATION`.
 
 The first time you [launch AnythingLLM in your browser](http://localhost:3001), you will see a welcome screen. Choose *Get Started*, then complete the following steps:
 
@@ -96,7 +96,7 @@ The first time you [launch AnythingLLM in your browser](http://localhost:3001), 
     - Max Tokens = `1024`
 2. Next, for User Setup, choose *Just me* or *My team*, and set an admin password
 3. If asked to fill in a survey, you may participate or skip this step. (The survey data goes to the AnythingLLM project, not Modular.)
-4. Enter a workspace name
+4. Finally, enter a workspace name
 
 ## Understand the project
 
