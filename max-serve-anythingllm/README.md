@@ -13,7 +13,7 @@ AnythingLLM is a powerful platform offering a familiar chat interface for intera
 
 ## Requirements
 
-Please make sure your system meets our [system requirements](https://docs.modular.com/max/get-started).
+Please make sure your system meets our [minimum requirements](https://docs.modular.com/max/get-started).
 
 ### Magic 🪄
 
@@ -43,19 +43,13 @@ Download the code for this recipe using git:
 
 ```bash
 git clone https://github.com/modular/max-recipes.git
-cd max-recipes/max-serve-open-webui
+cd max-recipes/max-serve-anythingllm
 ```
 
 Next, include your Hugging Face token in a `.env` file by running:
 
 ```bash
-cp .env.example .env
-```
-
-...then add your token in the `.env` file:
-
-```bash
-HUGGING_FACE_HUB_TOKEN=
+echo "HUGGING_FACE_HUB_TOKEN=your_token_here" >> .env
 ```
 
 ## Quick start: Run the app
@@ -106,7 +100,7 @@ Let's explore how the key components of this project work together.
 
 The project is configured in the `pyproject.toml` file, which defines:
 
-1. **Environment variables** to control the ports and storage locations:
+1. **Environment variables** to control the ports and storage location:
 
    ```bash
    MAX_LLM_PORT = "3002"  # Port for MAX Serve
@@ -130,24 +124,24 @@ The project is configured in the `pyproject.toml` file, which defines:
 
 When you run `magic run app`, the `main.py` script coordinates everything necessary to start and shutdown both services:
 
-1. **Initialization** takes places in the `initial_setup()` function:
+1. **initial_setup()**
    - Reads the configuration from `pyproject.toml`
-   - Creates the data directory for AnythingLLM if it doesn't exist
+   - Creates the persistent storage location for AnythingLLM if it doesn't exist
    - Ensures an empty `.env` file is present for AnythingLLM settings
 
-2. **Running the Services** occurs in the `run_tasks()` function:
+2. **run_tasks()**
    - Uses Honcho to run multiple `magic run` tasks concurrently
    - Starts both the MAX Serve LLM backend and AnythingLLM UI
 
-3. **Cleanup** happens at exit:
+3. **cleanup()**
    - `cleanup()` fnction is registered with `atexit` to ensure it runs when the script exits
    - Runs the `clean` task to terminate all processes and remove containers
 
 ## What's next?
 
-Now that you're up and running with Open WebUI on MAX, you can explore more features and join our developer community. Here are some resources to help you continue your journey:
+Now that you're up and running with AnythingLLM on MAX, you can explore more features and join our developer community. Here are some resources to help you continue your journey:
 
 - [Get started with MAX](https://docs.modular.com/max/get-started)
 - Explore [MAX Serve](https://docs.modular.com/max/serve) and [MAX Container](https://docs.modular.com/max/container/)
-- Learn more about `magic` CLI in this [Magic tutorial](https://docs.modular.com/max/tutorials/magic)
+- Learn more about the `magic` CLI in our [Magic tutorial](https://docs.modular.com/max/tutorials/magic)
 - Join the [Modular forum](https://forum.modular.com/)
