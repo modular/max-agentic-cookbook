@@ -1,0 +1,20 @@
+version: 1.0
+long_title: "Learn How to Build AI Agents with DeepSeek-R1, AutoGen and MAX Serve"
+short_title: "AI Agent with DeepSeek-R1, AutoGen and MAX Serve"
+author: "Ehsan M. Kermani"
+author_image: "author/ehsan.jpg"
+author_url: "https://www.linkedin.com/in/ehsanmkermani/"
+github_repo: "https://github.com/modular/max-recipes/tree/main/ai-weather-agent"
+date: "21-02-2025"
+difficulty: "beginner"
+tags:
+  - max-serve
+  - deepseek-r1
+  - qwen
+  - agent
+  - autogen
+
+tasks:
+  - magic run server
+  - magic run chat_agent
+  - magic run screenplay_agents
