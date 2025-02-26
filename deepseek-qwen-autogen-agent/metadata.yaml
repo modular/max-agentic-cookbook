@@ -4,7 +4,7 @@ short_title: "AI Agent with DeepSeek-R1, AutoGen and MAX Serve"
 author: "Ehsan M. Kermani"
 author_image: "author/ehsan.jpg"
 author_url: "https://www.linkedin.com/in/ehsanmkermani/"
-github_repo: "https://github.com/modular/max-recipes/tree/main/ai-weather-agent"
+github_repo: "https://github.com/modular/max-recipes/tree/main/deepseek-qwen-autogen-agent"
 date: "21-02-2025"
 difficulty: "beginner"
 tags:
