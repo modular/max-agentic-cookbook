@@ -1,0 +1,15 @@
+version: 1.0
+long_title: "WIP: Agentic Puzzles"
+short_title: "WIP"
+author: "Ehsan M. Kermani"
+author_image: "author/ehsan.jpg"
+author_url: "https://www.linkedin.com/in/ehsanmkermani/"
+github_repo: "https://github.com/modular/max-recipes/tree/main/agentic-puzzles"
+date: "26-02-2025"
+difficulty: "intermediate"
+tags:
+  - max-serve
+
+tasks:
+  - magic run server
+  - magic run chess
