@@ -2,7 +2,7 @@
 
 This recipe demonstrates how to build AI agents using:
 
-* [`DeepSeek-R1-Distill-Qwen-7B`](https://builds.modular.com/models/DeepSeek-R1-Distill-Qwen/7B) model that can run on both CPU and GPU
+* [`DeepSeek-R1-Distill-Qwen-7B`](https://builds.modular.com/models/DeepSeek-R1-Distill-Qwen/7B) model that runs on GPU
 * [AutoGen](https://microsoft.github.io/autogen/stable/) framework for multi-agent conversations
 * [MAX Serve](https://docs.modular.com/max/serve/) for efficient model serving and inference
 * [Rich](https://rich.readthedocs.io/en/stable/introduction.html) Python library for beautiful terminal interfaces
@@ -35,6 +35,14 @@ or update it via:
 ```bash
 magic self-update
 ```
+
+### GPU requirements
+
+**Structured output with MAX Serve requires GPU access**. For running the app on GPU, ensure your system meets these GPU requirements:
+
+* Supported GPUs: NVIDIA A100 (optimized), A10G, L4, or L40
+* NVIDIA Drivers: [Installation guide here](https://www.nvidia.com/download/index.aspx)
+* NVIDIA Container Toolkit: [Installation guide here](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
 
 ## Quick start
 
