@@ -107,7 +107,7 @@ The recipe is configured in the `pyproject.toml` file, which defines:
    - `MAX_SECRETS_LOCATION = ".env.max"`: Location of file containing your Hugging Face token
    - `MAX_CONTEXT_LENGTH = "16384"`: LLM context window size
    - `MAX_BATCH_SIZE = "1"`: LLM batch size (use 1 when running on CPU)
-   - `MAX_LLM_PORT = "3002"`: Port for MAX Serve
+   - `MAX_SERVE_PORT = "3002"`: Port for MAX Serve
    - `UI_PORT = "3001"`: Port for AnythingLLM
    - `UI_STORAGE_LOCATION = "./data"`: Persistent storage for AnythingLLM
    - `UI_CONTAINER_NAME = "anythingllm-max"`: Name for referencing the container with Docker
@@ -154,7 +154,7 @@ When you run `magic run app`, the `main.py` script coordinates everything necess
 
 4. **Cleanup Process**
    - Post-tasks (like `clean`) are automatically run when the application exits
-   - The `clean` task terminates all processes and removes Docker containers
+   - The `clean` task terminates all processes, releases all ports, and removes the AnythingLLM container from Docker
 
 ## What's next?
 

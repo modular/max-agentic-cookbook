@@ -28,7 +28,7 @@ max_serve_anythingllm = { path = ".", editable = true }
 MAX_SECRETS_LOCATION = ".env.max"
 MAX_CONTEXT_LENGTH = "16384"
 MAX_BATCH_SIZE = "1"
-MAX_LLM_PORT = "3002"
+MAX_SERVE_PORT = "3002"
 UI_PORT = "3001"
 UI_STORAGE_LOCATION = "./data"
 UI_CONTAINER_NAME = "anythingllm-max"
@@ -36,9 +36,9 @@ UI_CONTAINER_NAME = "anythingllm-max"
 [tool.pixi.tasks]
 app = "python main.py llm ui --pre setup --post clean"
 setup = "python setup.py"
-llm = "export MAX_SERVE_PORT=$MAX_LLM_PORT && max-pipelines serve  --max-length=$MAX_CONTEXT_LENGTH --max-batch-size=$MAX_BATCH_SIZE --model-path=deepseek-ai/DeepSeek-R1-Distill-Llama-8B --weight-path=lmstudio-community/DeepSeek-R1-Distill-Llama-8B-GGUF/DeepSeek-R1-Distill-Llama-8B-Q4_K_M.gguf"
+llm = "max-pipelines serve  --max-length=$MAX_CONTEXT_LENGTH --max-batch-size=$MAX_BATCH_SIZE --model-path=deepseek-ai/DeepSeek-R1-Distill-Llama-8B --weight-path=lmstudio-community/DeepSeek-R1-Distill-Llama-8B-GGUF/DeepSeek-R1-Distill-Llama-8B-Q4_K_M.gguf"
 ui = "docker run -p $UI_PORT:3001 --name $UI_CONTAINER_NAME --cap-add SYS_ADMIN -v $UI_STORAGE_LOCATION:/app/server/storage -v $UI_STORAGE_LOCATION/.env:/app/server/.env -e STORAGE_DIR=\"/app/server/storage\" mintplexlabs/anythingllm"
-clean = "pkill -f \"max-pipelines serve\" || true && lsof -ti:$MAX_LLM_PORT,$UI_PORT | xargs -r kill -9 2>/dev/null || true && docker rm -f $UI_CONTAINER_NAME 2>/dev/null || true"
+clean = "pkill -f \"max-pipelines serve\" || true && lsof -ti:$MAX_SERVE_PORT,$UI_PORT | xargs -r kill -9 2>/dev/null || true && docker rm -f $UI_CONTAINER_NAME 2>/dev/null || true"
 
 [tool.pixi.dependencies]
 max-pipelines = ">=25.2.0.dev2025022405,<26"

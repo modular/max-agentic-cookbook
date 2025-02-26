@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 
 @click.command()
-@click.argument("tasks", nargs=-1, help="Tasks to run concurrently. One or more task names must be specified.")
+@click.argument("tasks", nargs=-1)
 @click.option("--pre", multiple=True, help="Tasks to run sequentially before app tasks.")
 @click.option("--post", multiple=True, help="Tasks to run sequentially after app tasks complete.")
 def main(tasks, pre, post):
