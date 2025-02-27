@@ -74,7 +74,7 @@ magic self-update
 
 3. Open [http://localhost:7860](http://localhost:7860) in your browser to see the UI.
 
-In the demo, we upload [The Little Book of Deep Learning](https://fleuret.org/public/lbdl.pdf) and ask questions:
+In this demo, we upload [The Little Book of Deep Learning](https://fleuret.org/public/lbdl.pdf), which contains 185 pages that are parsed as images for question answering:
 
 <img src="multimodal-rag-demo.gif" alt="Multi-Modal RAG" width="100%" style="max-width: 800px;">
 
