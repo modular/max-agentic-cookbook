@@ -1,0 +1,3 @@
+llm-server: (magic global install max-pipelines && magic global update max-pipelines) || true; MAX_SERVE_PORT=8010 MAX_SERVE_HOST=0.0.0.0 max-pipelines serve --huggingface-repo-id=meta-llama/Llama-3.2-11B-Vision-Instruct --max-length 2048 --max-batch-size 1
+qdrant-server: docker run -p 6333:6333 -p 6334:6334 -v "$(pwd)/qdrant_storage:/qdrant/storage:z" qdrant/qdrant
+app: magic run python app.py

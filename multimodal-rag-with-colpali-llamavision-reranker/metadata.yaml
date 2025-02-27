@@ -1,0 +1,20 @@
+version: 1.0
+long_title: "Learn How to Build Multi-Modal RAG with Colpali, Llama3.2-Vision, Reranker and MAX Serve"
+short_title: "Multi-Modal RAG with Colpali, Llama3.2-Vision, Reranker and MAX Serve"
+author: "Ehsan M. Kermani"
+author_image: "author/ehsan.jpg"
+author_url: "https://www.linkedin.com/in/ehsanmkermani/"
+github_repo: "https://github.com/modular/max-recipes/tree/main/multimodal-rag-with-llamavision-colpali-reranker"
+date: "27-02-2025"
+difficulty: "intermediate"
+tags:
+  - multi-modal
+  - rag
+  - colpali
+  - max-serve
+  - llama3-vision
+  - reranker
+
+tasks:
+  - magic run app
+  - magic run clean

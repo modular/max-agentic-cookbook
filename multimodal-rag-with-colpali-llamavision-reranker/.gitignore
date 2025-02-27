@@ -1,0 +1,11 @@
+
+# pixi environments
+.pixi
+*.egg-info
+# magic environments
+.magic
+
+qdrant_storage
+.gradio
+temp_*
+.cache
