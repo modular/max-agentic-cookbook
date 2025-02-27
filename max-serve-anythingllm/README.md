@@ -47,10 +47,10 @@ git clone https://github.com/modular/max-recipes.git
 cd max-recipes/max-serve-anythingllm
 ```
 
-Next, include your Hugging Face token in a `.env.max` file by running:
+Next, include your Hugging Face token in a `.env` file by running:
 
 ```bash
-echo "HUGGING_FACE_HUB_TOKEN=your_token_here" >> .env.max
+echo "HUGGING_FACE_HUB_TOKEN=your_token_here" >> .env
 ```
 
 ## Quick start: Run the app
@@ -104,7 +104,7 @@ Let's explore how the key components of this recipe work together.
 The recipe is configured in the `pyproject.toml` file, which defines:
 
 1. **Environment variables** to control the ports, storage locations, and additional settings:
-   - `MAX_SECRETS_LOCATION = ".env.max"`: Location of file containing your Hugging Face token
+   - `MAX_SECRETS_LOCATION = ".env"`: Location of file containing your Hugging Face token
    - `MAX_CONTEXT_LENGTH = "16384"`: LLM context window size
    - `MAX_BATCH_SIZE = "1"`: LLM batch size (use 1 when running on CPU)
    - `MAX_SERVE_PORT = "3002"`: Port for MAX Serve
