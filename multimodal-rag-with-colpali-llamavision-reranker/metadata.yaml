@@ -1,6 +1,6 @@
 version: 1.0
-long_title: "Learn How to Build Multi-Modal RAG with Colpali, Llama3.2-Vision, Reranker and MAX Serve"
-short_title: "Multi-Modal RAG with Colpali, Llama3.2-Vision, Reranker and MAX Serve"
+long_title: "Learn How to Build Multi-Modal RAG with Colpali, Llama3.2-Vision, Qdrant, Reranker and MAX Serve"
+short_title: "Multi-Modal RAG with Colpali, Llama3.2-Vision, Qdrant, Reranker and MAX Serve"
 author: "Ehsan M. Kermani"
 author_image: "author/ehsan.jpg"
 author_url: "https://www.linkedin.com/in/ehsanmkermani/"
@@ -14,6 +14,7 @@ tags:
   - max-serve
   - llama3-vision
   - reranker
+  - qdrant
 
 tasks:
   - magic run app
