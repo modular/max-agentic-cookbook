@@ -22,7 +22,7 @@ from tensor import ManagedTensorSlice, foreach
 from utils.index import IndexList
 
 
-fn _vector_addition_cpu(
+fn vector_addition_cpu(
     out: ManagedTensorSlice,
     lhs: ManagedTensorSlice[type = out.type, rank = out.rank],
     rhs: ManagedTensorSlice[type = out.type, rank = out.rank],
@@ -36,7 +36,7 @@ fn _vector_addition_cpu(
         out[i] = lhs[i] + rhs[i]
 
 
-fn _vector_addition_gpu(
+fn vector_addition_gpu(
     out: ManagedTensorSlice,
     lhs: ManagedTensorSlice[type = out.type, rank = out.rank],
     rhs: ManagedTensorSlice[type = out.type, rank = out.rank],
@@ -91,8 +91,8 @@ struct VectorAddition:
         # this operation for, so we can specialize it for the target hardware.
         @parameter
         if target == "cpu":
-            _vector_addition_cpu(out, lhs, rhs, ctx)
+            vector_addition_cpu(out, lhs, rhs, ctx)
         elif target == "gpu":
-            _vector_addition_gpu(out, lhs, rhs, ctx)
+            vector_addition_gpu(out, lhs, rhs, ctx)
         else:
             raise Error("No known target:", target)
