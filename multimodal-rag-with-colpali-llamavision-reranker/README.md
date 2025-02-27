@@ -1,4 +1,4 @@
-# Build Multi-Modal RAG with ColPali, Llama 3.2 Vision and MAX Serve
+# Learn How to Build Multi-Modal RAG with Colpali, Llama3.2-Vision, Reranker and MAX Serve
 
 This recipe demonstrates how to build a powerful multi-modal RAG (Retrieval Augmented Generation) system on PDF that combines:
 
