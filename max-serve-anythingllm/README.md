@@ -1,10 +1,12 @@
-# Use AnythingLLM and DeepSeek R1 with MAX Serve
+# Use AnythingLLM with MAX Serve
 
 Building on the solid foundation MAX provides, adding a robust user interface is a natural next step.
 
+![AnythingLLM with MAX Serve Demo](demo.gif)
+
 In this recipe you will:
 
-- Use MAX Serve to provide an OpenAI-compatible endpoint for [DeepSeek R1](https://api-docs.deepseek.com/news/news250120)
+- Use MAX Serve to provide an OpenAI-compatible endpoint for [Llama 3.1](https://ai.meta.com/blog/meta-llama-3-1/)
 - Set up [AnythingLLM](https://github.com/Mintplex-Labs/anything-llm) to provide a robust chat interface
 - Learn how to orchestrate multiple services in pure Python, without tools like Kubernetes or docker-compose
 
@@ -88,18 +90,20 @@ The first time you [launch AnythingLLM in your browser](http://localhost:3001), 
 1. Select *Generic OpenAI* as the LLM provider, then enter:
     - Base URL = `http://host.docker.internal:3002/v1`
     - API Key = `local` (MAX doesn't require an API key, but this field can't be blank)
-    - Chat Model Name = `deepseek-ai/DeepSeek-R1-Distill-Llama-8B`
+    - Chat Model Name = `modularai/Llama-3.1-8B-Instruct-GGUF`
     - Token Context Window = `16384` (Must match `MAX_CONTEXT_LENTH` from `pyproject.toml`)
     - Max Tokens = `1024`
 2. Next, for User Setup, choose *Just me* or *My team*, and set an admin password.
 3. If asked to fill in a survey, you may participate or skip this step. (The survey data goes to the AnythingLLM project, not Modular.)
 4. Finally, enter a workspace name.
 
+Note: Don't let the `modularai` in the Chat Model Name field limit you. MAX supports any PyTorch model on Hugging Face, and includes special acceleration for the most common architectures. Modular simply hosts weights for Llama 3.1 to get you up and running quickly. (Access to the official [meta-llama repo](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) is gated and requires waiting for approval.)
+
 ## Understand the project
 
 Let's explore how the key components of this recipe work together.
 
-### Configuration with `pyproject.toml`
+### Configuration: pyproject.toml
 
 The recipe is configured in the `pyproject.toml` file, which defines:
 
@@ -116,7 +120,7 @@ The recipe is configured in the `pyproject.toml` file, which defines:
    - `app`: Runs the main Python script that coordinates both services
    - `setup`: Sets up persistent storage for AnythingLLM
    - `ui`: Launches the AnythingLLM Docker container
-   - `llm`: Starts MAX Serve with DeepSeek R1
+   - `llm`: Starts MAX Serve with Llama 3.1
    - `clean`: Cleans up network resources for both services
 
 3. **Dependencies** for running both services:
@@ -124,7 +128,7 @@ The recipe is configured in the `pyproject.toml` file, which defines:
    - AnythingLLM runs in a Docker container, keeping its dependencies isolated
    - Additional dependencies to orchestrate both services
 
-### Setup with `setup.py`
+### Initial Setup: setup.py
 
 The `setup.py` script handles the initial setup for AnythingLLM:
 
@@ -133,7 +137,7 @@ The `setup.py` script handles the initial setup for AnythingLLM:
 - Ensures an empty `.env` file is present for AnythingLLM settings
 - This script is automatically run as a pre-task when you execute `magic run app`
 
-### Orchestration with `main.py`
+### Orchestration: main.py
 
 When you run `magic run app`, the `main.py` script coordinates everything necessary to start and shutdown both services:
 
