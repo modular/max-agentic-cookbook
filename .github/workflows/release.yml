@@ -78,7 +78,7 @@ jobs:
           prerelease: false
           generate_release_notes: false
           body: |
-            This is a release of the ${FOLDER_NAME} recipe.
-            You can download the recipe from the [release page](https://github.com/modular/max-recipes/releases/tag/${TAG_NAME}).
+            This is a release of the ${{ steps.extract-tag-info.outputs.folder_name }} recipe.
+            You can download the recipe from the [release page](https://github.com/modular/max-recipes/releases/tag/${{ steps.extract-tag-info.outputs.tag_name }}).
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
