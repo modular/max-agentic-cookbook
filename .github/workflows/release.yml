@@ -17,7 +17,7 @@ on:
         default: recipe-directory
   push:
     tags:
-      - '**/*'  # Match tags with format folder_name/version
+      - '**'  # Match tags with format folder_name/version
 
 jobs:
   release:
