@@ -1,0 +1,84 @@
+name: Release Workflow
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      # trunk-ignore(checkov/CKV_GHA_7)
+      version:
+        description: Version number (e.g. 0.1.0)
+        required: true
+        default: 0.1.0
+      folder_name:
+        description: Folder name (e.g. max-recipe)
+        required: true
+        default: recipe-directory
+  push:
+    tags:
+      - '**/*'  # Match tags with format folder_name/version
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Extract tag information
+        id: extract-tag-info
+        run: |
+          # if workflow_dispatch, use inputs
+          if [ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]; then
+            FOLDER_NAME=${{ inputs.folder_name }}
+            VERSION=${{ inputs.version }}
+          else
+            TAG_NAME=${GITHUB_REF#refs/tags/}
+            FOLDER_NAME=$(echo $TAG_NAME | cut -d'/' -f1)
+            VERSION=$(echo $TAG_NAME | cut -d'/' -f2)
+          fi
+          
+          # Validate tag format
+          if [[ -z "$FOLDER_NAME" || -z "$VERSION" ]]; then
+            echo "Invalid tag format. Expected 'folder_name/version'"
+            exit 1
+          fi
+          
+          # Check if folder exists
+          if [ ! -d "$FOLDER_NAME" ]; then
+            echo "Folder '$FOLDER_NAME' does not exist"
+            exit 1
+          fi
+          
+          echo "folder_name=$FOLDER_NAME" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+
+      - name: Create zip archive
+        id: create-zip
+        run: |
+          FOLDER_NAME=${{ steps.extract-tag-info.outputs.folder_name }}
+          VERSION=${{ steps.extract-tag-info.outputs.version }}
+          ZIP_NAME="recipe.zip"
+          
+          # Ignore metadata.yaml
+          zip -r "$ZIP_NAME" "$FOLDER_NAME" -x "*/metadata.yaml"
+          echo "zip_name=$ZIP_NAME" >> $GITHUB_OUTPUT
+      
+      - name: Create GitHub Release
+        id: create-release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "${{ steps.extract-tag-info.outputs.folder_name }} ${{ steps.extract-tag-info.outputs.version }}"
+          tag_name: ${{ steps.extract-tag-info.outputs.tag_name }}
+          files: ${{ steps.create-zip.outputs.zip_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+          body: |
+            This is a release of the ${FOLDER_NAME} recipe.
+            You can download the recipe from the [release page](https://github.com/modular/max-recipes/releases/tag/${TAG_NAME}).
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
