@@ -2,6 +2,10 @@
 
 Building on the solid foundation MAX provides, adding a robust user interface is a natural next step.
 
+<div align="center">
+  <img src="cat-expert.png" alt="Open WebUI with MAX Serve Demo" width="500" />
+</div>
+
 In this recipe you will:
 
 - Use MAX Serve to provide an OpenAI-compatible endpoint for [Llama 3.1](https://ai.meta.com/blog/meta-llama-3-1/)
