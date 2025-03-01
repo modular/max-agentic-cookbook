@@ -10,6 +10,7 @@ difficulty: "intermediate"
 tags:
   - max-graph
   - gpu-programming
+  - mojo
 
 tasks:
   - magic run matrix_multiplication

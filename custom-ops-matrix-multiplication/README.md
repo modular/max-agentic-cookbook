@@ -164,7 +164,7 @@ particular piece of hardware avoids run-time branching and allows full
 utilization of an accelerator or CPU.
 
 Each algorithm is contained within its own function in
-`operations/matrix_multiplication.mojo`. Next, we'll discuss how each works:
+`operations/matrix_multiplication.mojo`. Next, we'll discuss how each works.
 
 ### Matrix multiplication algorithms
 
@@ -450,6 +450,9 @@ fn block_tiled_matrix_multiplication[
 
     dst.copy_from(dst_reg)
 ```
+
+In the above benchmarks, this provides an additional 50% boost over the
+previous algorithm.
 
 ### Block tiling with vectorized memory access
 
