@@ -351,7 +351,48 @@ magic run mandelbrot
 ```
 
 Once the graph is compiled and run, a visual representation of the Mandelbrot
-set will be printed to the console.
+set will be printed to the console:
+
+```
+...................................,,,,c@8cc,,,.............
+...............................,,,,,,cc8M @Mjc,,,,..........
+............................,,,,,,,ccccM@aQaM8c,,,,,........
+..........................,,,,,,,ccc88g.o. Owg8ccc,,,,......
+.......................,,,,,,,,c8888M@j,    ,wMM8cccc,,.....
+.....................,,,,,,cccMQOPjjPrgg,   OrwrwMMMjjc,....
+..................,,,,cccccc88MaP  @            ,pGa.g8c,...
+...............,,cccccccc888MjQp.                   o@8cc,..
+..........,,,,c8jjMMMMMMMMM@@w.                      aj8c,,.
+.....,,,,,,ccc88@QEJwr.wPjjjwG                        w8c,,.
+..,,,,,,,cccccMMjwQ       EpQ                         .8c,,,
+.,,,,,,cc888MrajwJ                                   MMcc,,,
+.cc88jMMM@@jaG.                                     oM8cc,,,
+.cc88jMMM@@jaG.                                     oM8cc,,,
+.,,,,,,cc888MrajwJ                                   MMcc,,,
+..,,,,,,,cccccMMjwQ       EpQ                         .8c,,,
+.....,,,,,,ccc88@QEJwr.wPjjjwG                        w8c,,.
+..........,,,,c8jjMMMMMMMMM@@w.                      aj8c,,.
+...............,,cccccccc888MjQp.                   o@8cc,..
+..................,,,,cccccc88MaP  @            ,pGa.g8c,...
+.....................,,,,,,cccMQOEjjPrgg,   OrwrwMMMjjc,....
+.......................,,,,,,,,c8888M@j,    ,wMM8cccc,,.....
+..........................,,,,,,,ccc88g.o. Owg8ccc,,,,......
+............................,,,,,,,ccccM@aQaM8c,,,,,........
+...............................,,,,,,cc8M @Mjc,,,,..........
+```
+
+Try experimenting with the parameters in `mandelbrot.py` to visualize
+different parts of the Mandelbrot set, at different resolutions:
+
+```python
+WIDTH = 60
+HEIGHT = 25
+MAX_ITERATIONS = 100
+MIN_X = -2.0
+MAX_X = 0.7
+MIN_Y = -1.12
+MAX_Y = 1.12
+```
 
 ## Conclusion
 
