@@ -1,0 +1,19 @@
+version: 1.0
+long_title: "GPU Functions in Mojo: A CUDA-style Programming Interface"
+short_title: "GPU Functions in Mojo"
+author: "Brad Larson"
+author_image: "author/bradlarson.jpg"
+author_url: "https://www.linkedin.com/in/brad-larson-3549a5291/"
+github_repo: "https://github.com/modular/max-recipes/tree/main/gpu-functions-mojo"
+date: "02-03-2025"
+difficulty: "beginner"
+tags:
+  - max-driver
+  - gpu-programming
+  - mojo
+
+tasks:
+  - magic run vector_addition
+  - magic run grayscale
+  - magic run naive_matrix_multiplication
+  - magic run mandelbrot
