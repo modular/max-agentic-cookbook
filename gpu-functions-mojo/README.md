@@ -104,9 +104,9 @@ threads past the end of the vector.
 ```mojo
 fn vector_addition(
     length: Int,
-    lhs: TensorType,
-    rhs: TensorType,
-    out: TensorType,
+    lhs: LayoutTensor[float_dtype],
+    rhs: LayoutTensor[float_dtype],
+    out: LayoutTensor[float_dtype],
 ):
     tid = block_dim.x * block_idx.x + thread_idx.x
     if tid < length:
@@ -171,9 +171,9 @@ var num_blocks = ceildiv(VECTOR_WIDTH, BLOCK_SIZE)
 gpu_function(
     gpu_device,
     VECTOR_WIDTH,
-    lhs_tensor.unsafe_slice(),
-    rhs_tensor.unsafe_slice(),
-    out_tensor.unsafe_slice(),
+    lhs_tensor.to_layout_tensor(),
+    rhs_tensor.to_layout_tensor(),
+    out_tensor.to_layout_tensor(),
     grid_dim=Dim(num_blocks),
     block_dim=Dim(BLOCK_SIZE),
 )
@@ -218,8 +218,8 @@ And this is the per-thread function that expresses this to be run on the GPU:
 fn color_to_grayscale_conversion(
     width: Int,
     height: Int,
-    image: TensorType,
-    out: TensorType,
+    image: LayoutTensor[channel_dtype],
+    out: LayoutTensor[channel_dtype],
 ):
     row = block_dim.y * block_idx.y + thread_idx.y
     col = block_dim.x * block_idx.x + thread_idx.x
@@ -247,8 +247,8 @@ gpu_function(
     gpu_device,
     IMAGE_WIDTH,
     IMAGE_HEIGHT,
-    rgb_tensor.unsafe_slice(),
-    gray_tensor.unsafe_slice(),
+    rgb_tensor.to_layout_tensor(),
+    gray_tensor.to_layout_tensor(),
     grid_dim=Dim(num_col_blocks, num_row_blocks),
     block_dim=Dim(BLOCK_SIZE, BLOCK_SIZE),
 )
@@ -275,9 +275,9 @@ fn naive_matrix_multiplication(
     i: Int,
     j: Int,
     k: Int,
-    m: TensorType,
-    n: TensorType,
-    p: TensorType,
+    m: LayoutTensor[float_dtype],
+    n: LayoutTensor[float_dtype],
+    p: LayoutTensor[float_dtype],
 ):
     row = block_dim.y * block_idx.y + thread_idx.y
     col = block_dim.x * block_idx.x + thread_idx.x

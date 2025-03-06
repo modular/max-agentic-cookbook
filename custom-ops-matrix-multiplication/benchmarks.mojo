@@ -11,82 +11,113 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-from operations.matrix_multiplication import MatrixMultiplication
-from gpu.host import DeviceContext
-from utils import IndexList
-from max.driver.device import cpu_device
+from benchmark import ThroughputMeasure, BenchId, BenchMetric, Bench, Bencher
+from bit import log2_floor
+from buffer.dimlist import DimList
+from gpu.host import DeviceContext, DeviceBuffer
+from math import iota
+from max.driver import cpu
 from max.tensor import (
     ManagedTensorSlice,
     InputTensor,
     OutputTensor,
     StaticTensorSpec,
+    IOSpec,
+    Input,
+    Output,
+    MutableInput,
 )
-from random import rand
-from memory import UnsafePointer
-from runtime.asyncrt import DeviceContextPtr
-from benchmark import ThroughputMeasure, BenchId, BenchMetric, Bench, Bencher
-from bit import log2_floor
-from sys import sizeof, has_nvidia_gpu_accelerator, has_amd_gpu_accelerator
 from memory import AddressSpace
+from memory import UnsafePointer
+from operations.matrix_multiplication import MatrixMultiplication
+from random import rand
+from runtime.asyncrt import DeviceContextPtr
+from sys import sizeof, has_nvidia_gpu_accelerator
+from utils import IndexList
+
+
+# Wrap a ManagedTensorSlice with a DeviceBuffer which has a lifetime to use
+# Mojo's memory management, and sidestep the Python initialized garbage
+# collected version.
+@value
+struct _BenchTensor[
+    dtype: DType,
+    rank: Int, //,
+    io_spec: IOSpec,
+    static_spec: StaticTensorSpec[dtype, rank],
+]:
+    alias tensor_type = ManagedTensorSlice[
+        io_spec=io_spec, static_spec=static_spec
+    ]
+    alias buffer_type = DeviceBuffer[dtype]
+    alias ptr_type = UnsafePointer[Scalar[dtype]]
+    alias size = Int(static_spec.shape.product())
+
+    var tensor: Self.tensor_type
+    var buffer: Self.buffer_type
+
+    fn __init__(out self, ctx: DeviceContext) raises:
+        self.buffer = ctx.enqueue_create_buffer[dtype](Self.size)
+
+        self.tensor = ManagedTensorSlice[
+            io_spec=io_spec, static_spec=static_spec
+        ](
+            self.buffer.unsafe_ptr(),
+            Self.static_spec.shape.into_index_list[rank](),
+            Self.static_spec.strides.into_index_list[rank](),
+        )
+
+    fn unsafe_ptr(self) -> Self.ptr_type:
+        return self.buffer.unsafe_ptr()
+
+    fn rand(self) raises -> Self:
+        with self.buffer.map_to_host() as host_buffer:
+            rand(host_buffer.unsafe_ptr(), Self.size)
+            return self
+
+    fn iota(self) raises -> Self:
+        with self.buffer.map_to_host() as host_buffer:
+            iota(host_buffer.unsafe_ptr(), Self.size)
+            return self
+
+
+# TODO: Change StaticTensorSpec to use `IndexList` instead of `DimList` in order
+# to determine strides from shape at compile time, and align with
+# RuntimeTensorSpec.
+fn _static_spec[
+    dtype: DType, rank: Int
+](shape: DimList, strides: DimList, out spec: StaticTensorSpec[dtype, rank]):
+    spec = __type_of(spec)(
+        shape=shape,
+        strides=strides,
+        alignment=sizeof[dtype](),
+        address_space=AddressSpace.GENERIC,
+        exclusive=True,
+        in_lambda=None,
+        out_lambda=None,
+    )
 
 
 def matmul():
     alias M = 1028
     alias K = 1028
     alias N = 1028
-    alias FLOPS = M * N * (2 * K - 1)
 
     alias rank = 2
-    alias a_shape = IndexList[rank](M, K)
-    alias b_shape = IndexList[rank](K, N)
-    alias c_shape = IndexList[rank](M, N)
-
-    alias a_els = a_shape.flattened_length()
-    alias b_els = b_shape.flattened_length()
-    alias c_els = c_shape.flattened_length()
-
     alias dtype = DType.float32
 
-    alias a_spec = StaticTensorSpec[dtype, rank](
-        shape=(M, K),
-        strides=(K, 1),
-        alignment=sizeof[dtype](),
-        address_space=AddressSpace.GENERIC,
-        exclusive=True,
-        in_lambda=None,
-        out_lambda=None,
-    )
-    alias b_spec = StaticTensorSpec[dtype, rank](
-        shape=(K, N),
-        strides=(N, 1),
-        alignment=sizeof[dtype](),
-        address_space=AddressSpace.GENERIC,
-        exclusive=True,
-        in_lambda=None,
-        out_lambda=None,
-    )
-    alias c_spec = StaticTensorSpec[dtype, rank](
-        shape=(M, N),
-        strides=(N, 1),
-        alignment=sizeof[dtype](),
-        address_space=AddressSpace.GENERIC,
-        exclusive=True,
-        in_lambda=None,
-        out_lambda=None,
-    )
+    alias FLOPS = M * N * (2 * K - 1)
 
-    var a_ptr = UnsafePointer[Scalar[dtype]].alloc(a_els)
-    var b_ptr = UnsafePointer[Scalar[dtype]].alloc(b_els)
-    var c_ptr = UnsafePointer[Scalar[dtype]].alloc(c_els)
+    alias a_spec = _static_spec[dtype, rank](shape=(M, K), strides=(K, 1))
+    alias b_spec = _static_spec[dtype, rank](shape=(K, N), strides=(N, 1))
+    alias c_spec = _static_spec[dtype, rank](shape=(M, N), strides=(N, 1))
 
-    var a = InputTensor[static_spec=a_spec](a_ptr, a_shape)
-    var b = InputTensor[static_spec=b_spec](b_ptr, b_shape)
-    var c = OutputTensor[static_spec=c_spec](c_ptr, c_shape)
+    var cpu_ctx = DeviceContext(api="cpu")
 
-    rand(a_ptr, a_els)
-    rand(b_ptr, b_els)
+    var a = _BenchTensor[Input, a_spec](cpu_ctx).rand()
+    var b = _BenchTensor[Input, b_spec](cpu_ctx).rand()
+    var c = _BenchTensor[Output, c_spec](cpu_ctx).rand()
 
-    var cpu_ctx_ptr = cpu_device().unsafe_ptr()
     var bench = Bench()
     var flops = ThroughputMeasure(BenchMetric.flops, FLOPS)
     var elements = ThroughputMeasure(BenchMetric.elements, M * N)
@@ -98,10 +129,7 @@ def matmul():
         @always_inline
         fn run_bench() raises:
             MatrixMultiplication["naive"].execute[target="cpu"](
-                c,
-                a,
-                b,
-                cpu_ctx_ptr,
+                c.tensor, a.tensor, b.tensor, cpu_ctx
             )
 
         bencher.iter[run_bench]()
@@ -109,16 +137,11 @@ def matmul():
     bench.bench_function[bench_cpu](BenchId("cpu", "naive"), flops, elements)
 
     @parameter
-    if has_nvidia_gpu_accelerator() or has_amd_gpu_accelerator():
+    if has_nvidia_gpu_accelerator():
         var gpu_ctx = DeviceContext()
-        var a_dev = gpu_ctx.enqueue_create_buffer[dtype](a_els)
-        var b_dev = gpu_ctx.enqueue_create_buffer[dtype](b_els)
-        var c_dev = gpu_ctx.enqueue_create_buffer[dtype](c_els)
-        var c = InputTensor[static_spec=c_spec](c_dev.unsafe_ptr(), c_shape)
-        var a = OutputTensor[static_spec=a_spec](a_dev.unsafe_ptr(), a_shape)
-        var b = OutputTensor[static_spec=b_spec](b_dev.unsafe_ptr(), b_shape)
-        gpu_ctx.copy(a_dev, a_ptr)
-        gpu_ctx.copy(b_dev, b_ptr)
+        var a_dev = _BenchTensor[Input, a_spec](gpu_ctx).rand()
+        var b_dev = _BenchTensor[Input, b_spec](gpu_ctx).rand()
+        var c_dev = _BenchTensor[Output, c_spec](gpu_ctx).rand()
 
         @parameter
         def bench_matmul_kernel[impl: StringLiteral]():
@@ -129,15 +152,10 @@ def matmul():
                 @always_inline
                 fn kernel_launch(gpu_ctx: DeviceContext) raises:
                     MatrixMultiplication[impl].execute[target="gpu"](
-                        c,
-                        a,
-                        b,
-                        gpu_ctx,
+                        c_dev.tensor, a_dev.tensor, b_dev.tensor, gpu_ctx
                     )
 
-                var gpu_ctx = DeviceContext()
                 bench.iter_custom[kernel_launch](gpu_ctx)
-                _ = gpu_ctx
 
             bench.bench_function[bench_gpu](
                 BenchId("gpu", impl), flops, elements
@@ -149,19 +167,10 @@ def matmul():
         bench_matmul_kernel["tiled_register"]()
         bench_matmul_kernel["block_tiled"]()
         bench_matmul_kernel["block_tiled_vectorized"]()
-        _ = gpu_ctx
-        _ = a_dev
-        _ = b_dev
-        _ = c_dev
 
     bench.config.verbose_metric_names = False
     print(bench)
 
-    a_ptr.free()
-    b_ptr.free()
-    c_ptr.free()
 
-
-# TODO: arg parsing to select benchmarks
 def main():
     matmul()

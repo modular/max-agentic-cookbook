@@ -63,12 +63,11 @@ from gpu.id import block_idx, thread_idx
 from gpu.sync import barrier
 from gpu.memory import AddressSpace
 from runtime.asyncrt import DeviceContextPtr
+from tensor import OutputTensor, InputTensor
 from utils import Index
 
-from tensor import ManagedTensorSlice
 
-
-@register("fused_attention_custom", num_dps_outputs=1)
+@register("fused_attention_custom")
 struct FusedAttention:
     """Registers the `fused_attention_custom` op, allowing python to use it from the `max`
     package.
@@ -85,10 +84,10 @@ struct FusedAttention:
         BD: Int,  # Dimension of blocks to split K, V into
         target: StringLiteral,  # "cpu" or "gpu"
     ](
-        output: ManagedTensorSlice[type=dtype, rank=rank],
-        key: ManagedTensorSlice[type=dtype, rank=rank],
-        query: ManagedTensorSlice[type=dtype, rank=rank],
-        value: ManagedTensorSlice[type=dtype, rank=rank],
+        output: OutputTensor[type=dtype, rank=rank],
+        key: InputTensor[type=dtype, rank=rank],
+        query: InputTensor[type=dtype, rank=rank],
+        value: InputTensor[type=dtype, rank=rank],
         ctx: DeviceContextPtr,
     ) raises:
         constrained[rank == 2, "rank must be 2"]()
@@ -279,7 +278,7 @@ fn matmul[
         res.copy_from(out_sram)
 
 
-fn fused_attention_kenel[
+fn fused_attention_kernel[
     q_dtype: DType,
     q_layout: Layout,
     k_dtype: DType,
@@ -339,7 +338,7 @@ def fused_attention_gpu[
     V: LayoutTensor,
     mut O: LayoutTensor,
 ):
-    alias kernel_func = fused_attention_kenel[
+    alias kernel_func = fused_attention_kernel[
         Q.dtype,
         Q.layout,
         K.dtype,

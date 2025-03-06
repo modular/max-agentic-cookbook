@@ -17,15 +17,15 @@ import compiler
 from gpu import block_dim, block_idx, thread_idx
 from gpu.host import DeviceContext
 from runtime.asyncrt import DeviceContextPtr
-from tensor import ManagedTensorSlice, foreach
+from tensor import OutputTensor, InputTensor, foreach
 
 from utils.index import IndexList
 
 
 fn vector_addition_cpu(
-    out: ManagedTensorSlice,
-    lhs: ManagedTensorSlice[type = out.type, rank = out.rank],
-    rhs: ManagedTensorSlice[type = out.type, rank = out.rank],
+    out: OutputTensor,
+    lhs: InputTensor[type = out.type, rank = out.rank],
+    rhs: InputTensor[type = out.type, rank = out.rank],
     ctx: DeviceContextPtr,
 ):
     # Warning: This is an extremely inefficient implementation! It's merely an
@@ -37,9 +37,9 @@ fn vector_addition_cpu(
 
 
 fn vector_addition_gpu(
-    out: ManagedTensorSlice,
-    lhs: ManagedTensorSlice[type = out.type, rank = out.rank],
-    rhs: ManagedTensorSlice[type = out.type, rank = out.rank],
+    out: OutputTensor,
+    lhs: InputTensor[type = out.type, rank = out.rank],
+    rhs: InputTensor[type = out.type, rank = out.rank],
     ctx: DeviceContextPtr,
 ) raises:
     # Note: The following has not been tuned for any GPU hardware, and is an
@@ -75,10 +75,10 @@ struct VectorAddition:
         target: StringLiteral,
     ](
         # as num_dps_outputs=1, the first argument is the "output"
-        out: ManagedTensorSlice[rank=1],
+        out: OutputTensor[rank=1],
         # starting here are the list of inputs
-        lhs: ManagedTensorSlice[type = out.type, rank = out.rank],
-        rhs: ManagedTensorSlice[type = out.type, rank = out.rank],
+        lhs: InputTensor[type = out.type, rank = out.rank],
+        rhs: InputTensor[type = out.type, rank = out.rank],
         # the context is needed for some GPU calls
         ctx: DeviceContextPtr,
     ) raises:

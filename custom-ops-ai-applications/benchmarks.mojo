@@ -11,23 +11,91 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
+from benchmark import ThroughputMeasure, BenchId, BenchMetric, Bench, Bencher
+from bit import log2_floor
+from buffer.dimlist import DimList
+from gpu.host import DeviceContext, DeviceBuffer
 from operations.top_k import TopK
-from gpu.host import DeviceContext
-from utils import IndexList
+from math import iota
 from max.driver import cpu
 from max.tensor import (
     ManagedTensorSlice,
     InputTensor,
     OutputTensor,
     StaticTensorSpec,
+    IOSpec,
+    Input,
+    Output,
+    MutableInput,
 )
-from random import rand
-from memory import UnsafePointer
-from runtime.asyncrt import DeviceContextPtr
-from benchmark import ThroughputMeasure, BenchId, BenchMetric, Bench, Bencher
-from bit import log2_floor
-from sys import sizeof, has_nvidia_gpu_accelerator
 from memory import AddressSpace
+from memory import UnsafePointer
+from random import rand
+from runtime.asyncrt import DeviceContextPtr
+from sys import sizeof, has_nvidia_gpu_accelerator
+from utils import IndexList
+
+
+# Wrap a ManagedTensorSlice with a DeviceBuffer which has a lifetime to use
+# Mojo's memory management, and sidestep the Python initialized garbage
+# collected version.
+@value
+struct _BenchTensor[
+    dtype: DType,
+    rank: Int, //,
+    io_spec: IOSpec,
+    static_spec: StaticTensorSpec[dtype, rank],
+]:
+    alias tensor_type = ManagedTensorSlice[
+        io_spec=io_spec, static_spec=static_spec
+    ]
+    alias buffer_type = DeviceBuffer[dtype]
+    alias ptr_type = UnsafePointer[Scalar[dtype]]
+    alias size = Int(static_spec.shape.product())
+
+    var tensor: Self.tensor_type
+    var buffer: Self.buffer_type
+
+    fn __init__(out self, ctx: DeviceContext) raises:
+        self.buffer = ctx.enqueue_create_buffer[dtype](Self.size)
+
+        self.tensor = ManagedTensorSlice[
+            io_spec=io_spec, static_spec=static_spec
+        ](
+            self.buffer.unsafe_ptr(),
+            Self.static_spec.shape.into_index_list[rank](),
+            Self.static_spec.strides.into_index_list[rank](),
+        )
+
+    fn unsafe_ptr(self) -> Self.ptr_type:
+        return self.buffer.unsafe_ptr()
+
+    fn rand(self) raises -> Self:
+        with self.buffer.map_to_host() as host_buffer:
+            rand(host_buffer.unsafe_ptr(), Self.size)
+            return self
+
+    fn iota(self) raises -> Self:
+        with self.buffer.map_to_host() as host_buffer:
+            iota(host_buffer.unsafe_ptr(), Self.size)
+            return self
+
+
+# TODO: Change StaticTensorSpec to use `IndexList` instead of `DimList` in order
+# to determine strides from shape at compile time, and align with
+# RuntimeTensorSpec.
+fn _static_spec[
+    dtype: DType, rank: Int
+](shape: DimList, strides: DimList, out spec: StaticTensorSpec[dtype, rank]):
+    spec = __type_of(spec)(
+        shape=shape,
+        strides=strides,
+        alignment=sizeof[dtype](),
+        address_space=AddressSpace.GENERIC,
+        exclusive=True,
+        in_lambda=None,
+        out_lambda=None,
+    )
 
 
 def top_k():
@@ -41,30 +109,15 @@ def top_k():
 
     # Slightly better performance compared to `create_unknown`. Using global
     # address space doesn't improve perf for GPU.
-    alias val_spec = StaticTensorSpec[val_dtype, rank](
-        shape=(batch_size, K),
-        strides=(K, 1),
-        alignment=sizeof[val_dtype](),
-        address_space=AddressSpace.GENERIC,
-        exclusive=True,
-        in_lambda=None,
-        out_lambda=None,
-    )
-    alias idx_spec = StaticTensorSpec[idx_dtype, rank](
-        shape=(batch_size, K),
-        strides=(K, 1),
-        alignment=sizeof[idx_dtype](),
-        address_space=AddressSpace.GENERIC,
-        exclusive=True,
-        in_lambda=None,
-        out_lambda=None,
-    )
 
-    var in_vals = InputTensor[static_spec=val_spec].rand()
-    var out_vals = OutputTensor[static_spec=val_spec].rand()
-    var out_idxs = OutputTensor[static_spec=idx_spec].rand()
+    alias val_spec = _static_spec[val_dtype, rank]((batch_size, K), (K, 1))
+    alias idx_spec = _static_spec[idx_dtype, rank]((batch_size, K), (K, 1))
 
     var cpu_ctx = DeviceContext(api="cpu")
+
+    var in_vals = _BenchTensor[Input, val_spec](cpu_ctx).rand()
+    var out_vals = _BenchTensor[Output, val_spec](cpu_ctx).rand()
+    var out_idxs = _BenchTensor[Output, idx_spec](cpu_ctx).rand()
 
     @parameter
     @always_inline
@@ -73,7 +126,7 @@ def top_k():
         @always_inline
         fn run_bench() raises:
             TopK.execute[K=K, target="cpu"](
-                out_vals, out_idxs, in_vals, cpu_ctx
+                out_vals.tensor, out_idxs.tensor, in_vals.tensor, cpu_ctx
             )
 
         b.iter[run_bench]()
@@ -88,21 +141,9 @@ def top_k():
     if has_nvidia_gpu_accelerator():
         var gpu_ctx = DeviceContext()
 
-        var in_vals_dev_buff = gpu_ctx.enqueue_create_buffer[val_dtype](els)
-        var out_vals_dev_buff = gpu_ctx.enqueue_create_buffer[val_dtype](els)
-        var out_idxs_dev_buff = gpu_ctx.enqueue_create_buffer[idx_dtype](els)
-
-        gpu_ctx.enqueue_copy(in_vals_dev_buff, in_vals.unsafe_ptr())
-
-        var out_vals_dev = OutputTensor[static_spec=val_spec](
-            out_vals_dev_buff.unsafe_ptr(), shape
-        )
-        var out_idxs_dev = OutputTensor[static_spec=idx_spec](
-            out_idxs_dev_buff.unsafe_ptr(), shape
-        )
-        var in_vals_dev = InputTensor[static_spec=val_spec](
-            in_vals_dev_buff.unsafe_ptr(), shape
-        )
+        var out_vals_dev = _BenchTensor[Output, val_spec](gpu_ctx).rand()
+        var out_idxs_dev = _BenchTensor[Output, idx_spec](gpu_ctx).rand()
+        var in_vals_dev = _BenchTensor[Input, val_spec](gpu_ctx).rand()
 
         @parameter
         @always_inline
@@ -111,7 +152,10 @@ def top_k():
             @always_inline
             fn kernel_launch(gpu_ctx: DeviceContext) raises:
                 TopK.execute[K=K, target="gpu"](
-                    out_vals_dev, out_idxs_dev, in_vals_dev, gpu_ctx
+                    out_vals_dev.tensor,
+                    out_idxs_dev.tensor,
+                    in_vals_dev.tensor,
+                    gpu_ctx,
                 )
 
             b.iter_custom[kernel_launch](gpu_ctx)
@@ -119,16 +163,8 @@ def top_k():
         b.bench_function[bench_gpu](
             BenchId("top_k_custom", "gpu"), flops, elements
         )
-        _ = in_vals_dev_buff
-        _ = out_vals_dev_buff
-        _ = out_idxs_dev_buff
-
     b.config.verbose_metric_names = False
     print(b)
-
-    _ = in_vals
-    _ = out_vals
-    _ = out_idxs
 
 
 def main():
