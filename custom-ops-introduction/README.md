@@ -122,8 +122,8 @@ struct AddOne:
     fn execute[
         target: StringLiteral,
     ](
-        out: ManagedTensorSlice,
-        x: ManagedTensorSlice[type = out.type, rank = out.rank],
+        out: OutputTensor,
+        x: InputTensor[type = out.type, rank = out.rank],
         ctx: DeviceContextPtr,
     ):
         @parameter

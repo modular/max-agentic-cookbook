@@ -28,7 +28,7 @@ from math import ceildiv
 from memory import UnsafePointer
 from runtime.asyncrt import DeviceContextPtr
 from sys.info import simdwidthof
-from tensor import ManagedTensorSlice, foreach
+from tensor import OutputTensor, InputTensor
 from utils.index import Index
 
 # ===-----------------------------------------------------------------------===#
@@ -37,9 +37,9 @@ from utils.index import Index
 
 
 fn naive_matrix_multiplication_cpu(
-    out: ManagedTensorSlice,
-    a: ManagedTensorSlice[type = out.type, rank = out.rank],
-    b: ManagedTensorSlice[type = out.type, rank = out.rank],
+    out: OutputTensor,
+    a: InputTensor[type = out.type, rank = out.rank],
+    b: InputTensor[type = out.type, rank = out.rank],
 ):
     """A naive matrix multiplication used as a fallback on CPU hardware."""
     var M = a.shape()[0]
@@ -782,10 +782,10 @@ struct MatrixMultiplication[algorithm: StringLiteral]:
         target: StringLiteral,
     ](
         # as num_dps_outputs=1, the first argument is the "output"
-        out: ManagedTensorSlice[rank=2],
+        out: OutputTensor[rank=2],
         # starting here are the list of inputs
-        a: ManagedTensorSlice[type = out.type, rank = out.rank],
-        b: ManagedTensorSlice[type = out.type, rank = out.rank],
+        a: InputTensor[type = out.type, rank = out.rank],
+        b: InputTensor[type = out.type, rank = out.rank],
         # the context is needed for some GPU calls
         ctx: DeviceContextPtr,
     ) raises:

@@ -15,7 +15,7 @@
 import compiler
 from complex import ComplexSIMD
 from math import iota
-from max.tensor import ManagedTensorSlice, foreach
+from tensor import OutputTensor, InputTensor, foreach
 from runtime.asyncrt import DeviceContextPtr
 from utils.index import IndexList
 
@@ -31,7 +31,7 @@ struct Mandelbrot:
         target: StringLiteral,
     ](
         # as num_dps_outputs=1, the first argument is the "output"
-        out: ManagedTensorSlice,
+        out: OutputTensor,
         # starting here are the list of inputs
         min_x: Float32,
         min_y: Float32,
@@ -40,7 +40,7 @@ struct Mandelbrot:
         max_iterations: Int32,
         # the context is needed for some GPU calls
         ctx: DeviceContextPtr,
-    ):
+    ) raises:
         @parameter
         @always_inline
         fn elementwise_mandelbrot[
