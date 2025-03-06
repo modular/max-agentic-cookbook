@@ -85,3 +85,6 @@ if __name__ == "__main__":
 
     print("Expected result:")
     print(lhs_values + rhs_values)
+
+    isclose = np.all(np.isclose(result.to_numpy(), lhs_values + rhs_values))
+    print("Are the results close to each other?: %s" % (isclose))

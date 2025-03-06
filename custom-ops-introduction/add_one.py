@@ -72,3 +72,7 @@ if __name__ == "__main__":
 
     print("Expected result:")
     print(x_values + 1)
+
+    isclose = np.all(np.isclose(result.to_numpy(), x_values + 1))
+    print("Are the results close to each other?: %s" % (isclose))
+

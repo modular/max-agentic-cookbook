@@ -18,16 +18,16 @@ from runtime.asyncrt import DeviceContextPtr
 from utils.index import IndexList
 
 
-@compiler.register("add_one", num_dps_outputs=1)
+@compiler.register("add_one")
 struct AddOne:
     @staticmethod
     fn execute[
         # The kind of device this will be run on: "cpu" or "gpu"
         target: StringLiteral,
     ](
-        # as num_dps_outputs=1, the first argument is the "output"
+        # the first argument is the "output"
         out: OutputTensor,
-        # starting here are the list of inputs
+        # this is followed by the "inputs"
         x: InputTensor[type = out.type, rank = out.rank],
         # the context is needed for some GPU calls
         ctx: DeviceContextPtr,

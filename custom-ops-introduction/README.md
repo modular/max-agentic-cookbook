@@ -116,7 +116,7 @@ add the number 1 to each element in parallel of a tensor. The operation itself
 is defined in Mojo within `operations/add_one.mojo`:
 
 ```mojo
-@compiler.register("add_one", num_dps_outputs=1)
+@compiler.register("add_one")
 struct AddOne:
     @staticmethod
     fn execute[
