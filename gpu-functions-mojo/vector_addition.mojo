@@ -96,10 +96,10 @@ def main():
         # are the dimensions of the grid in blocks, and the block dimensions.
         gpu_function(
             gpu_device,
+            VECTOR_WIDTH,
             lhs_layout_tensor,
             rhs_layout_tensor,
             out_layout_tensor,
-            VECTOR_WIDTH,
             grid_dim=Dim(num_blocks),
             block_dim=Dim(BLOCK_SIZE),
         )
