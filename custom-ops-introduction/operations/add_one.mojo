@@ -18,7 +18,7 @@ from runtime.asyncrt import DeviceContextPtr
 from utils.index import IndexList
 
 
-@compiler.register("add_one", num_dps_outputs=1)
+@compiler.register("add_one")
 struct AddOne:
     @staticmethod
     fn execute[

@@ -67,7 +67,7 @@ fn vector_addition_gpu(
     )
 
 
-@compiler.register("vector_addition", num_dps_outputs=1)
+@compiler.register("vector_addition")
 struct VectorAddition:
     @staticmethod
     fn execute[

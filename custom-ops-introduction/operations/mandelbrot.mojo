@@ -23,7 +23,7 @@ from utils.index import IndexList
 alias float_dtype = DType.float32
 
 
-@compiler.register("mandelbrot", num_dps_outputs=1)
+@compiler.register("mandelbrot")
 struct Mandelbrot:
     @staticmethod
     fn execute[
