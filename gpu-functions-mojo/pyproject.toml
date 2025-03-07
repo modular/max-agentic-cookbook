@@ -23,7 +23,7 @@ platforms = ["linux-64", "linux-aarch64"]
 
 [tool.pixi.tasks]
 vector_addition = { cmd = "mojo vector_addition.mojo" }
-grayscale = { cmd = "mojo benchmarks.mojo" }
+grayscale = { cmd = "mojo grayscale.mojo" }
 naive_matrix_multiplication = { cmd = "mojo naive_matrix_multiplication.mojo" }
 mandelbrot = { cmd = "mojo mandelbrot.mojo" }
 
