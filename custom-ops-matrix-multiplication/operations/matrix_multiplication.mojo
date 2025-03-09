@@ -968,7 +968,6 @@ struct MatrixMultiplication[algorithm: StringLiteral]:
                     block_dim=(NUM_THREADS),
                 )
             elif algorithm == "tensor_core":
-                constrained[""]
                 alias BM = 64
                 alias BN = 64
                 alias BK = 32
