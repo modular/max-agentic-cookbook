@@ -44,11 +44,11 @@ ensure your system meets
 
 ## Quick start
 
-1. Download the code for this recipe using git:
+1. Download this recipe using Magic:
 
 ```bash
-git clone https://github.com/modular/max-recipes.git
-cd max-recipes/custom-ops-introduction
+magic init custom-ops-introduction --from custom-ops-introduction@0.0.1
+cd custom-ops-introduction
 ```
 
 2. Run each of the examples:

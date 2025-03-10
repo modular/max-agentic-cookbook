@@ -28,4 +28,4 @@ mandelbrot = { cmd = "python mandelbrot.py", depends-on = ["package"] }
 vector_addition = { cmd = "python vector_addition.py", depends-on = ["package"] }
 
 [tool.pixi.dependencies]
-max = ">=25.2.0.dev2025022205"
+max = "==25.2.0.dev2025031005"
