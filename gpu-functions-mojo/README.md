@@ -69,7 +69,7 @@ optimized AI models, to the computational graphs that define those models, to
 direct GPU programming in the Mojo language. You can use whatever level of
 abstraction best suits your needs in MAX.
 
-[Mojo](https://docs.modular.com/mojo/manual/) is a Python-family language that
+[Mojo](https://docs.modular.com/mojo/manual/) is a Python-family language
 built for high-performance computing. It allows you to write custom
 algorithms for GPUs without the use of CUDA or other vendor-specific libraries.
 All of the operations that power AI models within MAX are written in Mojo.
