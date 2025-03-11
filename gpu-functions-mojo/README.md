@@ -44,11 +44,11 @@ These examples require a MAX-compatible GPU satisfying
 
 ## Quick start
 
-1. Download the code for this recipe using `git`:
+1. Download this recipe using Magic:
 
     ```bash
-    git clone https://github.com/modular/max-recipes.git
-    cd max-recipes/gpu-functions-mojo
+    magic init gpu-functions-mojo --from gpu-functions-mojo@0.0.1
+    cd gpu-functions-mojo
     ```
 
 1. Run the examples:

@@ -45,11 +45,11 @@ ensure your system meets
 
 ## Quick start
 
-1. Download the code for this recipe using git:
+1. Download this recipe using Magic:
 
 ```bash
-git clone https://github.com/modular/max-recipes.git
-cd max-recipes/custom-ai-applications
+magic init custom-ops-ai-applications --from custom-ops-ai-applications@0.0.1
+cd custom-ops-ai-applications
 ```
 
 2. Run the examples:

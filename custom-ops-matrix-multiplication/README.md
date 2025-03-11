@@ -45,11 +45,11 @@ ensure your system meets
 
 ## Quick start
 
-1. Download the code for this recipe using git:
+1. Download this recipe using Magic:
 
 ```bash
-git clone https://github.com/modular/max-recipes.git
-cd max-recipes/custom-ops-matrix-multiplication
+magic init custom-ops-matrix-multiplication --from custom-ops-matrix-multiplication@0.0.1
+cd custom-ops-matrix-multiplication
 ```
 
 2. Run the example:
