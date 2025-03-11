@@ -93,11 +93,11 @@ The following can be used to run the top-K token sampling demo:
 magic run top_k
 ```
 
-The file `top_k.py` defines a block of text, it then choses three words and
+The file `top_k.py` defines a block of text, then chooses three words and
 builds a Numpy array with three batches for how often each "next word" appears
 as percentages. The Numpy array is passed to the custom op, which returns two
 arrays to order each batch/word by highest frequency. It uses a `top_k` kernel
-that runs on CPU, or NVIDIA/AMD GPU if you have one attached. The GPU kernel
+that runs on CPU, or MAX-compatible GPU if you have one attached. The GPU kernel
 uses a warp-level algorithm to demonstrate using low-level GPU primitives, each
 word/batch runs in parallel on a separate GPU block.
 
