@@ -93,6 +93,23 @@ The following can be used to run the top-K token sampling demo:
 magic run top_k
 ```
 
+The file `top_k.py` defines a block of text, then chooses three words and
+builds a Numpy array with three batches for how often each "next word" appears
+as percentages. The Numpy array is passed to the custom op, which returns two
+arrays to order each batch/word by highest frequency. It uses a `top_k` kernel
+that runs on CPU, or MAX-compatible GPU if you have one attached. The GPU kernel
+uses a warp-level algorithm to demonstrate using low-level GPU primitives, each
+word/batch runs in parallel on a separate GPU block.
+
+You can look at the `kernels/top_k.mojo` file to see the differences between the
+CPU and GPU implementations. Run `magic run benchmarks` to see the performance
+difference.
+
+This demonstrates how you can build your own custom op for any specific
+functionality you want to add to MAX's performant op implementations, using low
+level GPU and CPU primitives. Note that it is a simplified version, MAX has it's
+own `mo.top_k` op which is more feature complete.
+
 ## Implementing a fused operation for FlashAttention-2
 
 Modern Transformer-based language models are constructed around the attention
