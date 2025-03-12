@@ -285,8 +285,8 @@ values are accessed from shared memory, significantly reducing the memory access
 latency in between arithmetic operations.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./images/matrix_multiplication_tiled_dark.png">
-  <img src="./images/matrix_multiplication_tiled.png">
+  <source media="(prefers-color-scheme: dark)" srcset="./images/matrix_multiplication_tiled_dark.png" class="darkModeOnly">
+  <img src="./images/matrix_multiplication_tiled.png" class="lightModeOnly">
 </picture>
 
 This version corresponds to "Kernel 3: Shared Memory Cache-Blocking" in Simon's 
