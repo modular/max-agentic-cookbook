@@ -34,6 +34,19 @@ logger = logging.getLogger(__name__)
 
 shutdown_event = asyncio.Event()
 
+CACHE_TTL = os.getenv("CACHE_TTL", 3600)  # 1 hour
+
+LLM_SERVER_URL = os.getenv("LLM_SERVER_URL", "http://0.0.0.0:8010/v1")
+LLM_HEALTH_URL = os.getenv("LLM_HEALTH_URL", "http://0.0.0.0:8010/v1/health")
+LLM_API_KEY = os.getenv("LLM_API_KEY", "local")
+LLM_MODEL = os.getenv("LLM_MODEL", "modularai/Llama-3.1-8B-Instruct-GGUF")
+EMBEDDING_SERVER_URL = os.getenv("EMBEDDING_SERVER_URL", "http://0.0.0.0:7999/v1")
+EMBEDDING_HEALTH_URL = os.getenv("EMBEDDING_HEALTH_URL", "http://0.0.0.0:7999/v1/health")
+EMBEDDING_API_KEY = os.getenv("EMBEDDING_API_KEY", "local")
+EMBEDDING_MODEL = os.getenv(
+    "EMBEDDING_MODEL", "sentence-transformers/all-mpnet-base-v2"
+)
+
 
 def signal_handler(sig, frame):
     print("\nReceived shutdown signal, cleaning up...")
@@ -47,8 +60,10 @@ async def lifespan(app: FastAPI):
 
     print("Starting up backend server...")
     try:
-        await wait_for_llm_server(LLM_SERVER_URL)
+        await wait_for_healthy(LLM_SERVER_URL, "LLM server", LLM_HEALTH_URL)
         logger.info("LLM server is healthy, starting application...")
+        await wait_for_healthy(EMBEDDING_SERVER_URL, "Embedding server", EMBEDDING_HEALTH_URL)
+        logger.info("Embedding server is healthy, starting application...")
         yield
     finally:
         print("Cleaning up backend resources...")
@@ -74,16 +89,8 @@ app.add_middleware(
     GZipMiddleware, minimum_size=1000
 )  # Only compress responses larger than 1KB
 
-CACHE_TTL = 3600  # 1 hour
-
-LLM_SERVER_URL = os.getenv("LLM_SERVER_URL", "http://0.0.0.0:8010/v1")
-EMBEDDING_SERVER_URL = os.getenv("EMBEDDING_SERVER_URL", "http://0.0.0.0:7999/v1")
-EMBEDDING_MODEL = os.getenv(
-    "EMBEDDING_MODEL", "sentence-transformers/all-mpnet-base-v2"
-)
-
-llm_client = AsyncOpenAI(base_url=LLM_SERVER_URL, api_key="local")
-embedding_client = AsyncOpenAI(base_url=EMBEDDING_SERVER_URL, api_key="local")
+llm_client = AsyncOpenAI(base_url=LLM_SERVER_URL, api_key=LLM_API_KEY)
+embedding_client = AsyncOpenAI(base_url=EMBEDDING_SERVER_URL, api_key=EMBEDDING_API_KEY)
 
 # CORS for frontend
 app.add_middleware(
@@ -528,7 +535,7 @@ def semantic_cache(threshold=0.75, ttl_seconds=CACHE_TTL):
 @track_operation_time("intent_detection")
 async def detect_intent(request_message: str, timing_collector: TimingCollector):
     return await llm_client.chat.completions.create(
-        model="modularai/Llama-3.1-8B-Instruct-GGUF",
+        model=LLM_MODEL,
         messages=[
             {"role": "system", "content": INTENT_PROMPT},
             {"role": "user", "content": request_message},
@@ -543,7 +550,7 @@ async def normalize_city(
 ) -> str:
     """Normalize city name using LLM"""
     city_response = await llm_client.chat.completions.create(
-        model="modularai/Llama-3.1-8B-Instruct-GGUF",
+        model=LLM_MODEL,
         messages=[
             {"role": "system", "content": CITY_NORMALIZATION_PROMPT},
             {"role": "user", "content": request_message},
@@ -623,7 +630,7 @@ async def analyze_weather_data(
     logger.info(f"Cache miss for {cache_key}, generating new analysis")
 
     response = await llm_client.chat.completions.create(
-        model="modularai/Llama-3.1-8B-Instruct-GGUF",
+        model=LLM_MODEL,
         messages=[{"role": "system", "content": content}],
         max_tokens=512,
         temperature=0,
@@ -642,7 +649,7 @@ async def generate_chat_response(
 ):
     """Generate a general chat response"""
     response = await llm_client.chat.completions.create(
-        model="modularai/Llama-3.1-8B-Instruct-GGUF",
+        model=LLM_MODEL,
         messages=[
             {
                 "role": "system",
@@ -717,25 +724,24 @@ async def general_exception_handler(request, exc):
     return JSONResponse(status_code=500, content={"detail": str(exc)})
 
 
-def wait_for_llm_server(base_url: str):
-    """Wait for LLM server to be healthy before starting"""
-
+def wait_for_healthy(base_url: str, service_name: str, health_url: str):
+    """Wait for a service to be healthy with configurable retry settings."""
     @retry(
-        stop=stop_after_attempt(20),
-        wait=wait_fixed(60),
+        stop=stop_after_attempt(60),
+        wait=wait_fixed(20),
         retry=(
             retry_if_exception_type(httpx.RequestError)
-            | retry_if_result(lambda response: response.status_code != 200)
+            | retry_if_result(lambda r: r.status_code != 200)
         ),
         before_sleep=lambda retry_state: logger.info(
-            f"Waiting for LLM server at {base_url} to start (attempt {retry_state.attempt_number}/20)..."
+            f"Waiting for {service_name} at {health_url} to start (attempt {retry_state.attempt_number}/60)..."
         ),
     )
-    async def _check_health():
+    async def _check_health(health_url: str):
         async with httpx.AsyncClient() as client:
-            return await client.get(f"{base_url}/health", timeout=5)
+            return await client.get(health_url, timeout=5)
 
-    return _check_health()
+    return _check_health(health_url)
 
 
 def check_port(port: int) -> bool:

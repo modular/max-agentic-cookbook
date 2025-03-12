@@ -29,8 +29,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-MAX_SERVE_URL = os.getenv("MAX_SERVE_URL", "http://localhost:8010/v1")
+LLM_SERVER_URL = os.getenv("LLM_SERVER_URL", "http://localhost:8010/v1")
+LLM_API_KEY = os.getenv("LLM_API_KEY", "local")
+LLM_HEALTH_URL = os.getenv("LLM_HEALTH_URL", "http://localhost:8010/v1/health")
+LLM_MODEL = os.getenv("LLM_MODEL", "meta-llama/Llama-3.2-11B-Vision-Instruct")
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
+QDRANT_HEALTH_URL = os.getenv("QDRANT_HEALTH_URL", "http://localhost:6333/healthz")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "vidore/colpali-v1.3")
 COLLECTION_NAME = "pdf_images"
 VECTOR_DIM = 128
@@ -44,9 +48,9 @@ Do not hallucinate. Be concise and to the point. If you don't know the answer, s
 torch.backends.cuda.matmul.allow_tf32 = True
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
-client = OpenAI(base_url=MAX_SERVE_URL, api_key="local")
+client = OpenAI(base_url=LLM_SERVER_URL, api_key=LLM_API_KEY)
 
-def wait_for_healthy(base_url: str, service_name: str, health_endpoint: str = "/health"):
+def wait_for_healthy(base_url: str, service_name: str, health_url: str):
     """Wait for a service to be healthy with configurable retry settings."""
     @retry(
         stop=stop_after_attempt(60),
@@ -56,11 +60,11 @@ def wait_for_healthy(base_url: str, service_name: str, health_endpoint: str = "/
             | retry_if_result(lambda r: r.status_code != 200)
         ),
         before_sleep=lambda retry_state: logger.info(
-            f"Waiting for {service_name} at {base_url} to start (attempt {retry_state.attempt_number}/60)..."
+            f"Waiting for {service_name} at {health_url} to start (attempt {retry_state.attempt_number}/60)..."
         ),
     )
     def _check_health():
-        return requests.get(f"{base_url}{health_endpoint}", timeout=5)
+        return requests.get(health_url, timeout=5)
 
     return _check_health()
 
@@ -351,7 +355,7 @@ class RAG:
 
         logger.info("Generating response with Llama 3.2 Vision...")
         response = self.llm_client.chat.completions.create(
-            model="meta-llama/Llama-3.2-11B-Vision-Instruct",
+            model=LLM_MODEL,
             messages=messages,
             max_tokens=1024,
             temperature=0.3
@@ -444,7 +448,7 @@ class UI:
         with gr.Blocks(title="Multi-Modal PDF RAG", theme=gr.themes.Soft(), css=custom_css) as demo:
             gr.Markdown(
                 """
-                # Multi-Modal PDF RAG with ColPali, Llama3.2-Vision, powered by [MAX Serve](https://docs.modular.com/max/serve) 🚀
+                # Multi-Modal PDF RAG with ColPali, Llama3.2-Vision, Qdrant, reranker powered by [MAX Serve](https://docs.modular.com/max/serve) 🚀
                 ### A powerful document question-answering system combining state-of-the-art visual and language models
                 """
             )
@@ -485,11 +489,11 @@ class UI:
 
 def main():
     logger.info("Checking if MAX Serve is healthy...")
-    wait_for_healthy(MAX_SERVE_URL, "MAX Serve")
+    wait_for_healthy(LLM_SERVER_URL, "MAX Serve", LLM_HEALTH_URL)
     logger.info("MAX Serve is healthy")
 
     logger.info("Checking if Qdrant is healthy...")
-    wait_for_healthy(QDRANT_URL, "Qdrant", health_endpoint="/healthz")
+    wait_for_healthy(QDRANT_URL, "Qdrant", QDRANT_HEALTH_URL)
     logger.info("Qdrant is healthy")
 
     logger.info("Starting Gradio UI...")

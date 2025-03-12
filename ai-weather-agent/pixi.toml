@@ -15,6 +15,7 @@ version = "0.0.0"
 app = "honcho start"
 clean = "honcho -f Procfile.clean start"
 test = "echo 'test passed'"
+demo = "honcho -f Procfile.demo start"
 
 [dependencies]
 docker-compose = ">=2.29"

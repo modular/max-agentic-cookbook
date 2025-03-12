@@ -12,7 +12,7 @@ console = Console()
 
 LLM_SERVER_URL = os.getenv("LLM_SERVER_URL", "http://localhost:8010/v1")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "local")
-MODEL = os.getenv("MODEL", "modularai/Llama-3.1-8B-Instruct-GGUF")
+LLM_MODEL = os.getenv("LLM_MODEL", "modularai/Llama-3.1-8B-Instruct-GGUF")
 
 client = OpenAI(base_url=LLM_SERVER_URL, api_key=LLM_API_KEY)
 
@@ -90,7 +90,7 @@ Important rules:
         console.print("[cyan]Generating code...[/cyan]")
         try:
             response = client.beta.chat.completions.parse(
-                model=MODEL,
+                model=LLM_MODEL,
                 messages=messages,
                 response_format=CodeExecution
             )
@@ -112,7 +112,7 @@ Important rules:
 
                 console.print("[cyan]Getting explanation...[/cyan]")
                 final_response = client.chat.completions.create(
-                    model=MODEL,
+                    model=LLM_MODEL,
                     messages=explanation_messages
                 )
 

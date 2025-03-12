@@ -28,7 +28,7 @@ from rich.live import Live
 
 warnings.filterwarnings("ignore", message="`search` method is deprecated")
 
-LLM_SERVER = os.getenv("LLM_SERVER", "http://localhost:8010/v1")
+LLM_SERVER_URL = os.getenv("LLM_SERVER_URL", "http://localhost:8010/v1")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "local")
 LLM_MODEL = "Qwen/Qwen2.5-7B-Instruct-1M"
 BATCH_SIZE = 50
@@ -1451,7 +1451,7 @@ The API is organized into the following categories:
 async def main():
     """Main entry point for the application."""
     console = Console()
-    client = AsyncOpenAI(base_url=LLM_SERVER, api_key=LLM_API_KEY)
+    client = AsyncOpenAI(base_url=LLM_SERVER_URL, api_key=LLM_API_KEY)
 
     handlers = {
         QueryType.CHAT: ChatHandler(client, console),

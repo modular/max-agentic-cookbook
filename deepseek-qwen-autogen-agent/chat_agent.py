@@ -16,10 +16,11 @@ from utils import patch_openai_client_usage_tracking
 patch_openai_client_usage_tracking()
 
 LLM_SERVER_URL = os.getenv("LLM_SERVER_URL", "http://localhost:8010/v1")
+LLM_HEALTH_URL = os.getenv("LLM_HEALTH_URL", "http://localhost:8010/v1/health")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "local")
 
 
-def wait_for_healthy(base_url: str):
+def wait_for_healthy(health_url: str):
     @retry(
         stop=stop_after_attempt(20),
         wait=wait_fixed(60),
@@ -28,17 +29,17 @@ def wait_for_healthy(base_url: str):
             | retry_if_result(lambda response: response.status_code != 200)
         ),
         before_sleep=lambda retry_state: print(
-            f"Waiting for server at {base_url} to start (attempt {retry_state.attempt_number}/20)..."
+            f"Waiting for server at {health_url} to start (attempt {retry_state.attempt_number}/20)..."
         ),
     )
     def _check_health():
-        return requests.get(f"{base_url}/health", timeout=5)
+        return requests.get(health_url, timeout=5)
 
     return _check_health()
 
 async def main() -> None:
     # Wait for server to be healthy before starting
-    wait_for_healthy(LLM_SERVER_URL)
+    wait_for_healthy(LLM_HEALTH_URL)
 
     console = Console()
 
