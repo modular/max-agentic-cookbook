@@ -84,11 +84,22 @@ sizable fraction of the GPU workload when running these models. Optimizations
 applied to matrix multiplication calculations can have a significant impact on
 the throughput of models on GPUs.
 
+To review, a matrix multiplication involves multiplying two matrices, A and B,
+to produce a new matrix C.
+
+![](images/matrix_multiplication_dark.png)
+
+Each value in the output matrix is the dot product of a row from A and a column 
+from B. In a worst case scenario, when multiplying an MxK matrix by a KxN matrix,
+calculating one output value requires loading `2 * K` values and performing `K`
+floating-point multiplications.
+
 MAX already contains leading-edge implementations of matrix multiplications,
 tuned for various hardware architectures. Models built upon MAX Graphs can take
 advantage of these optimized versions for best performance out of the box, but
 it can be instructive to see how the code for a matrix multiplication can be
 step-by-step tuned for GPU hardware.
+
 
 ### Structure of the custom operation
 
@@ -208,11 +219,15 @@ to 4096x4096 look like the following at the time this is written:
 The specific numbers may vary for your GPU, but the general progression should
 be the same.
 
-### Naive matrix multiplication with no optimizations
+### Kernel 1: Naive matrix multiplication with no optimizations
 
 The very first algorithm to start with is a "naive" matrix multiplication, one
 that expresses the problem but makes no attempt at optimizing for how GPUs
-actually work. In Mojo, a basic matrix multiplication looks like the following:
+actually work.
+
+
+
+In Mojo, a basic matrix multiplication looks like the following:
 
 ```mojo
 fn naive_matrix_multiplication[
@@ -249,7 +264,7 @@ you'll see that the naive matrix multiplication is roughly only 2.7% as fast as
 sixth algorithm on our list. There's clearly a lot of upside if this core
 algorithm can be improved.
 
-### Applying memory coalescing
+### Kernel 2: Applying memory coalescing
 
 As one quick optimization that has an outsized impact, global memory accesses can be coalesced by swapping the thread indices for columns and rows:
 
@@ -260,12 +275,44 @@ var row = thread_idx.y
 
 This leads to an almost tenfold jump in benchmarks on A100.
 
-### Reworking to use shared memory tiling
+### Kernel 3: Reworking to use shared memory tiling
 
 Shared memory on the GPU is far faster to access than global memory, so a next
 step is to rework the matrix multiplication to tile the computation and load
-values into shared memory. Within the tile, values are accessed from shared
-memory, significantly reducing the data required from global memory.
+values into shared memory. The input matrices A and B are loaded into shared 
+memory in tiles of size BM x BK and BK x BN, respectively. Within the tile, 
+values are accessed from shared memory, significantly reducing the memory access
+latency in between arithmetic operations.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./images/matrix_multiplication_tiled_dark.png" class="darkModeOnly">
+  <img src="./images/matrix_multiplication_tiled.png" class="lightModeOnly">
+</picture>
+
+This version corresponds to "Kernel 3: Shared Memory Cache-Blocking" in Simon's 
+blog post.
+
+Each thread is still computing a single output value, but it calculates a partial
+result for each tile worth of input data, and accumulates the partial results 
+to calculate the final value. 
+
+The `LayoutTensor` `tile()` method provides a view to one tile of a tensor, and it
+serves multiple purposes here.
+
+The `dst` value is a view of the chunk of the output tensor that the current
+block is responsible for generating. `dst` is a 32x32 chunk of the output
+tensor, but instead of the 32x32 thread blocks used for previous kernels, this
+kernel is invoked with a one-dimensional thread block of 32*32 threads. The
+threads are mapped onto the output values in row-major order, like this:
+
+![](images/tiled_dst_tile_dark.png)
+
+As in the previous example, accessing memory in this order is more efficient for the GPU, since it can coalesce adjacent memory accesses for adjacent threads in the same warp.
+
+This kernel uses the `LayoutTensorBuild` struct (imported as `tb` for brevity) to allocate layout tensors in shared memory to hold cached chunks
+of the input tensors.
+
+The `copy_dram_to_sram_async()` function deserves special note. This takes the place of the CUDA pattern of instructing each thread which value or values to copy to shared memory. The `thread_layout` parameter associates individual threads with values, and the function ensures efficient memory copies.
 
 A full implementation of a tiled matrix multiplication in Mojo looks like the
 following:
