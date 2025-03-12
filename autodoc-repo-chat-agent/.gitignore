@@ -1,0 +1,9 @@
+
+# pixi environments
+.pixi
+*.egg-info
+# magic environments
+.magic
+repo_content.json
+__pycache__
+docs/

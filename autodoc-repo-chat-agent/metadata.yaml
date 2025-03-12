@@ -1,0 +1,19 @@
+version: 1.0
+long_title: "Learn How to Build a GitHub Chat and Auto-Doc Agent with Qwen2.5 and MAX Serve"
+short_title: "GitHub Chat and AutoDoc Agent with Qwen2.5 and MAX Serve"
+author: "Ehsan M. Kermani"
+author_image: "author/ehsan.jpg"
+author_url: "https://www.linkedin.com/in/ehsanmkermani/"
+github_repo: "https://github.com/modular/max-recipes/tree/main/autodoc-repo-chat-agent"
+date: "11-03-2025"
+difficulty: "advanced"
+tags:
+  - agent
+  - qwen
+  - qdrant
+  - embeddings
+
+tasks:
+  - magic run server
+  - magic run agent
+  - magic run clean
