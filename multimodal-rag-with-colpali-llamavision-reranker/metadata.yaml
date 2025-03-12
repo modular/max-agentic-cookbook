@@ -8,7 +8,7 @@ github_repo: "https://github.com/modular/max-recipes/tree/main/multimodal-rag-wi
 date: "27-02-2025"
 difficulty: "intermediate"
 tags:
-  - multi-modal
+  - multimodal
   - rag
   - colpali
   - max-serve
