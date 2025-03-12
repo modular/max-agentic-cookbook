@@ -90,8 +90,8 @@ to produce a new matrix C.
 ![](images/matrix_multiplication_dark.png)
 
 Each value in the output matrix is the dot product of a row from A and a column 
-from B. In a worst case scenario, when multiplying an Mxj matrix by a jxN matrix,
-calculating one output value requires loading `2 * j` values and performing `j`
+from B. In a worst case scenario, when multiplying an MxK matrix by a KxN matrix,
+calculating one output value requires loading `2 * K` values and performing `K`
 floating-point multiplications.
 
 MAX already contains leading-edge implementations of matrix multiplications,
@@ -281,10 +281,13 @@ Shared memory on the GPU is far faster to access than global memory, so a next
 step is to rework the matrix multiplication to tile the computation and load
 values into shared memory. The input matrices A and B are loaded into shared 
 memory in tiles of size BM x BK and BK x BN, respectively. Within the tile, 
-values are accessed from shared memory, significantly reducing the data required 
-from global memory.
+values are accessed from shared memory, significantly reducing the memory access
+latency in between arithmetic operations.
 
-![](images/matrix_multiplication_tiled.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./images/matrix_multiplication_tiled_dark.png">
+  <img src="./images/matrix_multiplication_tiled.png">
+</picture>
 
 This version corresponds to "Kernel 3: Shared Memory Cache-Blocking" in Simon's 
 blog post.
@@ -297,12 +300,12 @@ The `LayoutTensor` `tile()` method provides a view to one tile of a tensor, and 
 serves multiple purposes here.
 
 The `dst` value is a view of the chunk of the output tensor that the current
-block is responsible for generating. `dst` is a 32x32 chunk of the output tensor, 
-but instead of the 32x32 blocks used for previous kernels, this kernel is invoked
-with a one-dimensional block of 32*32 threads. The threads are mapped onto the 
-output values in row-major order, like this:
+block is responsible for generating. `dst` is a 32x32 chunk of the output
+tensor, but instead of the 32x32 thread blocks used for previous kernels, this
+kernel is invoked with a one-dimensional thread block of 32*32 threads. The
+threads are mapped onto the output values in row-major order, like this:
 
-![](images/tiled_dst_tile.png)
+![](images/tiled_dst_tile_dark.png)
 
 As in the previous example, accessing memory in this order is more efficient for the GPU, since it can coalesce adjacent memory accesses for adjacent threads in the same warp.
 
