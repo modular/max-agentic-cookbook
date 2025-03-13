@@ -294,25 +294,25 @@ fn naive_matrix_multiplication[
     BM: Int,
     BN: Int,
 ](
-    a: LayoutTensor[dtype, a_layout],
-    b: LayoutTensor[dtype, b_layout],
-    c: LayoutTensor[dtype, c_layout],
+    a: LayoutTensor[dtype, a_layout, MutableAnyOrigin],
+    b: LayoutTensor[dtype, b_layout, MutableAnyOrigin],
+    c: LayoutTensor[dtype, c_layout, MutableAnyOrigin],
 ):
-    var col = thread_idx.y
-    var row = thread_idx.x
-    var bidx = block_idx.x
-    var bidy = block_idx.y
 
-    var dst = c.tile[BM, BN](bidy, bidx)
+    var M = a.dim(0)
+    var N = b.dim(1)
+    var K = b.dim(0)
+
+    var row = block_dim.x * block_idx.x + thread_idx.x
+    var col = block_dim.y * block_idx.y + thread_idx.y
+
     var dst_reg: c.element_type = 0
 
-    for k in range(b.dim(0)):
-        var a_tile = a.tile[BM, 1](bidy, k)
-        var b_tile = b.tile[1, BN](k, bidx)
+    if row < M and col < N:
+        for k_index in range(K):
+            dst_reg = dst_reg + a[row, k_index] * b[k_index, col]
 
-        dst_reg += a_tile[row, 0] * b_tile[0, col]
-
-    dst[row, col] += dst_reg
+    c[row, col] = dst_reg
 ```
 
 However, if you glance up at the benchmark table in the previous section,
@@ -326,12 +326,12 @@ As one quick optimization that has an outsized impact, global memory accesses
 can be coalesced by swapping the thread indices for columns and rows:
 
 ```mojo
-var col = thread_idx.x
-var row = thread_idx.y
+var row = block_dim.y * block_idx.y + thread_idx.y
+var col = block_dim.x * block_idx.x + thread_idx.x
 ```
 
-This change ensures that adjacent threads are accessing values in the same rows
-of the input matrices, which are contiguous in memory.
+With this change, adjacent threads access values in the same row of the
+input matrices, which are contiguous in memory.
 
 This leads to an almost tenfold jump in benchmarks on A100.
 
@@ -342,7 +342,8 @@ step is to rework the matrix multiplication to tile the computation and load
 values into shared memory. The input matrices A and B are loaded into shared 
 memory in tiles of size BM x BK and BK x BN, respectively. Within the tile, 
 values are accessed from shared memory, significantly reducing the memory access
-latency in between arithmetic operations.
+latency in between arithmetic operations. Since each value in shared memory is used by BK threads (32 in this case), this greatly reduces the number of reads
+from global memory.
 
 <img src="./images/matrix_multiplication_tiled_dark.png" class="darkModeOnly">
 <img src="./images/matrix_multiplication_tiled.png" class="lightModeOnly">
@@ -393,9 +394,9 @@ fn tiled_matrix_multiplication[
     BK: Int,
     NUM_THREADS: Int,
 ](
-    a: LayoutTensor[dtype, a_layout],
-    b: LayoutTensor[dtype, b_layout],
-    c: LayoutTensor[dtype, c_layout],
+    a: LayoutTensor[dtype, a_layout, MutableAnyOrigin],
+    b: LayoutTensor[dtype, b_layout, MutableAnyOrigin],
+    c: LayoutTensor[dtype, c_layout, MutableAnyOrigin],
 ):
     var col = thread_idx.x % BN
     var row = thread_idx.x // BN
@@ -432,6 +433,13 @@ fn tiled_matrix_multiplication[
 
 This improves overall performance by ~30% over the previous optimization.
 
+:::note
+
+While faster on A100, this kernel may not show gains over the previous one
+on all GPUs.
+
+:::
+
 ### Kernel 4: Using shared memory tiling and register tiling
 
 Expanding upon the advantages of using shared memory tiling, the partial
@@ -460,9 +468,9 @@ fn tiled_register_matrix_multiplication[
     TM: Int,
     NUM_THREADS: Int,
 ](
-    a: LayoutTensor[dtype, a_layout],
-    b: LayoutTensor[dtype, b_layout],
-    c: LayoutTensor[dtype, c_layout],
+    a: LayoutTensor[dtype, a_layout, MutableAnyOrigin],
+    b: LayoutTensor[dtype, b_layout, MutableAnyOrigin],
+    c: LayoutTensor[dtype, c_layout, MutableAnyOrigin],
 ):
     var col = thread_idx.x % BN
     var row = thread_idx.x // BN
@@ -511,7 +519,7 @@ This gives a nearly 80% improvement over the previous tiling implementation.
 ### Introducing block tiling
 
 We can further increase the arithmetic intensity of the calculation using a
-2-D block tiling strategy:
+2-D block tiling strategy. In this kernel, each thread is responsible for calculating the output value for an 8x8 tile of the output tensor.
 
 ```mojo
 fn block_tiled_matrix_multiplication[
@@ -526,9 +534,9 @@ fn block_tiled_matrix_multiplication[
     TN: Int,
     NUM_THREADS: Int,
 ](
-    a: LayoutTensor[dtype, a_layout],
-    b: LayoutTensor[dtype, b_layout],
-    c: LayoutTensor[dtype, c_layout],
+    a: LayoutTensor[dtype, a_layout, MutableAnyOrigin],
+    b: LayoutTensor[dtype, b_layout, MutableAnyOrigin],
+    c: LayoutTensor[dtype, c_layout, MutableAnyOrigin],
 ):
     var partition_col = thread_idx.x % (BN // TN)
     var partition_row = thread_idx.x // (BN // TN)
@@ -593,9 +601,9 @@ fn block_tiled_vectorized_matrix_multiplication[
     TN: Int,
     NUM_THREADS: Int,
 ](
-    a: LayoutTensor[dtype, a_layout],
-    b: LayoutTensor[dtype, b_layout],
-    c: LayoutTensor[dtype, c_layout],
+    a: LayoutTensor[dtype, a_layout, MutableAnyOrigin],
+    b: LayoutTensor[dtype, b_layout, MutableAnyOrigin],
+    c: LayoutTensor[dtype, c_layout, MutableAnyOrigin],
 ):
     alias simd_width = simdwidthof[dtype]()
     var partition_col = thread_idx.x % (BN // TN)
@@ -679,9 +687,9 @@ fn tensor_core_matrix_multiplication[
     MMA_N: Int,
     MMA_K: Int,
 ](
-    A: LayoutTensor[dtype, layout_a],
-    B: LayoutTensor[dtype, layout_b],
-    C: LayoutTensor[dtype, layout_c],
+    A: LayoutTensor[dtype, layout_a, MutableAnyOrigin],
+    B: LayoutTensor[dtype, layout_b, MutableAnyOrigin],
+    C: LayoutTensor[dtype, layout_c, MutableAnyOrigin],
 ):
     alias M = C.shape[0]()
     alias N = C.shape[1]()
