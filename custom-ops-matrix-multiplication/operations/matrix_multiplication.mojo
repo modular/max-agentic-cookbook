@@ -70,7 +70,7 @@ fn naive_matrix_multiplication[
     c: LayoutTensor[dtype, c_layout, MutableAnyOrigin],
 ):
     """
-    Tiled GEMM kernel that performs matrix multiplication C = A * B.
+    GEMM kernel that performs matrix multiplication C = A * B.
 
     Parameters:
         dtype: The data type of the input and output tensors.
@@ -85,7 +85,7 @@ fn naive_matrix_multiplication[
         b: The input tensor B.
         c: The output tensor C.
 
-    This kernel uses a simple nested loop structure to compute the matrix
+    This kernel uses a simple for loop structure to compute the matrix
     multiplication. Each thread computes a single element of the output matrix
     C by accumulating the dot product of the corresponding row of A and column
     of B.
@@ -94,30 +94,90 @@ fn naive_matrix_multiplication[
     matrix multiplication, i.e., the number of columns in A equals the number
     of rows in B.
     """
-    # Calculate the column and row indices for each thread.
-    var col = thread_idx.y
-    var row = thread_idx.x
-    var bidx = block_idx.x
-    var bidy = block_idx.y
 
-    # Get the tile of the output matrix C that this thread is
-    # responsible for computing.
-    var dst = c.tile[BM, BN](bidy, bidx)
+    var M = a.dim(0)
+    var N = b.dim(1)
+    var K = b.dim(0)
+
+    # Calculate the column and row indices for each thread.
+    var row = block_dim.x * block_idx.x + thread_idx.x
+    var col = block_dim.y * block_idx.y + thread_idx.y
 
     # Initialize a register to accumulate the result for this thread.
     var dst_reg: c.element_type = 0
 
     # Iterate over the K dimension to compute the dot product.
-    for k in range(b.dim(0)):
-        # Get the corresponding tiles from matrices A and B.
-        var a_tile = a.tile[BM, 1](bidy, k)
-        var b_tile = b.tile[1, BN](k, bidx)
-
-        # Multiply the elements and accumulate the result.
-        dst_reg += a_tile[row, 0] * b_tile[0, col]
+    if row < M and col < N:
+        for k_index in range(K):
+            # Multiply the elements and accumulate the result.
+            dst_reg = dst_reg + a[row, k_index] * b[k_index, col]
 
     # Write the final accumulated result to the output matrix.
-    dst[row, col] += dst_reg
+    c[row, col] = dst_reg
+
+
+# ===-----------------------------------------------------------------------===#
+# Matrix multiplication with global memory coalescing
+# ===-----------------------------------------------------------------------===#
+
+
+fn coalescing_matrix_multiplication[
+    dtype: DType,
+    a_layout: Layout,
+    b_layout: Layout,
+    c_layout: Layout,
+    BM: Int,
+    BN: Int,
+](
+    a: LayoutTensor[dtype, a_layout, MutableAnyOrigin],
+    b: LayoutTensor[dtype, b_layout, MutableAnyOrigin],
+    c: LayoutTensor[dtype, c_layout, MutableAnyOrigin],
+):
+    """
+    GEMM kernel that performs matrix multiplication C = A * B with
+    memory coalescing optimizations.
+
+    Parameters:
+        dtype: The data type of the input and output tensors.
+        a_layout: The layout of the input tensor A.
+        b_layout: The layout of the input tensor B.
+        c_layout: The layout of the output tensor C.
+        BM: The block size in the M dimension.
+        BN: The block size in the N dimension.
+
+    Args:
+        a: The input tensor A.
+        b: The input tensor B.
+        c: The output tensor C.
+
+    This kernel optimizes memory access patterns by ensuring that
+    threads within a warp access contiguous memory locations. 
+
+    Each thread computes a single element of the output matrix C by
+    accumulating the partial results in a register. The final result
+    is then stored back to the output matrix.
+    """
+
+    var M = a.dim(0)
+    var N = b.dim(1)
+    var K = b.dim(0)
+
+    # Calculate the column and row indices for each thread.
+    # Have adjacent threads work on the same row to allow for memory coalescing
+    var row = block_dim.y * block_idx.y + thread_idx.y
+    var col = block_dim.x * block_idx.x + thread_idx.x
+
+    # Initialize a register to accumulate the result for this thread.
+    var dst_reg: c.element_type = 0
+
+    # Iterate over the K dimension to compute the dot product.
+    if row < M and col < N:
+        for k_index in range(K):
+            # Multiply the elements and accumulate the result.
+            dst_reg = dst_reg + a[row, k_index] * b[k_index, col]
+
+    # Write the final accumulated result to the output matrix.
+    c[row, col] = dst_reg
 
 
 # ===-----------------------------------------------------------------------===#
