@@ -187,13 +187,13 @@ detailed by Simon Boehm in
 performant matrix multiplications. Each algorithm is represented by a shortened
 parameter name from the following list:
 
-* **naive**: Naive matrix multiplication with no optimizations.
-* **coalescing**: Applying memory coalescing.
-* **tiled**: Reworking to use shared memory tiling.
-* **tiled_register**: Using shared memory tiling and register tiling.
-* **block_tiled**: Introducing block tiling.
-* **block_tiled_vectorized**: Block tiling with vectorized memory access.
-* **tensor_core**: Using Tensor Cores for matrix multiplication.
+1. **naive**: Naive matrix multiplication with no optimizations.
+2. **coalescing**: Applying memory coalescing.
+3. **tiled**: Reworking to use shared memory tiling.
+4. **tiled_register**: Using shared memory tiling and register tiling.
+5. **block_tiled**: Introducing block tiling.
+6. **block_tiled_vectorized**: Block tiling with vectorized memory access.
+7. **tensor_core**: Using Tensor Cores for matrix multiplication.
 
 The last algorithm is not from Simon's original list, but shows how to access
 Tensor Core hardware using MAX in Mojo.
@@ -516,10 +516,16 @@ fn tiled_register_matrix_multiplication[
 
 This gives a nearly 80% improvement over the previous tiling implementation.
 
-### Introducing block tiling
+### Kernel 5: Introducing block tiling
 
 We can further increase the arithmetic intensity of the calculation using a
-2-D block tiling strategy. In this kernel, each thread is responsible for calculating the output value for an 8x8 tile of the output tensor.
+2-D block tiling strategy. In this kernel, each thread is responsible for calculating the output values for an 8x8 tile of the output tensor.
+
+In addition to caching a block's worth of the A & B matrices in shared memory,
+each thread copies the 8x8 tiles of the input matrices into local storage to
+further reduce memory access latency. Then it uses the
+[`outer_product_acc()`](/mojo/stdlib/layout/math/outer_product_acc/) function to
+calculate and accumulate the outer products of two vectors worth of values.
 
 ```mojo
 fn block_tiled_matrix_multiplication[
@@ -583,10 +589,13 @@ fn block_tiled_matrix_multiplication[
 In the above benchmarks, this provides an additional 50% boost over the
 previous algorithm.
 
-### Block tiling with vectorized memory access
+### Kernel 6: Block tiling with vectorized memory access
 
 As a final optimization, memory accesses can be vectorized to improve memory
-access bandwidth:
+access bandwidth. The only new thing in this kernel is the use of the 
+[`LayoutTensor.vectorize()`](/mojo/stdlib/layout/layout_tensor/LayoutTensor#vectorize)
+method to produce vectorized views of the tensors, allowing multiple values to
+be copied as a single SIMD vector.
 
 ```mojo
 fn block_tiled_vectorized_matrix_multiplication[
@@ -661,7 +670,7 @@ fn block_tiled_vectorized_matrix_multiplication[
 From beginning to end, we've realized more than a 36X improvement in matrix
 multiplication speed within our MAX custom operation!
 
-### Using Tensor Cores for matrix multiplication
+### Kernel 7: Using Tensor Cores for matrix multiplication
 
 Modern GPUs have dedicated hardware units for performing accelerated matrix
 multiplication called Tensor Cores. These Tensor Cores can perform matrix
@@ -781,6 +790,9 @@ showing pathways to get the most speed out of modern GPUs using MAX and Mojo.
 ## Next Steps
 
 * Follow [our tutorial for building a custom operation from scratch](https://docs.modular.com/max/tutorials/build-custom-ops).
+
+* See the [GPU programming](https://docs.modular.com/mojo/manual/gpu/gpu-basics)
+  page in the Mojo manual.
 
 * Explore MAX's [documentation](https://docs.modular.com/max/) for additional
   features. The [`gpu`](https://docs.modular.com/mojo/stdlib/gpu/) module has
