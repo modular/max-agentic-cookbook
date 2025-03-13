@@ -48,7 +48,7 @@ ensure your system meets
 1. Download this recipe using Magic:
 
 ```bash
-magic init custom-ops-ai-applications --from custom-ops-ai-applications@0.0.1
+magic init custom-ops-ai-applications --from custom-ops-ai-applications
 cd custom-ops-ai-applications
 ```
 

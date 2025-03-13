@@ -41,8 +41,7 @@ fn vector_addition[
     """The calculation to perform across the vector on the GPU."""
     tid = block_dim.x * block_idx.x + thread_idx.x
     if tid < length:
-        var result = lhs[tid] + rhs[tid]
-        out[tid] = result
+        out[tid] = lhs[tid] + rhs[tid]
 
 
 def main():

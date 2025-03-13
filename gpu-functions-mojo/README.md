@@ -47,7 +47,7 @@ These examples require a MAX-compatible GPU satisfying
 1. Download this recipe using Magic:
 
     ```bash
-    magic init gpu-functions-mojo --from gpu-functions-mojo@0.0.1
+    magic init gpu-functions-mojo --from gpu-functions-mojo
     cd gpu-functions-mojo
     ```
 
@@ -115,8 +115,7 @@ implement that in MAX.
     ):
         tid = block_dim.x * block_idx.x + thread_idx.x
         if tid < length:
-            var result = lhs[tid] + rhs[tid]
-            out[tid] = result
+            out[tid] = lhs[tid] + rhs[tid]
     ```
 
 1. Obtain a reference to the host (CPU) and accelerator (GPU) devices.
@@ -293,7 +292,7 @@ fn naive_matrix_multiplication(
 
     if row < i and col < k:
         for j_index in range(j):
-            p[row, col] = p[row, col] + m[row, j_index] * n[j_index, col]
+            p[row, col] += m[row, j_index] * n[j_index, col]
 ```
 
 The overall setup and execution of this function are extremely similar to the
