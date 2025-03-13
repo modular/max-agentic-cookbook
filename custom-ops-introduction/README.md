@@ -47,7 +47,7 @@ ensure your system meets
 1. Download this recipe using Magic:
 
 ```bash
-magic init custom-ops-introduction --from custom-ops-introduction@0.0.1
+magic init custom-ops-introduction --from custom-ops-introduction
 cd custom-ops-introduction
 ```
 

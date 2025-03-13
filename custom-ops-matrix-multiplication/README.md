@@ -48,7 +48,7 @@ ensure your system meets
 1. Download this recipe using Magic:
 
 ```bash
-magic init custom-ops-matrix-multiplication --from custom-ops-matrix-multiplication@0.0.1
+magic init custom-ops-matrix-multiplication --from custom-ops-matrix-multiplication
 cd custom-ops-matrix-multiplication
 ```
 

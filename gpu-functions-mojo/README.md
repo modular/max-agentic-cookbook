@@ -47,7 +47,7 @@ These examples require a MAX-compatible GPU satisfying
 1. Download this recipe using Magic:
 
     ```bash
-    magic init gpu-functions-mojo --from gpu-functions-mojo@0.0.1
+    magic init gpu-functions-mojo --from gpu-functions-mojo
     cd gpu-functions-mojo
     ```
 
@@ -92,6 +92,10 @@ popular GPU programming textbook
 
 The final example demonstrates calculating the Mandelbrot set on the GPU.
 
+These examples also work hand-in-hand with
+[our guide to the basics of GPU programming in Mojo](https://docs.modular.com/mojo/manual/gpu/gpu-basics),
+which we recommend reading alongside this recipe.
+
 ### Basic vector addition
 
 The common "hello world" example used for data-parallel programming is the
@@ -115,8 +119,7 @@ implement that in MAX.
     ):
         tid = block_dim.x * block_idx.x + thread_idx.x
         if tid < length:
-            var result = lhs[tid] + rhs[tid]
-            out[tid] = result
+            out[tid] = lhs[tid] + rhs[tid]
     ```
 
 1. Obtain a reference to the host (CPU) and accelerator (GPU) devices.
@@ -293,7 +296,7 @@ fn naive_matrix_multiplication(
 
     if row < i and col < k:
         for j_index in range(j):
-            p[row, col] = p[row, col] + m[row, j_index] * n[j_index, col]
+            p[row, col] += m[row, j_index] * n[j_index, col]
 ```
 
 The overall setup and execution of this function are extremely similar to the
@@ -428,6 +431,8 @@ you've been introduced to the very basics of getting started with GPU
 programming in MAX and Mojo, but there's much more to explore!
 
 ## Next Steps
+
+- Read [our detailed guide to the basics of GPU programming](https://docs.modular.com/mojo/manual/gpu/gpu-basics).
 
 - Try applying GPU programming in MAX for more complex workloads via tutorials
   on the [MAX Graph API](https://docs.modular.com/max/tutorials/get-started-with-max-graph-in-python)

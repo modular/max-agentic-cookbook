@@ -47,7 +47,7 @@ fn naive_matrix_multiplication[
 
     if row < i and col < k:
         for j_index in range(j):
-            p[row, col] = p[row, col] + m[row, j_index] * n[j_index, col]
+            p[row, col] += m[row, j_index] * n[j_index, col]
 
 
 def main():
