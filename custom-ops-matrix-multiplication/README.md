@@ -87,7 +87,9 @@ the throughput of models on GPUs.
 To review, a matrix multiplication involves multiplying two matrices, A and B,
 to produce a new matrix C.
 
-![](images/matrix_multiplication_dark.png)
+<img src="./images/matrix_multiplication_dark.png" class="darkModeOnly">
+<img src="./images/matrix_multiplication.png" class="lightModeOnly">
+
 
 Each value in the output matrix is the dot product of a row from A and a column 
 from B. In a worst case scenario, when multiplying an MxK matrix by a KxN matrix,
@@ -166,13 +168,13 @@ is specified by the `algorithm` compile-time parameter.
 
 The custom operation itself is defined in Mojo within the
 `operations/matrix_multiplication.mojo` file. The `MatrixMultiplication` struct
-hosts all of the setup code for taking in the matrix tensors, branch execution
-based on whether this is running on CPU or GPU, and then select and run a
-specific algorithm. Mojo supports compile-time specialization of code based on 
-parameters like target hardware, and that is also extended here to
-user-supplied algorithm choice. Compiling only the code paths used for a
-particular piece of hardware avoids run-time branching and allows full
-utilization of an accelerator or CPU.
+hosts all of the setup code for taking in the matrix tensors, branching
+execution based on whether the operation is running on CPU or GPU, and then
+selecting and running a specific algorithm. Mojo supports compile-time
+specialization of code based on parameters like target hardware, and that is
+also extended here to user-supplied algorithm choice. Compiling only the code
+paths used for a particular piece of hardware avoids run-time branching and
+allows full utilization of an accelerator or CPU.
 
 Each algorithm is contained within its own function in
 `operations/matrix_multiplication.mojo`. Next, we'll discuss how each works.
@@ -219,13 +221,67 @@ to 4096x4096 look like the following at the time this is written:
 The specific numbers may vary for your GPU, but the general progression should
 be the same.
 
+### Layouts and `LayoutTensor`
+
+The `matrix_multiplication` custom operation uses
+[layouts](/mojo/stdlib/layout/) and
+[`LayoutTensor`](/mojo/stdlib/layout/layout_tensor/LayoutTensor) to represent the
+input and output matrices, so it's helpful to understand a little bit about
+these types before getting started.
+
+A _layout_ represents a mapping from a set of logical coordinates to a single,
+one-dimensional coordinate—such as an array index or memory offset. For example,
+a layout could represent a 2x6, row-major layout:
+
+```mojo
+my_layout = Layout.row_major(2, 6)
+print_layout(my_layout)
+```
+
+
+```plaintext
+       0    1    2    3    4    5
+    +----+----+----+----+----+----+
+ 0  |  0 |  1 |  2 |  3 |  4 |  5 |
+    +----+----+----+----+----+----+
+ 1  |  6 |  7 |  8 |  9 | 10 | 11 |
+    +----+----+----+----+----+----+
+```
+
+A `LayoutTensor` consists of a layout and a pointer to memory. For example,
+if you create a `LayoutTensor` using the layout shown above, the value at
+(1, 1) is stored at memory offset 7.
+
+A layout tensor can point to an existing buffer, or you can allocate memory
+to store the tensor data. One `LayoutTensor` you'll see a lot in
+the following sections is `tile()`, which returns a new `LayoutTensor` which is 
+a subset of the original, but points to the same underlying data.
+
+For example, you can extract a 2x2 tile of the above tensor:
+
+```mojo
+tile = my_tensor.tile[2, 2](0, 1)
+```
+
+The layout of the extracted tile looks like this:
+
+```plaintext
+       0    1   
+    +----+----+
+ 0  |  2 |  3 |
+    +----+----+
+ 1  |  8 |  9 |
+    +----+----+
+```
+
+This just scratches the surface of layouts and `LayoutTensor`, which provide
+powerful tools for manipulating data and writing parallel algorithms.
+
 ### Kernel 1: Naive matrix multiplication with no optimizations
 
 The very first algorithm to start with is a "naive" matrix multiplication, one
 that expresses the problem but makes no attempt at optimizing for how GPUs
 actually work.
-
-
 
 In Mojo, a basic matrix multiplication looks like the following:
 
@@ -266,12 +322,16 @@ algorithm can be improved.
 
 ### Kernel 2: Applying memory coalescing
 
-As one quick optimization that has an outsized impact, global memory accesses can be coalesced by swapping the thread indices for columns and rows:
+As one quick optimization that has an outsized impact, global memory accesses
+can be coalesced by swapping the thread indices for columns and rows:
 
 ```mojo
 var col = thread_idx.x
 var row = thread_idx.y
 ```
+
+This change ensures that adjacent threads are accessing values in the same rows
+of the input matrices, which are contiguous in memory.
 
 This leads to an almost tenfold jump in benchmarks on A100.
 
@@ -284,10 +344,8 @@ memory in tiles of size BM x BK and BK x BN, respectively. Within the tile,
 values are accessed from shared memory, significantly reducing the memory access
 latency in between arithmetic operations.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./images/matrix_multiplication_tiled_dark.png" class="darkModeOnly">
-  <img src="./images/matrix_multiplication_tiled.png" class="lightModeOnly">
-</picture>
+<img src="./images/matrix_multiplication_tiled_dark.png" class="darkModeOnly">
+<img src="./images/matrix_multiplication_tiled.png" class="lightModeOnly">
 
 This version corresponds to "Kernel 3: Shared Memory Cache-Blocking" in Simon's 
 blog post.
@@ -305,14 +363,21 @@ tensor, but instead of the 32x32 thread blocks used for previous kernels, this
 kernel is invoked with a one-dimensional thread block of 32*32 threads. The
 threads are mapped onto the output values in row-major order, like this:
 
-![](images/tiled_dst_tile_dark.png)
+<img src="./images/tiled_dst_tile_dark.png" class="darkModeOnly">
+<img src="./images/tiled_dst_tile.png" class="lightModeOnly">
 
-As in the previous example, accessing memory in this order is more efficient for the GPU, since it can coalesce adjacent memory accesses for adjacent threads in the same warp.
+As in the previous example, accessing memory in this order is more efficient for
+the GPU, since it can coalesce adjacent memory accesses for adjacent threads in
+the same warp.
 
-This kernel uses the `LayoutTensorBuild` struct (imported as `tb` for brevity) to allocate layout tensors in shared memory to hold cached chunks
-of the input tensors.
+This kernel uses the `LayoutTensorBuild` struct (imported as `tb` for brevity)
+to allocate layout tensors in shared memory to hold cached chunks of the input
+tensors.
 
-The `copy_dram_to_sram_async()` function deserves special note. This takes the place of the CUDA pattern of instructing each thread which value or values to copy to shared memory. The `thread_layout` parameter associates individual threads with values, and the function ensures efficient memory copies.
+The `copy_dram_to_sram_async()` function deserves special note. This takes the
+place of the CUDA pattern of instructing each thread which value or values to
+copy to shared memory. The `thread_layout` parameter associates individual
+threads with values, and the function ensures efficient memory copies.
 
 A full implementation of a tiled matrix multiplication in Mojo looks like the
 following:
@@ -367,11 +432,20 @@ fn tiled_matrix_multiplication[
 
 This improves overall performance by ~30% over the previous optimization.
 
-### Using shared memory tiling and register tiling
+### Kernel 4: Using shared memory tiling and register tiling
 
 Expanding upon the advantages of using shared memory tiling, the partial
 results can be accumulated in tiled registers and then the final results
-transferred from there to global memory. Modifying the previous tiling to use
+transferred from there to global memory.
+
+In this version, each thread is responsible for calculating multiple values
+of C, further reducing the memory bandwidth required for each calculation.
+Specifically, each thread calculates a column of 8 results:
+
+<img src="./images/matrix_multiplication_1D_blocktiled_dark.png" class="darkModeOnly">
+<img src="./images/matrix_multiplication_1D_blocktiled.png" class="lightModeOnly">
+
+Modifying the previous tiling to use
 tiled registers looks like:
 
 ```mojo
