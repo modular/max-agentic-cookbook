@@ -92,6 +92,10 @@ popular GPU programming textbook
 
 The final example demonstrates calculating the Mandelbrot set on the GPU.
 
+These examples also work hand-in-hand with
+[our guide to the basics of GPU programming in Mojo](https://docs.modular.com/mojo/manual/gpu/gpu-basics),
+which we recommend reading alongside this recipe.
+
 ### Basic vector addition
 
 The common "hello world" example used for data-parallel programming is the
@@ -427,6 +431,8 @@ you've been introduced to the very basics of getting started with GPU
 programming in MAX and Mojo, but there's much more to explore!
 
 ## Next Steps
+
+- Read [our detailed guide to the basics of GPU programming](https://docs.modular.com/mojo/manual/gpu/gpu-basics).
 
 - Try applying GPU programming in MAX for more complex workloads via tutorials
   on the [MAX Graph API](https://docs.modular.com/max/tutorials/get-started-with-max-graph-in-python)
