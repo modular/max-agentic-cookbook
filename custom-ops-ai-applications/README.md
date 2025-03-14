@@ -6,7 +6,7 @@ In this recipe, we will cover:
 * Implementing FlashAttention-2 as a fused custom operation.
 * Accessing GPU hardware features, like Tensor Cores, from MAX.
 
-We'll walk through two examples that 
+We'll walk through two examples that
 
 * illustrate real-world applications of custom MAX Graph operations in AI
   models,
