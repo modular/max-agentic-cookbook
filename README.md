@@ -17,6 +17,7 @@ The recipes are designed to be practical, reusable examples that you can copy, c
 | [👁️ Multimodal RAG](./multimodal-rag-with-colpali-llamavision-reranker/) | 🔍 Multimodal RAG with Colpali embedding, Llama3.2-Vision, Qdrant, Reranker and MAX Serve |
 | [⚡ Custom ops AI Applications](./custom-ops-ai-applications/) | 🚀 Top-K token sampler and Flash Attention as fused custom op on GPU (Mojo 🔥 + Python 🐍) |
 | [💻 GPU Functions](./gpu-functions-mojo/) | 🔥 Writing thread-parallel GPU functions and dispatch using MAX Driver API. C -> Mojo patterns |
+| [🌐 Open WebUI and MAX Serve](./max-serve-open-webui/) | 🖥️ Seamlessly integrate Open WebUI with MAX Serve |
 
 ## Getting started
 
