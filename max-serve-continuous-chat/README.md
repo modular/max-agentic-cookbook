@@ -37,13 +37,6 @@ You'll need:
 * A valid [Hugging Face token](https://huggingface.co/settings/tokens) for accessing Llama 3
 * Access to [meta-llama/Llama-3.1-8B-Instruct](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) model
 
-Set up your environment variables:
-
-```bash
-cp .env.sample .env
-echo "HUGGING_FACE_HUB_TOKEN=your_hf_token" > .env
-```
-
 ### GPU requirements
 
 For running the app on GPU, ensure your system meets these GPU requirements:
@@ -59,26 +52,33 @@ For running the app on GPU, ensure your system meets these GPU requirements:
 
 1. Download the code for this recipe using git:
 
-```bash
-git clone https://github.com/modular/max-recipes.git
-cd max-recipes/max-serve-continuous-chat
-```
+    ```bash
+    magic init max-serve-continuous-chat --from modular/max-recipes/max-serve-continuous-chat
+    cd max-serve-continuous-chat
+    ```
 
-2. Running the chat app:
+2. Set up your environment variables:
 
-```bash
-magic run app
-```
+    ```bash
+    cp .env.sample .env
+    echo "HUGGING_FACE_HUB_TOKEN=your_hf_token" > .env
+    ```
 
-Once the Llama3 server and UI server are running, open <http://localhost:7860> to view the chat interface.
+3. Run the chat app:
 
-<img src="chat.png" alt="Chat interface" width="100%" style="max-width: 1024px;">
+    ```bash
+    magic run app
+    ```
 
-3. And once done with the app, to clean up the resources run:
+    Once the Llama3 server and UI server are running, open <http://localhost:7860> to view the chat interface.
 
-```bash
-magic run clean
-```
+    <img src="chat.png" alt="Chat interface" width="100%" style="max-width: 1024px;">
+
+4. And once done with the app, to clean up the resources run:
+
+    ```bash
+    magic run clean
+    ```
 
 ### (Optional) Attaching to a remote endpoint
 
@@ -89,30 +89,30 @@ or on [Kubernetes](https://docs.modular.com/max/tutorials/deploy-max-serve-on-ku
 
 1. Build the UI docker image for your platform separately:
 
-```bash
-# required only once
-docker buildx create --use --name mybuilder
+    ```bash
+    # required only once
+    docker buildx create --use --name mybuilder
 
-# Intel, AMD
-docker buildx bake --load --set "ui.platform=linux/amd64"
-# OR for ARM such as Apple M-series
-docker buildx bake --load --set "ui.platform=linux/arm64"
-```
+    # Intel, AMD
+    docker buildx bake --load --set "ui.platform=linux/amd64"
+    # OR for ARM such as Apple M-series
+    docker buildx bake --load --set "ui.platform=linux/arm64"
+    ```
 
 2. Run the UI docker image with your `BASE_URL` to the available endpoint:
 
-```bash
-docker run -p 7860:7860 \
-  -e "BASE_URL=http://<PUBLIC_IP>/v1" \
-  -e "HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}" \
-  llama3-chat-ui
-```
+    ```bash
+    docker run -p 7860:7860 \
+    -e "BASE_URL=http://<PUBLIC_IP>/v1" \
+    -e "HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}" \
+    llama3-chat-ui
+    ```
 
 3. For clean up, make sure to remove the builder too:
 
-```bash
-docker buildx rm mybuilder
-```
+    ```bash
+    docker buildx rm mybuilder
+    ```
 
 ## Features of Llama 3 chat app
 
@@ -170,7 +170,6 @@ How it works:
 To maintain the conversation's relevance, the latest user and system messages are always included. Older messages are trimmed dynamically when the token count exceeds the window size.
 
 ```python
-
 if chat_history:
     for user_msg, bot_msg in reversed(chat_history):
         new_messages = [
@@ -204,7 +203,6 @@ The UI logic is included in ui.py file and is central to the continuous chat int
 Gradio provides a user-friendly interface, making interactions intuitive and accessible.
 
 ```python
-
 def create_interface(config: ChatConfig, client, system_prompt, concurrency_limit: int = 1):
     with gr.Blocks(theme="soft") as iface:
         gr.Markdown("# Chat with Llama 3 model\n\nPowered by Modular [MAX](https://docs.modular.com/max/) 🚀")
@@ -247,7 +245,6 @@ Key components:
 The interface communicates with the Llama 3 model via the MAX Serve API to fetch chat completions.
 
 ```python
-
 async def respond(message, chat_history, config: ChatConfig, client, system_prompt):
     chat_history = chat_history or []
 
@@ -282,7 +279,6 @@ async def respond(message, chat_history, config: ChatConfig, client, system_prom
 The `wait_for_healthy` function ensures the MAX Serve API is ready before processing requests, retrying until the server is live.
 
 ```python
-
 from tenacity import (
     retry,
     stop_after_attempt,

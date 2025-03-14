@@ -9,6 +9,7 @@ This recipe demonstrates how to build a secure code execution assistant that com
 * [MAX Serve](https://docs.modular.com/max/serve/) for efficient model serving
 
 The assistant provides:
+
 1. **Secure code execution** in isolated sandboxes
 2. **Interactive Python REPL** with natural language interface
 3. **Beautiful output formatting** with syntax highlighting
@@ -21,31 +22,34 @@ Please make sure your system meets our [system requirements](https://docs.modula
 ### Important: API keys and requirements
 
 1. **E2B API Key**: Required for sandbox access
-   - Sign up at [e2b.dev](https://e2b.dev/)
-   - Get your API key from the dashboard
-   - Add to `.env` file: `E2B_API_KEY=your_key_here`
+   * Sign up at [e2b.dev](https://e2b.dev/)
+   * Get your API key from the dashboard
+   * Add to `.env` file: `E2B_API_KEY=your_key_here`
 
 2. **Hugging Face Token** (optional): For faster model downloads
-   - Get token from [Hugging Face](https://huggingface.co/settings/tokens)
-   - Add to `.env` file: `HF_TOKEN=your_token_here`
+   * Get token from [Hugging Face](https://huggingface.co/settings/tokens)
+   * Add to `.env` file: `HF_TOKEN=your_token_here`
 
 ### Installation
 
 1. Install the `magic` CLI:
-```bash
-curl -ssL https://magic.modular.com/ | bash
-```
+
+    ```bash
+    curl -ssL https://magic.modular.com/ | bash
+    ```
 
 2. Clone the repository:
-```bash
-git clone https://github.com/modular/max-recipes.git
-cd max-recipes/code-execution-sandbox-agent-with-e2b
-```
+
+    ```bash
+    magic init code-execution-sandbox-agent-with-e2b --from modular/max-recipes/code-execution-sandbox-agent-with-e2b
+    cd code-execution-sandbox-agent-with-e2b
+    ```
 
 3. Copy the environment template:
-```bash
-cp .env.example .env
-```
+
+    ```bash
+    cp .env.example .env
+    ```
 
 4. Add your API keys to `.env`
 
@@ -56,6 +60,7 @@ cp .env.example .env
     ```bash
     magic run hello
     ```
+
     This command runs a simple test to verify your E2B sandbox setup. You'll see a "hello world" output and a list of available files in the sandbox environment, confirming that code execution is working properly.
 
 1. Start the LLM server:
@@ -63,6 +68,7 @@ cp .env.example .env
     ```bash
     magic run server
     ```
+
     This launches the Llama model with MAX Serve, enabling structured output parsing for reliable code generation. The server runs locally on port 8010 and uses the `--enable-structured-output` flag for OpenAI-compatible function calling.
 
 2. Run the interactive agent:
@@ -70,16 +76,18 @@ cp .env.example .env
     ```bash
     magic run agent
     ```
+
     This starts the interactive Python assistant. You can now type natural language queries like:
-    - "calculate factorial of 5"
-    - "count how many r's are in strawberry"
-    - "generate fibonacci sequence up to 10 numbers"
+    * "calculate factorial of 5"
+    * "count how many r's are in strawberry"
+    * "generate fibonacci sequence up to 10 numbers"
 
 The demo below shows the agent in action, demonstrating:
-- Natural language code generation
-- Secure execution in the E2B sandbox
-- Beautiful output formatting with syntax highlighting
-- Clear explanations of the code and results
+
+* Natural language code generation
+* Secure execution in the E2B sandbox
+* Beautiful output formatting with syntax highlighting
+* Clear explanations of the code and results
 
 <img src="code-execution-agent.gif" alt="Demo agent" width="100%" style="max-width: 800px;">
 
@@ -110,29 +118,29 @@ graph TB
 Here's how the components work together:
 
 1. **Rich CLI Interface**:
-   - Provides a beautiful terminal interface
-   - Handles user input in natural language
-   - Displays code, results, and explanations in formatted panels
+   * Provides a beautiful terminal interface
+   * Handles user input in natural language
+   * Displays code, results, and explanations in formatted panels
 
 2. **Llama Model**:
-   - Processes natural language queries
-   - Generates Python code using structured output format
-   - Runs locally via MAX Serve with function calling enabled
+   * Processes natural language queries
+   * Generates Python code using structured output format
+   * Runs locally via MAX Serve with function calling enabled
 
 3. **Structured Output Parser**:
-   - Validates LLM responses using Pydantic models
-   - Ensures code blocks are properly formatted
-   - Handles error cases gracefully
+   * Validates LLM responses using Pydantic models
+   * Ensures code blocks are properly formatted
+   * Handles error cases gracefully
 
 4. **Code Executor**:
-   - Prepares code for execution
-   - Manages the execution flow
-   - Captures output and error states
+   * Prepares code for execution
+   * Manages the execution flow
+   * Captures output and error states
 
 5. **E2B Sandbox**:
-   - Provides secure, isolated execution environment
-   - Handles file system operations
-   - Manages resource limits and timeouts
+   * Provides secure, isolated execution environment
+   * Handles file system operations
+   * Manages resource limits and timeouts
 
 The flow ensures secure and reliable code execution while providing a seamless user experience with clear feedback at each step.
 
@@ -159,6 +167,7 @@ files = sbx.files.list("/")
 ```
 
 Key features:
+
 1. Sandbox initialization with automatic cleanup
 2. Code execution in isolated environment
 3. Access to execution logs and outputs
@@ -169,6 +178,7 @@ Key features:
 The agent implements a complete code execution assistant with these additional key features:
 
 1. **Environment Configuration**:
+
 ```python
 LLM_SERVER_URL = os.getenv("LLM_SERVER_URL", "http://localhost:8010/v1")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "local")
@@ -176,6 +186,7 @@ MODEL = os.getenv("MODEL", "modularai/Llama-3.1-8B-Instruct-GGUF")
 ```
 
 2. **Tool Definition for Function Calling**:
+
 ```python
 tools = [{
     "type": "function",
@@ -188,6 +199,7 @@ tools = [{
 ```
 
 3. **Enhanced Code Execution with Rich Output**:
+
 ```python
 def execute_python(blocks: List[CodeBlock]) -> str:
     with Sandbox() as sandbox:
@@ -213,11 +225,12 @@ def execute_python(blocks: List[CodeBlock]) -> str:
 ```
 
 4. **Three-Step Output Process**:
-   - Code Display: Shows the code to be executed with syntax highlighting
-   - Result Display: Shows the execution output in a green panel
-   - Explanation: Provides a natural language explanation of the code and its result
+   * Code Display: Shows the code to be executed with syntax highlighting
+   * Result Display: Shows the execution output in a green panel
+   * Explanation: Provides a natural language explanation of the code and its result
 
 5. **Interactive Session Management**:
+
 ```python
 def main():
     console.print(Panel("Interactive Python Assistant (type 'exit' to quit)",
@@ -232,6 +245,7 @@ def main():
 ```
 
 6. **Explanation Generation**:
+
 ```python
 explanation_messages = [
     {
@@ -250,6 +264,7 @@ explanation_messages = [
 The agent uses OpenAI's structured output format to ensure reliable code generation and execution. Here's how it works:
 
 1. **Structured Data Models**:
+
 ```python
 from pydantic import BaseModel
 from typing import List
@@ -264,6 +279,7 @@ class CodeExecution(BaseModel):
 ```
 
 2. **Tool Definition**:
+
 ```python
 # Define the function calling schema
 tools = [{
@@ -277,6 +293,7 @@ tools = [{
 ```
 
 3. **LLM Client Setup**:
+
 ```python
 from openai import OpenAI
 
@@ -288,6 +305,7 @@ client = OpenAI(
 ```
 
 4. **Message Construction**:
+
 ```python
 messages = [
     {
@@ -309,6 +327,7 @@ Important rules:
 ```
 
 5. **Structured Response Parsing**:
+
 ```python
 try:
     # Parse the response into structured format
@@ -328,6 +347,7 @@ except Exception as e:
 ```
 
 6. **Example Response Structure**:
+
 ```json
 {
     "code_blocks": [
@@ -340,6 +360,7 @@ except Exception as e:
 ```
 
 7. **Explanation Generation**:
+
 ```python
 # Generate explanation using vanilla completion
 explanation_messages = [
@@ -368,15 +389,16 @@ Key benefits of this structured approach:
 3. **Consistent Output**: Guaranteed code block structure
 4. **Error Handling**: Clear error messages for parsing failures
 5. **Separation of Concerns**:
-   - Code generation with structured output
-   - Code execution in sandbox
-   - Explanation generation with free-form text
+   * Code generation with structured output
+   * Code execution in sandbox
+   * Explanation generation with free-form text
 
 This structured approach ensures that:
-- The LLM always generates valid, executable code
-- The response can be reliably parsed and executed
-- Error handling is consistent and informative
-- The execution flow is predictable and maintainable
+
+* The LLM always generates valid, executable code
+* The response can be reliably parsed and executed
+* Error handling is consistent and informative
+* The execution flow is predictable and maintainable
 
 ### Example interactions
 
@@ -387,36 +409,39 @@ You can interact with the agent using natural language queries like:
 ### Key components
 
 1. **System Prompt**:
-   - Ensures complete, executable code
-   - Requires necessary imports
-   - Mandates print statements for output
-   - Enforces variable definition
+   * Ensures complete, executable code
+   * Requires necessary imports
+   * Mandates print statements for output
+   * Enforces variable definition
 
 2. **Code Execution Flow**:
-   - Code generation by LLM
-   - Parsing into structured blocks
-   - Secure execution in sandbox
-   - Result capture and formatting
-   - Explanation generation
+   * Code generation by LLM
+   * Parsing into structured blocks
+   * Secure execution in sandbox
+   * Result capture and formatting
+   * Explanation generation
 
 3. **Error Handling**:
-   - Sandbox execution errors
-   - JSON parsing errors
-   - LLM response validation
+   * Sandbox execution errors
+   * JSON parsing errors
+   * LLM response validation
 
 ## Customization options
 
 1. **Model Selection**:
+
 ```python
 MODEL = os.getenv("MODEL", "modularai/Llama-3.1-8B-Instruct-GGUF")
 ```
 
 2. **Sandbox Configuration**:
+
 ```python
 Sandbox(timeout=300)  # Configure timeout
 ```
 
 3. **Output Formatting**:
+
 ```python
 # Customize Rich themes and styles
 console.print(Panel(..., theme="custom"))
@@ -425,27 +450,27 @@ console.print(Panel(..., theme="custom"))
 ## Troubleshooting
 
 1. **Sandbox Issues**
-   - Error: "Failed to create sandbox"
-   - Solution: Check E2B API key
-   - Verify network connection
+   * Error: "Failed to create sandbox"
+   * Solution: Check E2B API key
+   * Verify network connection
 
 2. **LLM Issues**
-   - Error: "Failed to parse response"
-   - Solution: Check server is running
-   - Verify structured output format
+   * Error: "Failed to parse response"
+   * Solution: Check server is running
+   * Verify structured output format
 
 3. **Code Execution Issues**
-   - Error: "No output"
-   - Solution: Check print statements
-   - Verify code completeness
+   * Error: "No output"
+   * Solution: Check print statements
+   * Verify code completeness
 
 ## Next steps
 
 1. **Enhance the System**
-   - Add file upload capabilities
-   - Implement persistent sessions
-   - Add support for more languages
-   - Implement caching for responses
+   * Add file upload capabilities
+   * Implement persistent sessions
+   * Add support for more languages
+   * Implement caching for responses
 
 2. **Deploy to Production**
    * Deploy MAX Serve on [AWS, GCP or Azure](https://docs.modular.com/max/tutorials/max-serve-local-to-cloud/)

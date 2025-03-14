@@ -37,13 +37,13 @@ cp .env.sample .env
 echo "HUGGING_FACE_HUB_TOKEN=your_hf_token" > .env
 ```
 
-## Get the code
+## Quick start
 
 Download the code for this recipe using git:
 
 ```bash
-git clone https://github.com/modular/max-recipes.git
-cd max-recipes/max-serve-openai-function-calling
+magic init max-serve-openai-function-calling --from modular/max-recipes/max-serve-openai-function-calling
+cd max-serve-openai-function-calling
 ```
 
 ## What is LLM function calling and why is it useful?
@@ -65,16 +65,30 @@ Function calling allows LLMs to enhance their responses by:
 
 ## Implementing function calling with OpenAI
 
-First things first, you can run the MAX Serve easily on both CPU and GPU as follows:
-
-```bash
-magic global install max-pipelines
-max-serve serve --huggingface-repo-id=modularai/Llama-3.1-8B-Instruct-GGUF
-```
-
 Then to illustrate function calling, let's start with a simple example where an AI retrieves the weather using a mock function.
 
-### `single_function_call.py`
+First run the server on port 8077 using the `magic` CLI:
+
+```bash
+magic run server
+```
+
+**Note** that the very first compilation of the model can take a few minutes. The next invocations will be much faster.
+
+Once the server is ready, in a separate terminal run your first function calling with:
+
+```bash
+magic run single_function_call
+```
+
+which outputs:
+
+```txt
+User message: What's the weather like in San Francisco?
+Weather response: The weather in San Francisco is sunny with a temperature of 72°F
+```
+
+### Closer look into `single_function_call.py`
 
 ```python
 from openai import OpenAI
@@ -126,21 +140,6 @@ def main():
 if __name__ == "__main__":
     main()
 ```
-
-Run the example with the following with runs MAX Serve as well:
-
-```bash
-magic run single_function_call
-```
-
-which outputs:
-
-```txt
-User message: What's the weather like in San Francisco?
-Weather response: The weather in San Francisco is sunny with a temperature of 72°F
-```
-
-**Note** that the very first compilation of the model can take a few minutes. The next invocations will be much faster.
 
 ### Understanding the function calling format
 
@@ -195,7 +194,23 @@ This automates API calls within conversational AI agents, allowing for structure
 
 For more complex applications, we can introduce multiple function calls. Below is an example that allows the LLM to fetch both weather and air quality data.
 
-### `multi_function_calls.py`
+Now, in another terminal run
+
+```bash
+magic run multi_function_calls
+```
+
+which outputs:
+
+```txt
+User message: What's the weather like in San Francisco?
+Weather response: The weather in San Francisco is sunny with a temperature of 72°F
+
+User message: What's the air quality like in San Francisco?
+Air quality response: The air quality in San Francisco is good with a PM2.5 of 10µg/m³
+```
+
+### Closer look into `multi_function_calls.py`
 
 Let's include another mock function as follows:
 
@@ -252,22 +267,6 @@ TOOLS = [
 
 The LLM can now determine when to call `get_weather` or `get_air_quality` based on user input. This makes it possible to automate multiple API calls dynamically, allowing AI assistants to retrieve data from various sources.
 
-Run the example via:
-
-```bash
-magic run multi_function_calls
-```
-
-which outputs:
-
-```txt
-User message: What's the weather like in San Francisco?
-Weather response: The weather in San Francisco is sunny with a temperature of 72°F
-
-User message: What's the air quality like in San Francisco?
-Air quality response: The air quality in San Francisco is good with a PM2.5 of 10µg/m³
-```
-
 ## Deploying with MAX Serve
 
 To better simulate the real use case, we use `app.py`, a FastAPI-based service that integrates function calling with a real API.
@@ -286,7 +285,6 @@ WEATHERAPI_API_KEY=your_api_key_here
 Here is the code for the FastAPI weather app:
 
 ```python
-
 class ChatRequest(BaseModel):
     message: str
 
@@ -297,39 +295,43 @@ class ChatResponse(BaseModel):
     data: Optional[Dict[str, Any]] = None
 
 
-def get_weather(city: str) -> Dict[str, Any]:
+async def get_weather(city: str) -> Dict[str, Any]:
     """Get weather data for a city"""
-    url = f"http://api.weatherapi.com/v1/current.json?key={WEATHER_API_KEY}&q={city}"
-    response = requests.get(url)
-    if response.status_code != 200:
-        raise HTTPException(
-            status_code=response.status_code, detail="Weather API error"
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"http://api.weatherapi.com/v1/current.json?key={WEATHER_API_KEY}&q={city}"
         )
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code, detail="Weather API error"
+            )
 
-    data = response.json()
-    return {
-        "location": data["location"]["name"],
-        "temperature": data["current"]["temp_c"],
-        "condition": data["current"]["condition"]["text"],
-    }
+        data = response.json()
+        return {
+            "location": data["location"]["name"],
+            "temperature": data["current"]["temp_c"],
+            "condition": data["current"]["condition"]["text"],
+        }
 
 
-def get_air_quality(city: str) -> Dict[str, Any]:
+async def get_air_quality(city: str) -> Dict[str, Any]:
     """Get air quality data for a city"""
-    url = f"http://api.weatherapi.com/v1/current.json?key={WEATHER_API_KEY}&q={city}&aqi=yes"
-    response = requests.get(url)
-    if response.status_code != 200:
-        raise HTTPException(
-            status_code=response.status_code, detail="Air quality API error"
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"http://api.weatherapi.com/v1/current.json?key={WEATHER_API_KEY}&q={city}&aqi=yes"
         )
+        if response.status_code != 200:
+            raise HTTPException(
+                status_code=response.status_code, detail="Air quality API error"
+            )
 
-    data = response.json()
-    aqi = data["current"].get("air_quality", {})
-    return {
-        "location": data["location"]["name"],
-        "aqi": aqi.get("us-epa-index", 0),
-        "pm2_5": aqi.get("pm2_5", 0),
-    }
+        data = response.json()
+        aqi = data["current"].get("air_quality", {})
+        return {
+            "location": data["location"]["name"],
+            "aqi": aqi.get("us-epa-index", 0),
+            "pm2_5": aqi.get("pm2_5", 0),
+        }
 
 
 TOOLS = [
@@ -370,9 +372,12 @@ def health_check():
 
 
 @app.post("/api/chat", response_model=ChatResponse)
-def chat(request: ChatRequest):
+async def chat(request: ChatRequest):
     try:
-        response = client.chat.completions.create(
+        logger.info("Received request: %s", request.message)
+
+        logger.info("Calling LLM...")
+        response = await client.chat.completions.create(
             model="modularai/Llama-3.1-8B-Instruct-GGUF",
             messages=[
                 {
@@ -384,21 +389,24 @@ def chat(request: ChatRequest):
             tools=TOOLS,
             tool_choice="auto",
         )
+        logger.info("LLM response received")
 
         message = response.choices[0].message
 
         if message.tool_calls:
+            logger.info("Processing tool call...")
             tool_call = message.tool_calls[0]
             function_name = tool_call.function.name
+            logger.info("Function called: %s", function_name)
             function_args = eval(tool_call.function.arguments)
 
             if function_name == "get_weather":
-                data = get_weather(function_args["city"])
+                data = await get_weather(function_args["city"])
                 return ChatResponse(
                     type="weather", message="Here's the weather data", data=data
                 )
             elif function_name == "get_air_quality":
-                data = get_air_quality(function_args["city"])
+                data = await get_air_quality(function_args["city"])
                 return ChatResponse(
                     type="air_quality", message="Here's the air quality data", data=data
                 )
@@ -417,10 +425,10 @@ We deploy it locally using:
 magic run app
 ```
 
-This will run MAX Serve on port `8000` and our FastAPI application on port `8001` which we can test with:
+This will run our FastAPI application on port `8078` which we can test with:
 
 ```bash
-curl -X POST http://localhost:8001/api/chat \
+curl -X POST http://localhost:8078/api/chat \
   -H "Content-Type: application/json" \
   -d '{"message": "What is the weather in Toronto?"}'
 ```
@@ -442,7 +450,7 @@ the expected output is:
 and as another example testing the air quality function calling
 
 ```bash
-curl -X POST http://localhost:8001/api/chat \
+curl -X POST http://localhost:8078/api/chat \
   -H "Content-Type: application/json" \
   -d '{"message": "What is the air quality in Vancouver?"}'
 ```

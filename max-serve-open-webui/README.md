@@ -44,22 +44,20 @@ cp .env.example .env
 HUGGING_FACE_HUB_TOKEN=
 ```
 
-## Get the code
+## Quick start
 
-Download the code for this recipe using git:
+1. Download the code for this recipe using git:
 
-```bash
-git clone https://github.com/modular/max-recipes.git
-cd max-recipes/max-serve-open-webui
-```
+    ```bash
+    magic init max-serve-open-webui --from modular/max-recipes/max-serve-open-webui
+    cd max-serve-open-webui
+    ```
 
-## Quick start: Run the app
+2. Start MAX and Open WebUI with one command:
 
-You can start MAX and Open WebUI with one command:
-
-```bash
-magic run app
-```
+    ```bash
+    magic run app
+    ```
 
 This command is defined in the `pyproject.toml` file which we cover later.
 
@@ -105,7 +103,7 @@ To chat with real-time access to information from the Web, simply start a new ch
 
 ## Understand the project
 
-### Environemnts
+### Environments
 
 This project is configured in the `pyproject.toml` file, and the tasks executed with `magic run app` are defined in the [Procfile](https://judoscale.com/blog/six-tips-for-mastering-your-procfile). The project uses [Honcho](https://honcho.readthedocs.io/en/latest/) to run and monitor MAX and Open WebUI concurrently.
 

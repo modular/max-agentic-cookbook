@@ -54,8 +54,8 @@ export HUGGING_FACE_HUB_TOKEN=<your-token-yere>
 1. Download the code for this recipe using git:
 
     ```bash
-    git clone https://github.com/modular/max-recipes.git
-    cd max-recipes/max-serve-multimodal-structured-output
+    magic init max-serve-multimodal-structured-output --from modular/max-recipes/max-serve-multimodal-structured-output
+    cd max-serve-multimodal-structured-output
     ```
 
 2. Running the vision model:
@@ -115,6 +115,7 @@ class Player(BaseModel):
 class Players(BaseModel):
     players: List[Player] = Field(description="List of players visible in the image")
 ```
+
 How it works:
 
 * **Type validation**: Pydantic ensures all fields match their expected types
@@ -157,7 +158,6 @@ Key components:
 * **Structured parsing**: Uses the Players model to format the response
 * **Inference**: Runs on MAX Serve with OpenAI-compatible API
 
-
 ### MAX Serve Options
 
 To enable structured output in MAX Serve, simply include `--enable-structured-output`.
@@ -186,4 +186,3 @@ This implementation provides a foundation for building more complex vision-based
 * Join our [Modular Forum](https://forum.modular.com/) and [Discord community](https://discord.gg/modular) to share your experiences and get support
 
 We're excited to see what you'll build with Llama 3.2 Vision and MAX! Share your projects and experiences with us using `#ModularAI` on social media.
-

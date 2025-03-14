@@ -71,8 +71,8 @@ echo "WEATHERAPI_API_KEY=your_api_key" >> backend/.env
 1. Download the code for this recipe using git:
 
     ```bash
-    git clone https://github.com/modular/max-recipes.git
-    cd max-recipes/ai-weather-agent
+    magic init ai-weather-agent --from modular/max-recipes/ai-weather-agent
+    cd ai-weather-agent
     ```
 
 2. Run the application:

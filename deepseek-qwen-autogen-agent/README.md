@@ -49,8 +49,8 @@ magic self-update
 1. Download the code for this recipe using git:
 
     ```bash
-    git clone https://github.com/modular/max-recipes.git
-    cd max-recipes/deepseek-qwen-autogen-agent
+    magic init deepseek-qwen-autogen-agent --from modular/max-recipes/deepseek-qwen-autogen-agent
+    cd deepseek-qwen-autogen-agent
     ```
 
 2. Run the MAX Serve server via in a terminal:
@@ -62,11 +62,13 @@ magic self-update
 3. In a new terminal, run either example:
 
     * For the chat agent:
+
         ```bash
         magic run chat_agent
         ```
 
     * For the screenplay development team:
+
         ```bash
         magic run screenplay_agents
         ```
@@ -80,22 +82,24 @@ The agents will be ready when you see the welcome message in your terminal.
 <img src="chat_agent.gif" alt="Chat interface" width="100%" style="max-width: 800px;">
 
 *Demo shows:*
-- Starting a conversation with the AI
-- AI's thinking process displayed in yellow panels
-- Final responses in green panels
-- Multiple turns of natural conversation
-- Example of complex reasoning task
+
+* Starting a conversation with the AI
+* AI's thinking process displayed in yellow panels
+* Final responses in green panels
+* Multiple turns of natural conversation
+* Example of complex reasoning task
 
 ### Screenplay development team
 
 <img src="screenplay_agents.gif" alt="Screenplay agents" width="100%" style="max-width: 800px;">
 
 *Demo shows:*
-- User providing initial scene idea
-- Screenwriter creating first draft
-- Story Critic analyzing and improving
-- Dialogue Expert polishing the scene
-- Full collaborative workflow between agents
+
+* User providing initial scene idea
+* Screenwriter creating first draft
+* Story Critic analyzing and improving
+* Dialogue Expert polishing the scene
+* Full collaborative workflow between agents
 
 ## Technical deep dive
 
@@ -125,9 +129,10 @@ assistant = AssistantAgent(
 ```
 
 Key features:
-- Uses DeepSeek-R1 model through MAX Serve
-- Configurable temperature for response creativity
-- Adjust `max_tokens` for longer conversations
+
+* Uses DeepSeek-R1 model through MAX Serve
+* Configurable temperature for response creativity
+* Adjust `max_tokens` for longer conversations
 
 #### 2. Conversation management
 
@@ -147,9 +152,10 @@ conversation_history.append(response.chat_message)
 ```
 
 Benefits:
-- Maintains context across multiple turns
-- Enables coherent multi-turn conversations
-- Preserves conversation state
+
+* Maintains context across multiple turns
+* Enables coherent multi-turn conversations
+* Preserves conversation state
 
 #### 3. Thinking process visibility
 
@@ -167,9 +173,10 @@ else:
 ```
 
 This allows users to see:
-- The reasoning process
-- Considered alternatives
-- Decision-making steps
+
+* The reasoning process
+* Considered alternatives
+* Decision-making steps
 
 #### 4. Rich terminal interface
 
@@ -192,10 +199,11 @@ console.print(Panel(
 ```
 
 Features:
-- Color-coded panels for different content types
-- Markdown rendering for formatted text
-- Clear separation of thinking and responses
-- Status indicators during processing
+
+* Color-coded panels for different content types
+* Markdown rendering for formatted text
+* Clear separation of thinking and responses
+* Status indicators during processing
 
 ### Multi-agent screenplay development
 
@@ -241,9 +249,10 @@ Then provide:
 ```
 
 Each agent has a specific role:
-- **Screenwriter**: Creates initial scene drafts
-- **Story Critic**: Improves plot and structure
-- **Dialogue Expert**: Enhances character voices and interactions
+
+* **Screenwriter**: Creates initial scene drafts
+* **Story Critic**: Improves plot and structure
+* **Dialogue Expert**: Enhances character voices and interactions
 
 #### 2. Team coordination
 
@@ -256,9 +265,10 @@ agent_team = RoundRobinGroupChat(
 ```
 
 The round-robin chat ensures:
-- Ordered turn-taking between agents
-- Complete review cycle for each scene
-- Collaborative improvement process
+
+* Ordered turn-taking between agents
+* Complete review cycle for each scene
+* Collaborative improvement process
 
 #### 3. Message processing and display
 
@@ -294,14 +304,16 @@ async for message in stream:
 ```
 
 Features:
-- Real-time display of each agent's process
-- Clear attribution of contributions
-- Separation of thinking and final output
-- Rich formatting for readability
+
+* Real-time display of each agent's process
+* Clear attribution of contributions
+* Separation of thinking and final output
+* Rich formatting for readability
 
 #### Example workflow
 
 1. **Initial Scene Creation**
+
 ```
 User: Write a scene about a reunion between old friends
 Screenwriter: [Analyzes setting and characters]
@@ -309,12 +321,14 @@ Screenwriter: [Creates initial scene with dialogue]
 ```
 
 2. **Story Review and Enhancement**
+
 ```
 Story Critic: [Evaluates dramatic tension]
 Story Critic: [Suggests structural improvements]
 ```
 
 3. **Dialogue Polish**
+
 ```
 Dialogue Expert: [Analyzes character voices]
 Dialogue Expert: [Enhances dialogue authenticity]
@@ -325,6 +339,7 @@ Dialogue Expert: [Enhances dialogue authenticity]
 You can adapt the screenplay system for different creative tasks:
 
 1. **Add Specialized Agents**
+
 ```python
 technical_advisor = AssistantAgent(
     name="technical_advisor",
@@ -334,6 +349,7 @@ technical_advisor = AssistantAgent(
 ```
 
 2. **Modify Review Cycles**
+
 ```python
 agent_team = RoundRobinGroupChat(
     agents=[...],
@@ -342,6 +358,7 @@ agent_team = RoundRobinGroupChat(
 ```
 
 3. **Enhance Agent Specialties**
+
 ```python
 system_message="""You are a genre specialist focusing on:
 - Genre conventions
@@ -391,6 +408,7 @@ Common issues and solutions:
 ## Conclusion
 
 This recipe demonstrates how to:
+
 * Build single and multi-agent systems with AutoGen
 * Use DeepSeek-R1 and examine its thinking process
 * Create beautiful terminal interfaces with Rich Python library

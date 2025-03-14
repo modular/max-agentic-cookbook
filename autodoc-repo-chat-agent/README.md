@@ -10,6 +10,7 @@ This recipe demonstrates how to build a powerful GitHub repository assistant tha
 * [MAX Serve](https://docs.modular.com/max/serve/) for efficient model serving
 
 The agent provides three main capabilities:
+
 1. **Repository-aware Q&A** for answering questions about specific codebases
 2. **Automatic documentation generation** for Python and Mojo repositories
 3. **General programming chat** for development assistance
@@ -29,7 +30,8 @@ Please make sure your system meets our [system requirements](https://docs.modula
 ### Important: GPU requirements
 
 This recipe requires a GPU with CUDA 12.5 support. Recommended GPUs:
-* NVIDIA H100, A100, A40, L40
+
+* NVIDIA H100 A100, A40, L40
 
 To proceed, ensure you have the `magic` CLI installed:
 
@@ -48,8 +50,8 @@ magic self-update
 1. Download the code for this recipe using git:
 
 ```bash
-git clone https://github.com/modular/max-recipes.git
-cd max-recipes/autodoc-agent
+magic init autodoc-repo-chat-agent --from modular/max-recipes/autodoc-repo-chat-agent
+cd autodoc-repo-chat-agent
 ```
 
 2. Start the LLM server:
@@ -65,9 +67,9 @@ magic run agent
 ```
 
 4. When prompted, you can:
-   - Ask questions about a specific repository
-   - Include URL of a GitHub repository and start asking questions about it
-   - Ask to generate documentation for a Python GitHub repository (larger code bases are more time consuming)
+   * Ask questions about a specific repository
+   * Include URL of a GitHub repository and start asking questions about it
+   * Ask to generate documentation for a Python GitHub repository (larger code bases are more time consuming)
 
 5. To clean up generated files:
 
@@ -117,17 +119,17 @@ The architecture consists of several key components:
 
 1. **User Interface**: Rich CLI for interaction
 2. **Repository Analysis**:
-   - GitHub repository ingestion
-   - Code chunk extraction
-   - Embedding generation
+   * GitHub repository ingestion
+   * Code chunk extraction
+   * Embedding generation
 3. **Query Handling**:
-   - Documentation generation
-   - Repository-aware Q&A
-   - General programming chat
+   * Documentation generation
+   * Repository-aware Q&A
+   * General programming chat
 4. **LLM Integration**:
-   - MAX Serve with Qwen2.5
-   - Context-aware prompting
-   - Response formatting
+   * MAX Serve with Qwen2.5
+   * Context-aware prompting
+   * Response formatting
 
 ## Request flow
 
@@ -230,10 +232,11 @@ async def main():
 ```
 
 Key features:
-- Rich console interface with colorful formatting
-- Conversation history management across handlers
-- Query type detection and routing
-- Context preservation between interactions
+
+* Rich console interface with colorful formatting
+* Conversation history management across handlers
+* Query type detection and routing
+* Context preservation between interactions
 
 ### Query type detection
 
@@ -257,9 +260,10 @@ async def determine_query_type(query: str, client: AsyncOpenAI) -> Tuple[QueryTy
 ```
 
 Key features:
-- URL extraction with regex
-- Keyword-based classification
-- Default fallback to general chat
+
+* URL extraction with regex
+* Keyword-based classification
+* Default fallback to general chat
 
 ### Repository Q&A
 
@@ -324,10 +328,11 @@ If you don't know the answer, say so rather than making something up."""
 ```
 
 Features:
-- Repository content caching
-- Semantic search for relevant code
-- Context-aware prompting
-- Conversation history tracking
+
+* Repository content caching
+* Semantic search for relevant code
+* Context-aware prompting
+* Conversation history tracking
 
 ### Code extraction and analysis
 
@@ -367,9 +372,10 @@ async def extract_code_chunks(repo_content, language='python'):
 ```
 
 Key features:
-- Language-specific pattern matching
-- Intelligent chunk extraction
-- Metadata collection for context
+
+* Language-specific pattern matching
+* Intelligent chunk extraction
+* Metadata collection for context
 
 ### Documentation generation
 
@@ -412,10 +418,11 @@ When creating code examples:
 ```
 
 Key capabilities:
-- Language-specific prompting
-- Code example generation
-- Proper formatting and linking
-- Error handling
+
+* Language-specific prompting
+* Code example generation
+* Proper formatting and linking
+* Error handling
 
 ### MkDocs site generation
 
@@ -515,10 +522,11 @@ nav:
 ```
 
 Features:
-- Parallel file writing for performance
-- Automatic component categorization
-- Structured navigation generation
-- Markdown extension configuration
+
+* Parallel file writing for performance
+* Automatic component categorization
+* Structured navigation generation
+* Markdown extension configuration
 
 ### Example creation and verification
 
@@ -636,11 +644,12 @@ async def verify_examples(self, examples, documentation, console):
 ```
 
 This process ensures:
-- Examples are contextually relevant to the codebase
-- Each component has practical usage demonstrations
-- Examples are verified for correctness
-- Issues are clearly marked for user awareness
-- Documentation includes both API reference and usage examples
+
+* Examples are contextually relevant to the codebase
+* Each component has practical usage demonstrations
+* Examples are verified for correctness
+* Issues are clearly marked for user awareness
+* Documentation includes both API reference and usage examples
 
 ## Customization options
 

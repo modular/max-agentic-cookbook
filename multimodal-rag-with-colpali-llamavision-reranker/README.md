@@ -24,11 +24,12 @@ Please make sure your system meets our [system requirements](https://docs.modula
 ### Important: Model Access Requirements
 
 1. **Meta Llama Model Access**
-   - Accept the license agreement to access [meta-llama/Llama-3.2-11B-Vision-Instruct](https://huggingface.co/meta-llama/Llama-3.2-11B-Vision-Instruct)
+   * Accept the license agreement to access [meta-llama/Llama-3.2-11B-Vision-Instruct](https://huggingface.co/meta-llama/Llama-3.2-11B-Vision-Instruct)
 
 2. **HuggingFace Token**
-   - A valid Hugging Face access token at [https://huggingface.co/settings/tokens]
-   - Set the token in your environment:
+   * A valid Hugging Face access token at [https://huggingface.co/settings/tokens]
+   * Set the token in your environment:
+
      ```bash
      export HUGGING_FACE_HUB_TOKEN=your_token_here
      ```
@@ -36,6 +37,7 @@ Please make sure your system meets our [system requirements](https://docs.modula
 ### GPU Requirements
 
 This recipe requires a GPU with at least 35GB of VRAM to run efficiently. Recommended GPUs:
+
 * NVIDIA A100 (40GB/80GB)
 * NVIDIA A40 (48GB)
 * NVIDIA L40 (48GB)
@@ -57,8 +59,8 @@ magic self-update
 1. Download the code for this recipe using git:
 
     ```bash
-    git clone https://github.com/modular/max-recipes.git
-    cd max-recipes/multimodal-rag-with-colpali-llamavision-reranker
+    magic init multimodal-rag-with-colpali-llamavision-reranker --from modular/max-recipes/multimodal-rag-with-colpali-llamavision-reranker
+    cd multimodal-rag-with-colpali-llamavision-reranker
     ```
 
 2. Run the application:
@@ -68,16 +70,15 @@ magic self-update
     ```
 
     This command will:
-    - Start MAX Serve with `meta-llama/Llama-3.2-11B-Vision` on port `8010`
-    - Launch Qdrant vector database on port `6333`
-    - Start the Gradio interface on port `7860`
+    * Start MAX Serve with `meta-llama/Llama-3.2-11B-Vision` on port `8010`
+    * Launch Qdrant vector database on port `6333`
+    * Start the Gradio interface on port `7860`
 
 3. Open [http://localhost:7860](http://localhost:7860) in your browser to see the UI.
 
-In this demo, we upload [The Little Book of Deep Learning](https://fleuret.org/public/lbdl.pdf), which contains 185 pages that are parsed as images for question answering:
+    In this demo, we upload [The Little Book of Deep Learning](https://fleuret.org/public/lbdl.pdf), which contains 185 pages that are parsed as images for question answering:
 
-<img src="multimodal-rag-demo.gif" alt="Multi-Modal RAG" width="100%" style="max-width: 800px;">
-
+    <img src="multimodal-rag-demo.gif" alt="Multi-Modal RAG" width="100%" style="max-width: 800px;">
 
 4. To clean up resources when done:
 
@@ -118,13 +119,13 @@ The architecture consists of several key components:
 
 1. **Frontend**: Gradio interface for PDF upload and Q&A
 2. **Backend Processing**:
-   - PDF image extraction
-   - ColPali embedding generation
-   - Qdrant vector storage
+   * PDF image extraction
+   * ColPali embedding generation
+   * Qdrant vector storage
 3. **Question Answering**:
-   - Similarity search in Qdrant
-   - Visual analysis with Llama 3.2 Vision
-   - Response generation
+   * Similarity search in Qdrant
+   * Visual analysis with Llama 3.2 Vision
+   * Response generation
 
 ## Request flow
 
@@ -155,16 +156,16 @@ sequenceDiagram
 ```
 
 1. **PDF Upload and Processing**:
-   - PDF is converted to high-quality images
-   - Images are embedded using ColPali
-   - Embeddings stored in Qdrant
+   * PDF is converted to high-quality images
+   * Images are embedded using ColPali
+   * Embeddings stored in Qdrant
 
 2. **Query Processing**:
-   - User question is embedded
-   - Similar images retrieved from Qdrant
-   - Results reranked by cross-encoder
-   - Top images sent to Llama Vision
-   - Response generated with visual context
+   * User question is embedded
+   * Similar images retrieved from Qdrant
+   * Results reranked by cross-encoder
+   * Top images sent to Llama Vision
+   * Response generated with visual context
 
 ## Technical deep dive
 
@@ -193,9 +194,10 @@ class PDFProcessor:
 ```
 
 Key features:
-- High-resolution image extraction (300 DPI)
-- Efficient memory management
-- Temporary storage handling
+
+* High-resolution image extraction (300 DPI)
+* Efficient memory management
+* Temporary storage handling
 
 ### Embedding generation
 
@@ -211,10 +213,11 @@ class EmbedData:
 ```
 
 Optimizations include:
-- Batch processing for efficiency
-- Automatic mixed precision (AMP)
-- CUDA memory management
-- Efficient tensor operations
+
+* Batch processing for efficiency
+* Automatic mixed precision (AMP)
+* CUDA memory management
+* Efficient tensor operations
 
 ### Vector database management
 
@@ -230,10 +233,11 @@ class QdrantVectorDB:
 ```
 
 Features:
-- gRPC communication for speed
-- Batch ingestion support
-- Automatic collection management
-- Efficient similarity search
+
+* gRPC communication for speed
+* Batch ingestion support
+* Automatic collection management
+* Efficient similarity search
 
 ### Retrieval and reranking
 
@@ -293,13 +297,15 @@ class Retriever:
 ```
 
 Key features:
-- Two-stage retrieval pipeline
-- Initial broad retrieval with ColPali embeddings
-- Cross-encoder reranking for better precision
-- Configurable result limits
-- Graceful fallback on reranker errors
+
+* Two-stage retrieval pipeline
+* Initial broad retrieval with ColPali embeddings
+* Cross-encoder reranking for better precision
+* Configurable result limits
+* Graceful fallback on reranker errors
 
 The reranking process:
+
 1. Initial retrieval gets more candidates than needed (e.g., top 10)
 2. Cross-encoder reranker scores each candidate more accurately
 3. Top K results after reranking are returned
@@ -320,10 +326,11 @@ class UI:
 ```
 
 Features:
-- Real-time PDF processing
-- Interactive Q&A interface
-- Context image display
-- Status updates
+
+* Real-time PDF processing
+* Interactive Q&A interface
+* Context image display
+* Status updates
 
 ### RAG implementation
 
@@ -381,10 +388,11 @@ class RAG:
 ```
 
 Key features:
-- Dynamic context selection
-- Efficient image preprocessing
-- Structured prompt engineering
-- Temperature control for consistent responses
+
+* Dynamic context selection
+* Efficient image preprocessing
+* Structured prompt engineering
+* Temperature control for consistent responses
 
 ## Customization options
 

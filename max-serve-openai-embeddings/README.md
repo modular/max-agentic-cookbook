@@ -55,40 +55,40 @@ For running the app on GPU, ensure your system meets these GPU requirements:
 
 1. Download the code for this recipe using git:
 
-```bash
-git clone https://github.com/modular/max-recipes.git
-cd max-recipes/max-serve-openai-embeddings
-```
+    ```bash
+    magic init max-serve-openai-embeddings --from modular/max-recipes/max-serve-openai-embeddings
+    cd max-serve-openai-embeddings
+    ```
 
 2. Run the embedding application
 
-```bash
-magic run app
-```
+    ```bash
+    magic run app
+    ```
 
-This command is defined in the `pyproject.toml` file and invokes the `max-pipelines` CLI using `Procfile` for convenience.
+    This command is defined in the `pyproject.toml` file and invokes the `max-pipelines` CLI using `Procfile` for convenience.
 
-MAX Serve is ready once you see a line containing the following in the Docker output:
+    MAX Serve is ready once you see a line containing the following in the Docker output:
 
-```plaintext
-Server running on http://0.0.0.0:8000/
-```
+    ```plaintext
+    Server running on http://0.0.0.0:8000/
+    ```
 
-When the embedding code in `main.py` runs, you should see output like this:
+    When the embedding code in `main.py` runs, you should see output like this:
 
-```plaintext
-=== Generated embeddings with OpenAI client ===
-Successfully generated embeddings!
-Number of embeddings: 5
-Embedding dimension: 768
-1st few values of 1st embedding: [0.36384445428848267, -0.7647817730903625, ...]
-```
+    ```plaintext
+    === Generated embeddings with OpenAI client ===
+    Successfully generated embeddings!
+    Number of embeddings: 5
+    Embedding dimension: 768
+    1st few values of 1st embedding: [0.36384445428848267, -0.7647817730903625, ...]
+    ```
 
 3. And once done with the app, to clean up the resources run:
 
-```bash
-magic run clean
-```
+    ```bash
+    magic run clean
+    ```
 
 ## Understand the code
 

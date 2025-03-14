@@ -44,16 +44,16 @@ We'll use Docker to run the AnythingLLM container. Follow the instructions in th
 
 Download the code for this recipe using git:
 
-```bash
-git clone https://github.com/modular/max-recipes.git
-cd max-recipes/max-serve-anythingllm
-```
+   ```bash
+   magic init max-serve-anythingllm --from modular/max-recipes/max-serve-anythingllm
+   cd max-serve-anythingllm
+   ```
 
 Next, include your Hugging Face token in a `.env` file by running:
 
-```bash
-echo "HUGGING_FACE_HUB_TOKEN=your_token_here" >> .env
-```
+   ```bash
+   echo "HUGGING_FACE_HUB_TOKEN=your_token_here" >> .env
+   ```
 
 ## Quick start: Run the app
 
