@@ -224,8 +224,8 @@ be the same.
 ### Layouts and `LayoutTensor`
 
 The `matrix_multiplication` custom operation uses
-[layouts](/mojo/stdlib/layout/) and
-[`LayoutTensor`](/mojo/stdlib/layout/layout_tensor/LayoutTensor) to represent the
+[layouts](https://docs.modular.com/mojo/stdlib/layout/layout/) and
+[`LayoutTensor`](https://docs.modular.com/mojo/stdlib/layout/layout_tensor/LayoutTensor) to represent the
 input and output matrices, so it's helpful to understand a little bit about
 these types before getting started.
 
@@ -524,7 +524,7 @@ We can further increase the arithmetic intensity of the calculation using a
 In addition to caching a block's worth of the A & B matrices in shared memory,
 each thread copies the 8x8 tiles of the input matrices into local storage to
 further reduce memory access latency. Then it uses the
-[`outer_product_acc()`](/mojo/stdlib/layout/math/outer_product_acc/) function to
+[`outer_product_acc()`](https://docs.modular.com/mojo/stdlib/layout/math/outer_product_acc/) function to
 calculate and accumulate the outer products of two vectors worth of values.
 
 ```mojo
@@ -593,7 +593,7 @@ previous algorithm.
 
 As a final optimization, memory accesses can be vectorized to improve memory
 access bandwidth. The only new thing in this kernel is the use of the 
-[`LayoutTensor.vectorize()`](/mojo/stdlib/layout/layout_tensor/LayoutTensor#vectorize)
+[`LayoutTensor.vectorize()`](https://docs.modular.com/mojo/stdlib/layout/layout_tensor/LayoutTensor#vectorize)
 method to produce vectorized views of the tensors, allowing multiple values to
 be copied as a single SIMD vector.
 
