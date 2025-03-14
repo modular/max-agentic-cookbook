@@ -114,16 +114,103 @@ own `mo.top_k` op which is more feature complete.
 
 Modern Transformer-based language models are constructed around the attention
 mechanism. Optimizing how attention is performed is a key driver in improving
-large language model performance. One such optimization is the
-[FlashAttention-2](https://arxiv.org/abs/2307.08691) layer. In this example,
-you'll see how to implement FlashAttention-2 as a fused operation that runs on
-the GPU in MAX using Mojo.
+large language model performance.
+
+[FlashAttention-2](https://arxiv.org/abs/2307.08691) is a memory-efficient
+attention algorithm that significantly improves the performance of
+transformer-based models by reducing memory bandwidth requirements and
+optimizing computation patterns.  FlashAttention is particularly beneficial
+for:
+
+- Large language models with long context windows
+- Vision transformers processing high-resolution images
+- Multi-modal models with large attention matrices
+- Fine-tuning large models on limited GPU memory
+
+In this example, you'll see how to implement FlashAttention-2 as a fused
+operation that runs on the GPU in MAX using Mojo.
 
 To run the example, use the following command:
 
 ```bash
 magic run fused_attention
 ```
+
+### Limitations of classic attention
+
+The classic attention operation consists of
+
+- `bmm`: `Q x Transpose(K)`
+    where `Q`, `K` both have shape `[batchSize, numHeads, S, d]`
+    and `Q x K^t` has the shape `[batchSize, numHeads, S, S]`
+- `softmax`
+- `bmm`: `softmax(Q x K^t) x V`
+    where V has the shape `[batchSize, numHeads, S, d]`
+
+`bmm` is short for batched matrix multiplication.
+
+`S` denotes the sequence length. Depending on the model, it can be as large as
+`O(10^3) - O(10^4)`. `d` is the size per head in multi-head attention. It’s
+usually a power of 2 like 64, 128, etc, and smaller than `S`.
+
+A limitation of the classic implementation is that it materializes an
+intermediate matrix of shape `[batchSize, numHeads, S, S]`. This introduces
+`O(S^2)` memory allocation and traffic.
+
+### Optimizing attention via FlashAttention
+
+FlashAttention optimizes the standard attention mechanism by:
+
+1. **Tiling the computation**: Breaking the `Q`, `K`, and `V` matrices into
+  smaller blocks that fit in GPU shared memory, which is much faster than
+  global memory.
+2. **Fusing operations**: Combining softmax normalization with matrix
+  multiplication for each tile into a single kernel.
+
+These help maximize the locality and reduce DRAM (global memory) traffic.
+
+This is the core of the fused FlashAttention kernel used in this example:
+
+```mojo
+alias N = Q.shape[0]()
+alias D = Q.shape[1]()
+
+Q_tile = Q.tile[BN, D](block_idx.y, 0)
+
+m_1 = (
+    LayoutTensor[q_dtype, Layout(BN, 1), MutableAnyOrigin]
+    .stack_allocation()
+    .fill(Scalar[q_dtype].MIN)
+)
+l_1 = (
+    LayoutTensor[q_dtype, Layout(BN, 1), MutableAnyOrigin]
+    .stack_allocation()
+    .fill(0)
+)
+O_i = (
+    LayoutTensor[q_dtype, Layout.row_major(BN, BD), MutableAnyOrigin]
+    .stack_allocation()
+    .fill(0)
+)
+
+alias BN_1 = 8
+
+@parameter
+for tile_n_idx in range(N // BN_1):
+    K_tile = K.tile[BN_1, D](tile_n_idx, 0)
+    V_tile = V.tile[BN_1, BD](tile_n_idx, block_idx.x)
+    S = matmul["gpu", transpose_b=True](Q_tile, K_tile)
+    m_2 = max(m_1, rebind[__type_of(m_1)](max[axis=1](S)))
+    l_2 = exp(m_1 - m_2) * l_1 + sum[axis=1](exp(S - m_2))
+    P = exp(S - m_2) / l_2
+    O_i = O_i * (l_1 / l_2) * exp(m_1 - m_2) + matmul["gpu"](P, V_tile)
+    m_1 = m_2
+    l_1 = rebind[__type_of(l_1)](l_2)
+O.tile[BN, BD](block_idx.y, block_idx.x).copy_from(O_i)
+```
+
+Note how the Mojo abstractions present in MAX allow for this algorithm to be
+expressed very closely to the description in the original research paper.
 
 ## Conclusion
 
