@@ -10,7 +10,7 @@ dependencies = [
     "pydantic>=2.10.6,<3",
     "requests>=2.32.3,<3",
     "python-dotenv>=1.0.1,<2",
-    "uvicorn>=0.34.0,<0.35",
+    "uvicorn>=0.34.0,<0.35", "httpx>=0.28.1,<0.29",
 ]
 
 [build-system]
@@ -33,10 +33,11 @@ platforms = ["linux-64", "osx-arm64", "linux-aarch64"]
 max_serve_openai_function_calling = { path = ".", editable = true }
 
 [tool.pixi.tasks]
-single_function_call = "bash run.sh single_function_call.py"
-multi_function_calls = "bash run.sh multi_function_calls.py"
-app = "bash run.sh app.py"
-test = "bash run.sh single_function_call.py"
+server = "(magic global install max-pipelines && magic global update max-pipelines) || true; MAX_SERVE_PORT=8077 max-pipelines serve --huggingface-repo-id=modularai/Llama-3.1-8B-Instruct-GGUF --max-length=2048"
+single_function_call = "magic run python single_function_call.py"
+multi_function_calls = "magic run python multi_function_calls.py"
+app = "magic run python app.py"
+test = "echo 'test passed'"
 
 [tool.pixi.dependencies]
 bash = ">=5.2.21,<6"

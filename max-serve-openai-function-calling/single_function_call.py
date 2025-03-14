@@ -1,7 +1,7 @@
 from openai import OpenAI
 
 
-client = OpenAI(base_url="http://0.0.0.0:8000/v1", api_key="local")
+client = OpenAI(base_url="http://0.0.0.0:8077/v1", api_key="local")
 
 
 def get_weather(city: str) -> str:
