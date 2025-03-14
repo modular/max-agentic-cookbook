@@ -1,4 +1,3 @@
-
 # pixi environments
 .pixi
 *.egg-info
@@ -6,4 +5,4 @@
 .magic
 repo_content.json
 __pycache__
-docs/
+doc*/

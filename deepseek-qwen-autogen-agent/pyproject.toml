@@ -17,7 +17,7 @@ packages = ["."]
 
 [tool.pixi.project]
 channels = ["https://conda.modular.com/max-nightly", "https://conda.modular.com/max", "https://repo.prefix.dev/modular-community", "conda-forge"]
-platforms = ["linux-64"]
+platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
 
 [tool.pixi.pypi-dependencies]
 deepseek_qwen_autogen_agent = { path = ".", editable = true }
