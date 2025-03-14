@@ -215,13 +215,13 @@ to 4096x4096 look like the following at the time this is written:
 | coalescing             | 2936     |
 | tiled                  | 3943     |
 | tiled_register         | 7078     |
-| block_tiled            | 10661    | 
+| block_tiled            | 10661    |
 | block_tiled_vectorized | 10663    |
 
 The specific numbers may vary for your GPU, but the general progression should
 be the same.
 
-### Layouts and `LayoutTensor`
+### Layouts and LayoutTensor
 
 The `matrix_multiplication` custom operation uses
 [layouts](https://docs.modular.com/mojo/stdlib/layout/layout/) and
@@ -433,12 +433,8 @@ fn tiled_matrix_multiplication[
 
 This improves overall performance by ~30% over the previous optimization.
 
-:::note
-
-While faster on A100, this kernel may not show gains over the previous one
-on all GPUs.
-
-:::
+**Note:** While faster on A100, this kernel may not show gains over the previous
+one on all GPUs.
 
 ### Kernel 4: Using shared memory tiling and register tiling
 
