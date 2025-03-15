@@ -138,7 +138,12 @@ magic run fused_attention
 
 ### Limitations of classic attention
 
-The classic attention operation consists of
+The classic attention operation follows this general structure:
+
+<img src="./images/attention_dark.png" class="darkModeOnly" width="100%" style="max-width: 400px;">
+<img src="./images/attention.png" class="lightModeOnly" width="100%" style="max-width: 400px;">
+
+It consists of:
 
 - `bmm`: `Q x Transpose(K)`
     where `Q`, `K` both have shape `[batchSize, numHeads, S, d]`
@@ -168,6 +173,9 @@ FlashAttention optimizes the standard attention mechanism by:
   multiplication for each tile into a single kernel.
 
 These help maximize the locality and reduce DRAM (global memory) traffic.
+
+<img src="./images/flashattention_dark.png" class="darkModeOnly">
+<img src="./images/flashattention.png" class="lightModeOnly">
 
 This is the core of the fused FlashAttention kernel used in this example:
 
