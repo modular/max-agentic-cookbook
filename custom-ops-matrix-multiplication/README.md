@@ -7,7 +7,7 @@ In this recipe, we will cover:
   progressively optimize a matrix multiplication.
 * Accessing GPU hardware features, like Tensor Cores, from MAX.
 
-We'll walk through an example that 
+We'll walk through an example that
 
 * defines a matrix multiplication running on a GPU,
 * applies seven optimizations that sequentially improve GPU performance,
@@ -45,24 +45,24 @@ ensure your system meets
 
 ## Quick start
 
-1. Download this recipe using Magic:
+1. Download this recipe using the `magic` CLI:
 
-```bash
-magic init custom-ops-matrix-multiplication --from custom-ops-matrix-multiplication
-cd custom-ops-matrix-multiplication
-```
+    ```bash
+    magic init custom-ops-matrix-multiplication --from custom-ops-matrix-multiplication
+    cd custom-ops-matrix-multiplication
+    ```
 
 2. Run the example:
 
-```bash
-magic run matrix_multiplication
-```
+    ```bash
+    magic run matrix_multiplication
+    ```
 
 3. Run the benchmarks to see the impact of each optimization:
 
-```bash
-magic run benchmarks
-```
+    ```bash
+    magic run benchmarks
+    ```
 
 ## Optimizing a matrix multiplication for GPUs in MAX
 
@@ -90,8 +90,7 @@ to produce a new matrix C.
 <img src="./images/matrix_multiplication_dark.png" class="darkModeOnly">
 <img src="./images/matrix_multiplication.png" class="lightModeOnly">
 
-
-Each value in the output matrix is the dot product of a row from A and a column 
+Each value in the output matrix is the dot product of a row from A and a column
 from B. In a worst case scenario, when multiplying an MxK matrix by a KxN matrix,
 calculating one output value requires loading `2 * K` values and performing `K`
 floating-point multiplications.
@@ -101,7 +100,6 @@ tuned for various hardware architectures. Models built upon MAX Graphs can take
 advantage of these optimized versions for best performance out of the box, but
 it can be instructive to see how the code for a matrix multiplication can be
 step-by-step tuned for GPU hardware.
-
 
 ### Structure of the custom operation
 
@@ -238,7 +236,6 @@ my_layout = Layout.row_major(2, 6)
 print_layout(my_layout)
 ```
 
-
 ```plaintext
        0    1    2    3    4    5
     +----+----+----+----+----+----+
@@ -254,7 +251,7 @@ if you create a `LayoutTensor` using the layout shown above, the value at
 
 A layout tensor can point to an existing buffer, or you can allocate memory
 to store the tensor data. One `LayoutTensor` you'll see a lot in
-the following sections is `tile()`, which returns a new `LayoutTensor` which is 
+the following sections is `tile()`, which returns a new `LayoutTensor` which is
 a subset of the original, but points to the same underlying data.
 
 For example, you can extract a 2x2 tile of the above tensor:
@@ -266,7 +263,7 @@ tile = my_tensor.tile[2, 2](0, 1)
 The layout of the extracted tile looks like this:
 
 ```plaintext
-       0    1   
+       0    1
     +----+----+
  0  |  2 |  3 |
     +----+----+

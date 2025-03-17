@@ -42,7 +42,7 @@ We'll use Docker to run the AnythingLLM container. Follow the instructions in th
 
 ## Get the code
 
-Download the code for this recipe using git:
+Download the code for this recipe using the `magic` CLI:
 
    ```bash
    magic init max-serve-anythingllm --from modular/max-recipes/max-serve-anythingllm

@@ -38,7 +38,7 @@ Please make sure your system meets our [system requirements](https://docs.modula
     curl -ssL https://magic.modular.com/ | bash
     ```
 
-2. Clone the repository:
+2. Download the code using the `magic` CLI:
 
     ```bash
     magic init code-execution-sandbox-agent-with-e2b --from modular/max-recipes/code-execution-sandbox-agent-with-e2b

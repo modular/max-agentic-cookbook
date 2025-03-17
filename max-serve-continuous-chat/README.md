@@ -50,7 +50,7 @@ For running the app on GPU, ensure your system meets these GPU requirements:
 
 ## Quick start
 
-1. Download the code for this recipe using git:
+1. Download the code for this recipe using the `magic` CLI:
 
     ```bash
     magic init max-serve-continuous-chat --from modular/max-recipes/max-serve-continuous-chat

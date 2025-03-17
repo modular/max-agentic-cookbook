@@ -68,7 +68,7 @@ echo "WEATHERAPI_API_KEY=your_api_key" >> backend/.env
 
 ## Quick start
 
-1. Download the code for this recipe using git:
+1. Download the code for this recipe using `magic` CLI:
 
     ```bash
     magic init ai-weather-agent --from modular/max-recipes/ai-weather-agent

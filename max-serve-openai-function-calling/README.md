@@ -39,7 +39,7 @@ echo "HUGGING_FACE_HUB_TOKEN=your_hf_token" > .env
 
 ## Quick start
 
-Download the code for this recipe using git:
+Download the code for this recipe using the `magic` CLI:
 
 ```bash
 magic init max-serve-openai-function-calling --from modular/max-recipes/max-serve-openai-function-calling

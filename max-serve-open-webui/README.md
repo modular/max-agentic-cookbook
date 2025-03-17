@@ -46,7 +46,7 @@ HUGGING_FACE_HUB_TOKEN=
 
 ## Quick start
 
-1. Download the code for this recipe using git:
+1. Download the code for this recipe using the `magic` CLI:
 
     ```bash
     magic init max-serve-open-webui --from modular/max-recipes/max-serve-open-webui

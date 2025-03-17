@@ -46,7 +46,7 @@ magic self-update
 
 ## Quick start
 
-1. Download the code for this recipe using git:
+1. Download the code for this recipe using the `magic` CLI:
 
     ```bash
     magic init deepseek-qwen-autogen-agent --from modular/max-recipes/deepseek-qwen-autogen-agent

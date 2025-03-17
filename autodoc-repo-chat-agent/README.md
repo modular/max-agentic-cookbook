@@ -47,7 +47,7 @@ magic self-update
 
 ## Quick start
 
-1. Download the code for this recipe using git:
+1. Download the code for this recipe using `magic` CLI:
 
 ```bash
 magic init autodoc-repo-chat-agent --from modular/max-recipes/autodoc-repo-chat-agent

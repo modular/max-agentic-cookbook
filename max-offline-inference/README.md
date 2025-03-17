@@ -36,7 +36,7 @@ HUGGING_FACE_HUB_TOKEN=<YOUR_HUGGING_FACE_HUB_TOKEN_HERE>
 
 ## Quick start
 
-1. Download the code for this recipe using git:
+1. Download the code for this recipe using the `magic` CLI:
 
     ```bash
     magic init max-offline-inference --from modular/max-recipes/max-offline-inference

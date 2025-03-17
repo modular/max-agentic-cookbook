@@ -45,26 +45,26 @@ ensure your system meets
 
 ## Quick start
 
-1. Download this recipe using Magic:
+1. Download this recipe using the `magic` CLI:
 
-```bash
-magic init custom-ops-ai-applications --from custom-ops-ai-applications
-cd custom-ops-ai-applications
-```
+  ```bash
+  magic init custom-ops-ai-applications --from custom-ops-ai-applications
+  cd custom-ops-ai-applications
+  ```
 
 2. Run the examples:
 
-```bash
-magic run top_k
-magic run fused_attention
-```
+  ```bash
+  magic run top_k
+  magic run fused_attention
+  ```
 
 3. Run the benchmarks of the top-K token sampler to sse how much faster it
 runs on GPU:
 
-```bash
-magic run benchmarks
-```
+  ```bash
+  magic run benchmarks
+  ```
 
 ## Optimizing top-K token sampling for GPUs in MAX
 
@@ -122,10 +122,10 @@ transformer-based models by reducing memory bandwidth requirements and
 optimizing computation patterns.  FlashAttention is particularly beneficial
 for:
 
-- Large language models with long context windows
-- Vision transformers processing high-resolution images
-- Multi-modal models with large attention matrices
-- Fine-tuning large models on limited GPU memory
+* Large language models with long context windows
+* Vision transformers processing high-resolution images
+* Multi-modal models with large attention matrices
+* Fine-tuning large models on limited GPU memory
 
 In this example, you'll see how to implement FlashAttention-2 as a fused
 operation that runs on the GPU in MAX using Mojo.
@@ -145,11 +145,11 @@ The classic attention operation follows this general structure:
 
 It consists of:
 
-- `bmm`: `Q x Transpose(K)`
+* `bmm`: `Q x Transpose(K)`
     where `Q`, `K` both have shape `[batchSize, numHeads, S, d]`
     and `Q x K^t` has the shape `[batchSize, numHeads, S, S]`
-- `softmax`
-- `bmm`: `softmax(Q x K^t) x V`
+* `softmax`
+* `bmm`: `softmax(Q x K^t) x V`
     where V has the shape `[batchSize, numHeads, S, d]`
 
 `bmm` is short for batched matrix multiplication.

@@ -56,7 +56,7 @@ magic self-update
 
 ## Quick start
 
-1. Download the code for this recipe using git:
+1. Download the code for this recipe using the `magic` CLI:
 
     ```bash
     magic init multimodal-rag-with-colpali-llamavision-reranker --from modular/max-recipes/multimodal-rag-with-colpali-llamavision-reranker

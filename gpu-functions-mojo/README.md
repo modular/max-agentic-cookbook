@@ -44,7 +44,7 @@ These examples require a MAX-compatible GPU satisfying
 
 ## Quick start
 
-1. Download this recipe using Magic:
+1. Download this recipe using the `magic` CLI:
 
     ```bash
     magic init gpu-functions-mojo --from gpu-functions-mojo

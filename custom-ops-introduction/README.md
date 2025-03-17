@@ -44,20 +44,20 @@ ensure your system meets
 
 ## Quick start
 
-1. Download this recipe using Magic:
+1. Download this recipe using the `magic` CLI:
 
-```bash
-magic init custom-ops-introduction --from custom-ops-introduction
-cd custom-ops-introduction
-```
+    ```bash
+    magic init custom-ops-introduction --from custom-ops-introduction
+    cd custom-ops-introduction
+    ```
 
 2. Run each of the examples:
 
-```bash
-magic run add_one
-magic run vector_addition
-magic run mandelbrot
-```
+    ```bash
+    magic run add_one
+    magic run vector_addition
+    magic run mandelbrot
+    ```
 
 3. Browse through the commented source code to see how they work.
 
