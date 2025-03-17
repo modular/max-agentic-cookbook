@@ -17,7 +17,8 @@ The assistant provides:
 
 ## Requirements
 
-Please make sure your system meets our [system requirements](https://docs.modular.com/max/get-started).
+This recipe requires a supported GPU, please make sure your machine meets our
+[system requirements](https://docs.modular.com/max/get-started).
 
 ### Important: API keys and requirements
 
