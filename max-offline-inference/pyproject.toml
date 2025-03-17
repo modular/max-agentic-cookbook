@@ -31,5 +31,5 @@ app = "python main.py"
 test = "echo 'test passed'"
 
 [tool.pixi.dependencies]
-max-pipelines = "*"
 python-dotenv = ">=1.0.1,<2"
+max-pipelines = "==25.2.0.dev2025031705"
