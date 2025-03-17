@@ -25,10 +25,18 @@ def main():
     path = Path(__file__).parent / "operations.mojopkg"
 
     dtype = DType.float32
-    N = 32
-    D = 32
-    BD = 8
-    BN = 16
+
+    if accelerator_count() == 0:
+        N = 8
+        D = 8
+        BD = 4
+        BN = 4
+    else:
+        N = 32
+        D = 32
+        BD = 8
+        BN = 16
+
     with Graph(
         "fused_attention",
         input_types=[
