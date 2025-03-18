@@ -448,7 +448,7 @@ class UI:
         with gr.Blocks(title="Multi-Modal PDF RAG", theme=gr.themes.Soft(), css=custom_css) as demo:
             gr.Markdown(
                 """
-                # Multi-Modal PDF RAG with ColPali, Llama3.2-Vision, Qdrant, reranker powered by [MAX Serve](https://docs.modular.com/max/serve) 🚀
+                # Multi-Modal PDF RAG with ColPali, Llama3.2-Vision, Qdrant, Reranker powered by [MAX Serve](https://docs.modular.com/max/serve) 🚀
                 ### A powerful document question-answering system combining state-of-the-art visual and language models
                 """
             )
