@@ -19,6 +19,18 @@ The assistant provides:
 
 Please make sure your system meets our [system requirements](https://docs.modular.com/max/get-started).
 
+To proceed, ensure you have the `magic` CLI installed with the `magic --version` to be **0.7.2** or newer:
+
+```bash
+curl -ssL https://magic.modular.com/ | bash
+```
+
+or update it via:
+
+```bash
+magic self-update
+```
+
 ### Important: GPU requirements
 
 This recipe requires a GPU with CUDA 12.5 support. Recommended GPUs:
@@ -38,30 +50,24 @@ This recipe requires a GPU with CUDA 12.5 support. Recommended GPUs:
 
 ### Installation
 
-1. Install the `magic` CLI:
-
-    ```bash
-    curl -ssL https://magic.modular.com/ | bash
-    ```
-
-2. Download the code using the `magic` CLI:
+1. Download the code using the `magic` CLI:
 
     ```bash
     magic init code-execution-sandbox-agent-with-e2b --from modular/max-recipes/code-execution-sandbox-agent-with-e2b
     cd code-execution-sandbox-agent-with-e2b
     ```
 
-3. Copy the environment template:
+2. Copy the environment template:
 
     ```bash
     cp .env.example .env
     ```
 
-4. Add your API keys to `.env`
+3. Add your API keys to `.env`
 
 ## Quick start
 
-0. Test the sandbox:
+1. Test the sandbox:
 
     ```bash
     magic run hello
@@ -69,7 +75,7 @@ This recipe requires a GPU with CUDA 12.5 support. Recommended GPUs:
 
     This command runs a simple test to verify your E2B sandbox setup. You'll see a "hello world" output and a list of available files in the sandbox environment, confirming that code execution is working properly.
 
-1. Start the LLM server:
+2. Start the LLM server:
 
     **Make sure the port `8010` is available. You can adjust the port settings in [pyproject.toml](./pyproject.toml).**
 
@@ -79,7 +85,7 @@ This recipe requires a GPU with CUDA 12.5 support. Recommended GPUs:
 
     This launches the Llama model with MAX Serve, enabling structured output parsing for reliable code generation. The server runs locally on port `8010` and uses the `--enable-structured-output` flag for OpenAI-compatible function calling.
 
-2. Run the interactive agent:
+3. Run the interactive agent:
 
     ```bash
     magic run agent

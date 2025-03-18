@@ -9,7 +9,7 @@ In this recipe you will:
 
 ## Requirements
 
-To proceed, ensure you have the `magic` CLI installed:
+To proceed, ensure you have the `magic` CLI installed with the `magic --version` to be **0.7.2** or newer:
 
 ```bash
 curl -ssL https://magic.modular.com/ | bash

@@ -43,7 +43,7 @@ This recipe requires a GPU with at least 35GB of VRAM to run efficiently. Recomm
 * NVIDIA A40 (48GB)
 * NVIDIA L40 (48GB)
 
-To proceed, ensure you have the `magic` CLI installed:
+To proceed, ensure you have the `magic` CLI installed with the `magic --version` to be **0.7.2** or newer:
 
 ```bash
 curl -ssL https://magic.modular.com/ | bash

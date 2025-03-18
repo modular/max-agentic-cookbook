@@ -14,13 +14,13 @@ Note that this feature is available in [MAX nightly](https://github.com/modular/
 
 ## Requirements
 
-To proceed, please make sure to install the `magic` CLI
+To proceed, please make sure to install the `magic` CLI with the `magic --version` to be **0.7.2** or newer:
 
 ```bash
 curl -ssL https://magic.modular.com/ | bash
 ```
 
-Or update it via
+Or update it via:
 
 ```bash
 magic self-update
@@ -68,7 +68,6 @@ Function calling allows LLMs to enhance their responses by:
 Then to illustrate function calling, let's start with a simple example where an AI retrieves the weather using a mock function.
 
 **Make sure the port `8077` is available. You can adjust the port settings in [pyproject.toml](./pyproject.toml).**
-
 
 First run the server on port `8077` using the `magic` CLI:
 

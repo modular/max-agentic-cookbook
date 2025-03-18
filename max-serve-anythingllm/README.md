@@ -20,7 +20,7 @@ Please make sure your system meets our [minimum requirements](https://docs.modul
 
 ### Magic 🪄
 
-To proceed, ensure you have the `magic` CLI installed:
+To proceed, ensure you have the `magic` CLI installed with the `magic --version` to be **0.7.2** or newer:
 
 ```bash
 curl -ssL https://magic.modular.com/ | bash
