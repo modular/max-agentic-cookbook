@@ -73,7 +73,7 @@ def main():
 )
 
     players = completion.choices[0].message.parsed
-    logger.info(f"Players: {players}")
+    logger.info(f"{players.model_dump_json(indent=2)}")
     assert len(players.players) == 3
 
 if __name__ == "__main__":

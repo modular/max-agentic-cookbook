@@ -14,5 +14,5 @@ tags:
   - llama3-vision
 
 tasks:
-  - magic run app
-  - magic run clean
+  - magic run server
+  - magic run

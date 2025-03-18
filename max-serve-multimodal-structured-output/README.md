@@ -58,15 +58,21 @@ export HUGGING_FACE_HUB_TOKEN=<your-token-yere>
     cd max-serve-multimodal-structured-output
     ```
 
-2. Running the vision model:
+2. Run the server with vision model:
 
     **Make sure the port `8010` is available. You can adjust the port settings in [pyproject.toml](./pyproject.toml).**
 
     ```bash
-    magic run app
+    magic run server
     ```
 
-    This will start MAX Serve with Llama 3.2 Vision and run the example code that extracts player information from a basketball image.
+    This will start MAX Serve with Llama 3.2 Vision and
+
+3. Run the example code that extracts player information from a basketball image via:
+
+    ```bash
+    magic run python main.py
+    ```
 
     <img src="image.jpg" alt="Players" width="100%" style="max-width: 1024px;">
 
@@ -89,12 +95,6 @@ export HUGGING_FACE_HUB_TOKEN=<your-token-yere>
         }
     ]
     }
-    ```
-
-3. And once done, to clean up the resources run:
-
-    ```bash
-    magic run clean
     ```
 
 ## Features of Llama 3.2 Vision structured output

@@ -23,8 +23,8 @@ platforms = ["linux-64", "linux-aarch64"]
 max_serve_multimodal_structured_output = { path = ".", editable = true }
 
 [tool.pixi.tasks]
-app = "honcho start"
-clean = "honcho -f Procfile.clean start"
+server = "magic global install max-pipelines==25.2.0.dev2025031705; MAX_SERVE_PORT=8010 max-pipelines serve --model-path meta-llama/Llama-3.2-11B-Vision-Instruct --max-length=1000 --max-batch-size=1 --enable-structured-output"
+main = "magic run python main.py"
 test = "echo 'test passed'"
 
 [tool.pixi.dependencies]
