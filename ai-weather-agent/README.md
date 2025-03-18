@@ -85,7 +85,7 @@ echo "WEATHERAPI_API_KEY=your_api_key" >> backend/.env
 
     Note that it may take a few minutes for models to be downloaded and compiled.
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser to see the UI when all services below are ready:
+3. Open [http://localhost:3000](http://localhost:3000) in your browser to see the UI when **all services** below are ready:
 
    * MAX Serve embedding on port `7999`
    * MAX Serve Llama 3 on port `8000` and
