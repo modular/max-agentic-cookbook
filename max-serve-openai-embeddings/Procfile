@@ -1,2 +1,2 @@
-llm: for i in $(seq 1 3); do (magic global install max-pipelines && magic global update max-pipelines); MAX_SERVE_PORT=8000 HUGGING_FACE_HUB_TOKEN=$(cat .env | grep HUGGING_FACE_HUB_TOKEN | cut -d '=' -f2) && max-pipelines serve --model-path sentence-transformers/all-mpnet-base-v2 && break || (echo "Attempt $i failed, retrying..." && sleep 5); done
+llm: for i in $(seq 1 3); do (magic global install max-pipelines==25.2.0.dev2025031705); MAX_SERVE_PORT=8000 HUGGING_FACE_HUB_TOKEN=$(cat .env | grep HUGGING_FACE_HUB_TOKEN | cut -d '=' -f2) && max-pipelines serve --model-path sentence-transformers/all-mpnet-base-v2 && break || (echo "Attempt $i failed, retrying..." && sleep 5); done
 main: magic run python main.py && kill -2 $(pgrep -f "max-pipelines serve")
