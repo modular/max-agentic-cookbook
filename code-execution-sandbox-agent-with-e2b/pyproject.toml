@@ -30,6 +30,6 @@ platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
 code_execution_sandbox_agent_with_e2b = { path = ".", editable = true }
 
 [tool.pixi.tasks]
-server = "magic global install max-pipelines && magic global update max-pipelines; MAX_SERVE_PORT=8010 max-pipelines serve --model-path modularai/Llama-3.1-8B-Instruct-GGUF --enable-structured-output"
+server = "magic global install max-pipelines==25.2.0.dev2025031705; MAX_SERVE_PORT=8010 max-pipelines serve --model-path modularai/Llama-3.1-8B-Instruct-GGUF --enable-structured-output"
 hello = "magic run python hello.py"
 agent = "magic run python agent.py"
