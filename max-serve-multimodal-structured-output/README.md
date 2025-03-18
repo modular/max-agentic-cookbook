@@ -60,6 +60,8 @@ export HUGGING_FACE_HUB_TOKEN=<your-token-yere>
 
 2. Running the vision model:
 
+    **Make sure the port `8010` is available. You can adjust the port settings in [pyproject.toml](./pyproject.toml).**
+
     ```bash
     magic run app
     ```

@@ -65,6 +65,9 @@ magic self-update
 
 2. Run the application:
 
+    **Make sure the port `6333`, `6334` and `8010` are available. You can adjust the port settings in [Procfile](./Procfile).**
+
+
     ```bash
     magic run app
     ```

@@ -67,7 +67,10 @@ Function calling allows LLMs to enhance their responses by:
 
 Then to illustrate function calling, let's start with a simple example where an AI retrieves the weather using a mock function.
 
-First run the server on port 8077 using the `magic` CLI:
+**Make sure the port `8077` is available. You can adjust the port settings in [pyproject.toml](./pyproject.toml).**
+
+
+First run the server on port `8077` using the `magic` CLI:
 
 ```bash
 magic run server

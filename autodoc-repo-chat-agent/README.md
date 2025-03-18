@@ -49,22 +49,24 @@ magic self-update
 
 1. Download the code for this recipe using `magic` CLI:
 
-```bash
-magic init autodoc-repo-chat-agent --from modular/max-recipes/autodoc-repo-chat-agent
-cd autodoc-repo-chat-agent
-```
+    ```bash
+    magic init autodoc-repo-chat-agent --from modular/max-recipes/autodoc-repo-chat-agent
+    cd autodoc-repo-chat-agent
+    ```
 
 2. Start the LLM server:
 
-```bash
-magic run server
-```
+    **Make sure the port `8010` is available. You can adjust the port settings in [pyproject.toml](./pyproject.toml).**
+
+    ```bash
+    magic run server
+    ```
 
 3. In a new terminal, run the agent:
 
-```bash
-magic run agent
-```
+    ```bash
+    magic run agent
+    ```
 
 4. When prompted, you can:
    * Ask questions about a specific repository

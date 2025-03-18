@@ -77,6 +77,8 @@ echo "WEATHERAPI_API_KEY=your_api_key" >> backend/.env
 
 2. Run the application:
 
+    **Make sure the ports `8010` and `7999` are available. You can adjust the port settings in [Procfile](./Procfile).**
+
     ```bash
     magic run app
     ```

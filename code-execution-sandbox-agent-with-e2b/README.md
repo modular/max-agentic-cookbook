@@ -65,11 +65,13 @@ Please make sure your system meets our [system requirements](https://docs.modula
 
 1. Start the LLM server:
 
+    **Make sure the port `8010` is available. You can adjust the port settings in [pyproject.toml](./pyproject.toml).**
+
     ```bash
     magic run server
     ```
 
-    This launches the Llama model with MAX Serve, enabling structured output parsing for reliable code generation. The server runs locally on port 8010 and uses the `--enable-structured-output` flag for OpenAI-compatible function calling.
+    This launches the Llama model with MAX Serve, enabling structured output parsing for reliable code generation. The server runs locally on port `8010` and uses the `--enable-structured-output` flag for OpenAI-compatible function calling.
 
 2. Run the interactive agent:
 

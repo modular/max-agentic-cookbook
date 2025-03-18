@@ -55,6 +55,8 @@ magic self-update
 
 2. Run the MAX Serve server via in a terminal:
 
+    **Make sure the port `8010` is available. You can adjust the port settings in [pyproject.toml](./pyproject.toml).**
+
     ```bash
     magic run server
     ```

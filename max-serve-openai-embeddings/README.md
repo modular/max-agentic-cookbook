@@ -62,6 +62,8 @@ For running the app on GPU, ensure your system meets these GPU requirements:
 
 2. Run the embedding application
 
+    **Make sure the port `8000` is available. You can adjust the port settings in [Procfile](./Procfile).**
+
     ```bash
     magic run app
     ```
