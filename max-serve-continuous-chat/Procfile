@@ -1,2 +1,2 @@
-llm: (magic global install max-pipelines && magic global update max-pipelines); MAX_SERVE_PORT=8000 HUGGING_FACE_HUB_TOKEN=$(cat .env | grep HUGGING_FACE_HUB_TOKEN | cut -d '=' -f2) && max-pipelines serve --model-path modularai/Llama-3.1-8B-Instruct-GGUF --max-length 4096
+llm: magic global install max-pipelines==25.2.0.dev2025031705; MAX_SERVE_PORT=8000 HUGGING_FACE_HUB_TOKEN=$(cat .env | grep HUGGING_FACE_HUB_TOKEN | cut -d '=' -f2) && max-pipelines serve --model-path modularai/Llama-3.1-8B-Instruct-GGUF --max-length 4096
 ui: TOKENIZERS_PARALLELISM=false PORT=7860 magic run python ui.py
