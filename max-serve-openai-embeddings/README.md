@@ -54,18 +54,24 @@ HUGGING_FACE_HUB_TOKEN=<YOUR_HUGGING_FACE_HUB_TOKEN_HERE>
     **Make sure the port `8000` is available. You can adjust the port settings in [Procfile](./Procfile).**
 
     ```bash
-    magic run app
+    magic run server
     ```
 
-    This command is defined in the `pyproject.toml` file and invokes the `max-pipelines` CLI using `Procfile` for convenience.
+    This command is defined in the `pyproject.toml` file and invokes the `max-pipelines` CLI.
 
-    MAX Serve is ready once you see a line containing the following in the Docker output:
+    MAX Serve is ready once you see a line containing the following output:
 
     ```plaintext
     Server running on http://0.0.0.0:8000/
     ```
 
-    When the embedding code in `main.py` runs, you should see output like this:
+3. Run the embedding code in `main.py` with `magic`:
+
+    ```bash
+    magic run main
+    ```
+
+    And you should see output like this:
 
     ```plaintext
     === Generated embeddings with OpenAI client ===
@@ -75,7 +81,7 @@ HUGGING_FACE_HUB_TOKEN=<YOUR_HUGGING_FACE_HUB_TOKEN_HERE>
     1st few values of 1st embedding: [0.36384445428848267, -0.7647817730903625, ...]
     ```
 
-3. And once done with the app, to clean up the resources run:
+4. And once done with the app, to clean up the resources run:
 
     ```bash
     magic run clean

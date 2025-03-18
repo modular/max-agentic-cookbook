@@ -1,3 +1,0 @@
-cleanup: pkill -f "max-pipelines serve" || true && pkill -f "magic run python main.py" || true
-gpu-cleanup: command -v nvidia-smi >/dev/null && nvidia-smi pmon -c 1 | grep python | awk '{print $2}' | xargs -r kill -9 2>/dev/null || true
-port-cleanup: lsof -ti:8000 | xargs -r kill -9 2>/dev/null || true

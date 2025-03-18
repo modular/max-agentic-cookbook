@@ -12,5 +12,5 @@ tags:
   - embeddings
 
 tasks:
-  - magic run app
-  - magic run clean
+  - magic run server
+  - magic run main

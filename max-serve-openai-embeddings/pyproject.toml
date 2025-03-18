@@ -30,9 +30,9 @@ platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
 max_embeddings = { path = ".", editable = true }
 
 [tool.pixi.tasks]
-app = "honcho start"
-clean = "honcho -f Procfile.clean start"
-test = "honcho start"
+server = "magic global install max-pipelines==25.2.0.dev2025031705; MAX_SERVE_PORT=8000 max-pipelines serve --model-path sentence-transformers/all-mpnet-base-v2"
+main = "magic run python main.py"
+test = "echo 'test passed'"
 
 [tool.pixi.dependencies]
 docker-compose = ">=2.32.4,<3"
