@@ -35,7 +35,7 @@ services:
       - $HOME/.cache/huggingface:/root/.cache/huggingface
     ports:
       - "8000:8000"
-    command: "--huggingface-repo-id ${HUGGINGFACE_REPO_ID:-modularai/Llama-3.1-8B-Instruct-GGUF} --max-length ${MAX_CONTEXT_WINDOW:-4096} --max-batch-size ${MAX_BATCH_SIZE:-1}"
+    command: "--model-path ${HUGGINGFACE_REPO_ID:-modularai/Llama-3.1-8B-Instruct-GGUF} --max-length ${MAX_CONTEXT_WINDOW:-4096} --max-batch-size ${MAX_BATCH_SIZE:-1}"
 
   server-gpu:
     image: modular/max-openai-api:${MAX_OPENAI_API_VERSION:-nightly}
@@ -56,4 +56,4 @@ services:
               count: 1
               capabilities: [ gpu ]
     ipc: host
-    command: "--huggingface-repo-id ${HUGGINGFACE_REPO_ID:-modularai/Llama-3.1-8B-Instruct-GGUF} --max-length ${MAX_CONTEXT_WINDOW:-4096} --max-batch-size ${MAX_BATCH_SIZE:-1}"
+    command: "--model-path ${HUGGINGFACE_REPO_ID:-modularai/Llama-3.1-8B-Instruct-GGUF} --max-length ${MAX_CONTEXT_WINDOW:-4096} --max-batch-size ${MAX_BATCH_SIZE:-1}"

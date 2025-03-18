@@ -1,2 +1,2 @@
-max-serve-vision: (magic global install max-pipelines && magic global update max-pipelines) || true; MAX_SERVE_PORT=8010 MAX_SERVE_HOST=0.0.0.0 max-pipelines serve --huggingface-repo-id=meta-llama/Llama-3.2-11B-Vision-Instruct --max-length=1000 --max-batch-size=1 --enable-structured-output
+max-serve-vision: (magic global install max-pipelines && magic global update max-pipelines); MAX_SERVE_PORT=8010 max-pipelines serve --model-path meta-llama/Llama-3.2-11B-Vision-Instruct --max-length=1000 --max-batch-size=1 --enable-structured-output
 app: sleep 10 && magic run python main.py

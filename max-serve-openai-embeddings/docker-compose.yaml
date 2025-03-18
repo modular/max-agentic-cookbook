@@ -27,7 +27,7 @@ services:
       HF_HUB_ENABLE_HF_TRANSFER: "1"
     volumes:
       - ~/.cache/huggingface:/root/.cache/huggingface
-    command: --huggingface-repo-id sentence-transformers/all-mpnet-base-v2
+    command: --model-path sentence-transformers/all-mpnet-base-v2
     healthcheck:
       test: [ "CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/v1/health')" ]
       interval: 10s
@@ -53,7 +53,7 @@ services:
             - driver: nvidia
               count: all
               capabilities: [ gpu ]
-    command: --huggingface-repo-id sentence-transformers/all-mpnet-base-v2
+    command: --model-path sentence-transformers/all-mpnet-base-v2
     healthcheck:
       test: [ "CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/v1/health')" ]
       interval: 10s
