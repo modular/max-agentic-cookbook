@@ -55,6 +55,12 @@ or update it via:
 magic self-update
 ```
 
+Then install `max-pipelines` via:
+
+```bash
+magic global install max-pipelines=="25.2.0.dev2025031705"
+```
+
 ## Quick start
 
 1. Download the code for this recipe using the `magic` CLI:

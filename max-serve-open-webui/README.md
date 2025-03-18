@@ -31,7 +31,13 @@ curl -ssL https://magic.modular.com/ | bash
 magic self-update
 ```
 
-A valid [Hugging Face token](https://huggingface.co/settings/tokens) is required to access the model.
+Then install `max-pipelines` via:
+
+```bash
+magic global install max-pipelines=="25.2.0.dev2025031705"
+```
+
+For this recipe, you will need a valid [Hugging Face token](https://huggingface.co/settings/tokens) to access the model.
 Once you have obtained the token, include it in `.env` by running:
 
 ```bash

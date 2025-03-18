@@ -30,7 +30,13 @@ or update it via:
 magic self-update
 ```
 
-You'll need:
+Then install `max-pipelines` via:
+
+```bash
+magic global install max-pipelines=="25.2.0.dev2025031705"
+```
+
+For this recipe, you will need:
 
 * Access to [meta-llama/Llama-3.2-11B-Vision-Instruct](https://huggingface.co/meta-llama/Llama-3.2-11B-Vision-Instruct) model
 * A valid [Hugging Face token](https://huggingface.co/settings/tokens) for accessing Llama 3.2 Vision
