@@ -31,7 +31,7 @@ Please make sure your system meets our [system requirements](https://docs.modula
 
 This recipe requires a GPU with CUDA 12.5 support. Recommended GPUs:
 
-* NVIDIA H100 A100, A40, L40
+* NVIDIA H100 / H200, A100, A40, L40
 
 To proceed, ensure you have the `magic` CLI installed:
 

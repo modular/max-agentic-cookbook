@@ -19,7 +19,13 @@ The assistant provides:
 
 Please make sure your system meets our [system requirements](https://docs.modular.com/max/get-started).
 
-### Important: API keys and requirements
+### Important: GPU requirements
+
+This recipe requires a GPU with CUDA 12.5 support. Recommended GPUs:
+
+* NVIDIA H100 / H200, A100, A40, L40
+
+### API keys
 
 1. **E2B API Key**: Required for sandbox access
    * Sign up at [e2b.dev](https://e2b.dev/)

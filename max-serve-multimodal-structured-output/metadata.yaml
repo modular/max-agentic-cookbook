@@ -15,4 +15,4 @@ tags:
 
 tasks:
   - magic run server
-  - magic run
+  - magic run main

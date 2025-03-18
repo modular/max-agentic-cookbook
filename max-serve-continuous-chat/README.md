@@ -41,7 +41,7 @@ You'll need:
 
 For running the app on GPU, ensure your system meets these GPU requirements:
 
-* Supported GPUs: NVIDIA A100 (optimized), A10G, L4, or L40.
+* Supported GPUs: NVIDIA H100 / H200, A100, A10G, L4, or L40.
 * (Optional) Docker and Docker Compose: Installed with [NVIDIA GPU support](https://docs.docker.com/config/containers/resource_constraints/#gpu).
 * NVIDIA Drivers: [Installation guide here](https://www.nvidia.com/download/index.aspx).
 * NVIDIA Container Toolkit: [Installation guide here](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).

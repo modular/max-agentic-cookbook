@@ -40,17 +40,6 @@ then add your token in `.env`
 HUGGING_FACE_HUB_TOKEN=<YOUR_HUGGING_FACE_HUB_TOKEN_HERE>
 ```
 
-### GPU requirements
-
-For running the app on GPU, ensure your system meets these GPU requirements:
-
-- Supported GPUs: NVIDIA A100 (optimized), A10G, L4, or L40.
-- (Optional) Docker and Docker Compose: Installed with [NVIDIA GPU support](https://docs.docker.com/config/containers/resource_constraints/#gpu).
-- NVIDIA Drivers: [Installation guide here](https://www.nvidia.com/download/index.aspx).
-- NVIDIA Container Toolkit: [Installation guide here](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
-
-**Docker and Docker Compose are optional. Note that this recipe works on compatible Linux machines. We are actively working on enabling MAX Serve Docker image for MacOS ARM64 as well.**
-
 ## Quick start
 
 1. Download the code for this recipe using the `magic` CLI:

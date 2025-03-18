@@ -45,7 +45,7 @@ export HUGGING_FACE_HUB_TOKEN=<your-token-yere>
 
 **Structured output with MAX Serve requires GPU access**. For running the app on GPU, ensure your system meets these GPU requirements:
 
-* Supported GPUs: NVIDIA A100 (optimized), A10G, L4, or L40
+* Supported GPUs: NVIDIA H100 / H200, A100, A10G, L4, or L40
 * NVIDIA Drivers: [Installation guide here](https://www.nvidia.com/download/index.aspx)
 * NVIDIA Container Toolkit: [Installation guide here](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
 
