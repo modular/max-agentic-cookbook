@@ -424,7 +424,10 @@ This structured approach ensures that:
 
 You can interact with the agent using natural language queries like:
 
-1. Basic calculations:
+1. Test with querying "Hi" and see the agent responds by generating `print("Hello")` and executing it
+2. Find fibonacci 100
+3. Sum of all twin prime numbers below 1000
+4. How many r's are in the word strawberry?
 
 ### Key components
 
