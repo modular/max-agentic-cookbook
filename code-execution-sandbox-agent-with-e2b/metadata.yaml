@@ -1,6 +1,6 @@
 version: 1.0
 long_title: "Build a Code Execution Agent with Llama, E2B Sandbox and MAX Serve"
-short_title: "Code Execution Agent with E2B Sandbox"
+short_title: "Code Executor Agent with E2B Sandbox"
 author: "Ehsan M. Kermani"
 author_image: "author/ehsan.jpg"
 author_url: "https://www.linkedin.com/in/ehsanmkermani/"

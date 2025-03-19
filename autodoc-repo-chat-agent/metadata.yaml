@@ -1,6 +1,6 @@
 version: 1.0
 long_title: "Learn How to Build a GitHub Chat and Auto-Doc Agent with Qwen2.5 and MAX Serve"
-short_title: "GitHub Chat and AutoDoc Agent with Qwen2.5 and MAX Serve"
+short_title: "Auto Documentation Agent for GitHub Repository"
 author: "Ehsan M. Kermani"
 author_image: "author/ehsan.jpg"
 author_url: "https://www.linkedin.com/in/ehsanmkermani/"
