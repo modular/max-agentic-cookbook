@@ -30,7 +30,7 @@ platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
 max_embeddings = { path = ".", editable = true }
 
 [tool.pixi.tasks]
-server = "magic global install max-pipelines==25.2.0.dev2025031705; MAX_SERVE_PORT=8000 max-pipelines serve --model-path sentence-transformers/all-mpnet-base-v2"
+server = "MAX_SERVE_PORT=8000 max-pipelines serve --model-path sentence-transformers/all-mpnet-base-v2"
 main = "magic run python main.py"
 test = "echo 'test passed'"
 

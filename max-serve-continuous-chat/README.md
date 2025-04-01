@@ -35,7 +35,7 @@ magic self-update
 Then install `max-pipelines` via:
 
 ```bash
-magic global install max-pipelines=="25.2.0.dev2025031705"
+magic global install -u max-pipelines
 ```
 
 For this recipe, you will need:
@@ -339,7 +339,7 @@ When deploying your chat application, consider these key factors:
 You can explore various configuration options by running:
 
 ```bash
-magic global install max-pipelines
+magic global install -u max-pipelines
 max-pipelines serve --help
 ```
 

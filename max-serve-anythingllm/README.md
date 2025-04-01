@@ -35,7 +35,7 @@ magic self-update
 Then install `max-pipelines` via:
 
 ```bash
-magic global install max-pipelines=="25.2.0.dev2025031705"
+magic global install -u max-pipelines
 ```
 
 ### Hugging Face

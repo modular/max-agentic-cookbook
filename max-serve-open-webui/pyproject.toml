@@ -54,7 +54,7 @@ max = "max-pipelines serve --model-path modularai/Llama-3.1-8B-Instruct-GGUF --m
 
 ### Dependencies
 [tool.pixi.feature.max.dependencies]
-max-pipelines = "==25.2.0.dev2025031705"
+max-pipelines = "*"
 
 
 ## ENVIRONMENT: BASE

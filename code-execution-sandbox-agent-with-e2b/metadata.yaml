@@ -9,7 +9,7 @@ date: "11-03-2025"
 difficulty: "beginner"
 tags:
   - agent
-  - llama
+  - llama3
   - code-execution
   - structured-output
 

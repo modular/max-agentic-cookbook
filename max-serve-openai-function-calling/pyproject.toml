@@ -33,7 +33,7 @@ platforms = ["linux-64", "osx-arm64", "linux-aarch64"]
 max_serve_openai_function_calling = { path = ".", editable = true }
 
 [tool.pixi.tasks]
-server = "(magic global install max-pipelines==25.2.0.dev2025031705); MAX_SERVE_PORT=8077 max-pipelines serve --model-path modularai/Llama-3.1-8B-Instruct-GGUF --max-length=2048"
+server = "MAX_SERVE_PORT=8077 max-pipelines serve --model-path modularai/Llama-3.1-8B-Instruct-GGUF --max-length=2048"
 single_function_call = "magic run python single_function_call.py"
 multi_function_calls = "magic run python multi_function_calls.py"
 app = "magic run python app.py"

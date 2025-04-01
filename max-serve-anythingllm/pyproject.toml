@@ -40,8 +40,9 @@ llm = "max-pipelines serve  --max-length=$MAX_CONTEXT_LENGTH --max-batch-size=$M
 ui = "docker run -p $UI_PORT:3001 --name $UI_CONTAINER_NAME --cap-add SYS_ADMIN -v $UI_STORAGE_LOCATION:/app/server/storage -v $UI_STORAGE_LOCATION/.env:/app/server/.env -e STORAGE_DIR=\"/app/server/storage\" mintplexlabs/anythingllm"
 clean = "pkill -f \"max-pipelines serve\" || true && lsof -ti:$MAX_SERVE_PORT,$UI_PORT | xargs -r kill -9 2>/dev/null || true && docker rm -f $UI_CONTAINER_NAME 2>/dev/null || true"
 test = "echo 'test passed'"
+
 [tool.pixi.dependencies]
-max-pipelines = "==25.2.0.dev2025031705"
+max-pipelines = "*"
 honcho = ">=2.0.0,<3"
 tomli = ">=2.2.1,<3"
 python-dotenv = ">=1.0.1,<2"
