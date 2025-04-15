@@ -45,8 +45,11 @@ def create_mandelbrot_graph(
 ) -> Graph:
     """Configure a graph to run a Mandelbrot kernel."""
     output_dtype = DType.int32
+    mojo_kernels = Path(__file__).parent / "operations"
+
     with Graph(
         "mandelbrot",
+        custom_extensions=[mojo_kernels],
     ) as graph:
         # The custom Mojo operation is referenced by its string name, and we
         # need to provide inputs as a list as well as expected output types.
@@ -68,8 +71,6 @@ def create_mandelbrot_graph(
 
 
 if __name__ == "__main__":
-    path = Path(__file__).parent / "operations.mojopkg"
-
     # Establish Mandelbrot set ranges.
     WIDTH = 60
     HEIGHT = 25
@@ -90,10 +91,8 @@ if __name__ == "__main__":
     device = CPU() if accelerator_count() == 0 else Accelerator()
 
     # Set up an inference session that runs the graph on a GPU, if available.
-    session = InferenceSession(
-        devices=[device],
-        custom_extensions=path,
-    )
+    session = InferenceSession(devices=[device])
+
     # Compile the graph.
     model = session.load(graph)
 

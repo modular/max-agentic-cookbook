@@ -112,7 +112,7 @@ def main():
     args = parser.parse_args()
 
     # Get the path to our compiled custom ops
-    path = Path(__file__).parent / "operations.mojopkg"
+    mojo_kernels = Path(__file__).parent / "operations"
 
     # Initialize the next word frequency for each unique word
     frequencies = NextWordFrequency(INPUT_TEXT)
@@ -129,6 +129,7 @@ def main():
         "top_k_sampler",
         # The dtype and shape of the probabilities being passed in
         input_types=[TensorType(DType.float32, shape=[batch_size, K])],
+        custom_extensions=[mojo_kernels],
     ) as graph:
         # Take the probabilities as a single input to the graph.
         probs, *_ = graph.inputs
@@ -153,7 +154,7 @@ def main():
     device = CPU() if args.cpu or accelerator_count() == 0 else Accelerator()
 
     # Set up an inference session for running the graph.
-    session = InferenceSession(devices=[device], custom_extensions=path)
+    session = InferenceSession(devices=[device])
 
     # Compile the graph.
     model = session.load(graph)

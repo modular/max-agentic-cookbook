@@ -27,4 +27,4 @@ matrix_multiplication = { cmd = "python matrix_multiplication.py", depends-on = 
 benchmarks = { cmd = "mojo benchmarks.mojo", depends-on = ["package"] }
 
 [tool.pixi.dependencies]
-max = "==25.2.0.dev2025031705"
+max = "==25.3.0.dev2025041105"

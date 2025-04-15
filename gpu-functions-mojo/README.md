@@ -112,13 +112,12 @@ implement that in MAX.
 
     ```mojo
     fn vector_addition(
-        length: Int,
         lhs: LayoutTensor[float_dtype],
         rhs: LayoutTensor[float_dtype],
         out: LayoutTensor[float_dtype],
     ):
         tid = block_dim.x * block_idx.x + thread_idx.x
-        if tid < length:
+        if tid < out.layout.size():
             out[tid] = lhs[tid] + rhs[tid]
     ```
 
@@ -179,7 +178,6 @@ implement that in MAX.
 
     gpu_function(
         gpu_device,
-        VECTOR_WIDTH,
         lhs_tensor.to_layout_tensor(),
         rhs_tensor.to_layout_tensor(),
         out_tensor.to_layout_tensor(),
@@ -283,19 +281,24 @@ optimizations to take advantage of hardware resources. The GPU function for
 this looks like the following:
 
 ```mojo
-fn naive_matrix_multiplication(
-    i: Int,
-    j: Int,
-    k: Int,
-    m: LayoutTensor[float_dtype],
-    n: LayoutTensor[float_dtype],
-    p: LayoutTensor[float_dtype],
+fn naive_matrix_multiplication[
+    m_layout: Layout,
+    n_layout: Layout,
+    p_layout: Layout,
+](
+    m: LayoutTensor[float_dtype, m_layout, MutableAnyOrigin],
+    n: LayoutTensor[float_dtype, n_layout, MutableAnyOrigin],
+    p: LayoutTensor[float_dtype, p_layout, MutableAnyOrigin],
 ):
     row = block_dim.y * block_idx.y + thread_idx.y
     col = block_dim.x * block_idx.x + thread_idx.x
 
-    if row < i and col < k:
-        for j_index in range(j):
+    m_dim = p.dim(0)
+    n_dim = p.dim(1)
+    k_dim = n.dim(0)
+
+    if row < m_dim and col < n_dim:
+        for j_index in range(k_dim):
             p[row, col] += m[row, j_index] * n[j_index, col]
 ```
 

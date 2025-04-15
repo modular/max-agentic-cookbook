@@ -20,7 +20,7 @@ from max.engine import InferenceSession
 from max.graph import Graph, TensorType, ops
 
 if __name__ == "__main__":
-    path = Path(__file__).parent / "operations.mojopkg"
+    mojo_kernels = Path(__file__).parent / "operations"
 
     rows = 5
     columns = 10
@@ -39,16 +39,14 @@ if __name__ == "__main__":
         input_types=[
             TensorType(dtype, shape=[rows, columns]),
         ],
+        custom_extensions=[mojo_kernels],
     )
 
     # Place the graph on a GPU, if available. Fall back to CPU if not.
     device = CPU() if accelerator_count() == 0 else Accelerator()
 
     # Set up an inference session for running the graph.
-    session = InferenceSession(
-        devices=[device],
-        custom_extensions=path,
-    )
+    session = InferenceSession(devices=[device])
 
     # Compile the graph.
     model = session.load(graph)

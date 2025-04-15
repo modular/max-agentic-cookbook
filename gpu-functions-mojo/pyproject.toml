@@ -22,10 +22,10 @@ channels = [
 platforms = ["linux-64", "linux-aarch64"]
 
 [tool.pixi.tasks]
-vector_addition = { cmd = "mojo vector_addition.mojo" }
-grayscale = { cmd = "mojo grayscale.mojo" }
-naive_matrix_multiplication = { cmd = "mojo naive_matrix_multiplication.mojo" }
-mandelbrot = { cmd = "mojo mandelbrot.mojo" }
+vector_addition = "mojo vector_addition.mojo"
+grayscale = "mojo grayscale.mojo"
+naive_matrix_multiplication = "mojo naive_matrix_multiplication.mojo"
+mandelbrot = "mojo mandelbrot.mojo"
 
 [tool.pixi.dependencies]
-max = "==25.2.0.dev2025031705"
+max = "==25.3.0.dev2025041105"

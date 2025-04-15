@@ -23,7 +23,7 @@ struct AddOne:
     @staticmethod
     fn execute[
         # The kind of device this will be run on: "cpu" or "gpu"
-        target: StringLiteral,
+        target: StaticString,
     ](
         # the first argument is the "output"
         out: OutputTensor,
