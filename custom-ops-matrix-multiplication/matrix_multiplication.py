@@ -11,7 +11,6 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-import os
 from pathlib import Path
 
 import numpy as np
@@ -36,6 +35,8 @@ def matrix_multiplication(
     a_tensor = Tensor.from_numpy(a).to(device)
     b_tensor = Tensor.from_numpy(b).to(device)
 
+    mojo_kernels = Path(__file__).parent / "operations"
+
     # Configure our simple one-operation graph.
     with Graph(
         "matrix_multiplication_graph",
@@ -43,6 +44,7 @@ def matrix_multiplication(
             TensorType(dtype, shape=a_tensor.shape),
             TensorType(dtype, shape=b_tensor.shape),
         ],
+        custom_extensions=[mojo_kernels],
     ) as graph:
         # Take in the two inputs to the graph.
         a_value, b_value = graph.inputs
@@ -76,8 +78,6 @@ def matrix_multiplication(
 
 
 if __name__ == "__main__":
-    path = Path(__file__).parent / "operations.mojopkg"
-
     M = 256
     K = 256
     N = 256
@@ -86,10 +86,7 @@ if __name__ == "__main__":
     device = CPU() if accelerator_count() == 0 else Accelerator()
 
     # Set up an inference session for running the graph.
-    session = InferenceSession(
-        devices=[device],
-        custom_extensions=path,
-    )
+    session = InferenceSession(devices=[device])
 
     # Fill the input matrices with random values.
     a = np.random.uniform(size=(M, K)).astype(np.float32)

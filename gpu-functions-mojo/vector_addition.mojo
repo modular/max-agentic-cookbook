@@ -33,14 +33,13 @@ fn vector_addition[
     rhs_layout: Layout,
     out_layout: Layout,
 ](
-    length: Int,
     lhs: LayoutTensor[float_dtype, lhs_layout, MutableAnyOrigin],
     rhs: LayoutTensor[float_dtype, rhs_layout, MutableAnyOrigin],
     out: LayoutTensor[float_dtype, out_layout, MutableAnyOrigin],
 ):
     """The calculation to perform across the vector on the GPU."""
     tid = block_dim.x * block_idx.x + thread_idx.x
-    if tid < length:
+    if tid < out.layout.size():
         out[tid] = lhs[tid] + rhs[tid]
 
 
@@ -95,7 +94,6 @@ def main():
         # are the dimensions of the grid in blocks, and the block dimensions.
         gpu_function(
             gpu_device,
-            VECTOR_WIDTH,
             lhs_layout_tensor,
             rhs_layout_tensor,
             out_layout_tensor,

@@ -120,7 +120,7 @@ is defined in Mojo within `operations/add_one.mojo`:
 struct AddOne:
     @staticmethod
     fn execute[
-        target: StringLiteral,
+        target: StaticString,
     ](
         out: OutputTensor,
         x: InputTensor[type = out.type, rank = out.rank],
@@ -167,6 +167,7 @@ graph = Graph(
     input_types=[
         TensorType(dtype, shape=[rows, columns]),
     ],
+    custom_extensions=[mojo_kernels],
 )
 ```
 

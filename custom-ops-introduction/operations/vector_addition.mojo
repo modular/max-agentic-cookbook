@@ -17,15 +17,15 @@ import compiler
 from gpu import block_dim, block_idx, thread_idx
 from gpu.host import DeviceContext
 from runtime.asyncrt import DeviceContextPtr
-from tensor import OutputTensor, InputTensor, foreach
+from tensor import InputTensor, ManagedTensorSlice, OutputTensor, foreach
 
 from utils.index import IndexList
 
 
 fn vector_addition_cpu(
-    out: OutputTensor,
-    lhs: InputTensor[type = out.type, rank = out.rank],
-    rhs: InputTensor[type = out.type, rank = out.rank],
+    out: ManagedTensorSlice[mut=True],
+    lhs: ManagedTensorSlice[type = out.type, rank = out.rank],
+    rhs: ManagedTensorSlice[type = out.type, rank = out.rank],
     ctx: DeviceContextPtr,
 ):
     # Warning: This is an extremely inefficient implementation! It's merely an
@@ -37,9 +37,9 @@ fn vector_addition_cpu(
 
 
 fn vector_addition_gpu(
-    out: OutputTensor,
-    lhs: InputTensor[type = out.type, rank = out.rank],
-    rhs: InputTensor[type = out.type, rank = out.rank],
+    out: ManagedTensorSlice[mut=True],
+    lhs: ManagedTensorSlice[type = out.type, rank = out.rank],
+    rhs: ManagedTensorSlice[type = out.type, rank = out.rank],
     ctx: DeviceContextPtr,
 ) raises:
     # Note: The following has not been tuned for any GPU hardware, and is an
@@ -72,7 +72,7 @@ struct VectorAddition:
     @staticmethod
     fn execute[
         # The kind of device this will be run on: "cpu" or "gpu"
-        target: StringLiteral,
+        target: StaticString,
     ](
         # as num_dps_outputs=1, the first argument is the "output"
         out: OutputTensor[rank=1],

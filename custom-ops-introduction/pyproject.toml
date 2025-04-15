@@ -22,10 +22,9 @@ channels = [
 platforms = ["linux-64", "osx-arm64", "linux-aarch64"]
 
 [tool.pixi.tasks]
-package = "mojo package operations/ -o operations.mojopkg"
-add_one = { cmd = "python add_one.py", depends-on = ["package"] }
-mandelbrot = { cmd = "python mandelbrot.py", depends-on = ["package"] }
-vector_addition = { cmd = "python vector_addition.py", depends-on = ["package"] }
+add_one = "python add_one.py"
+mandelbrot = "python mandelbrot.py"
+vector_addition = "python vector_addition.py"
 
 [tool.pixi.dependencies]
-max = "==25.2.0.dev2025031705"
+max = "==25.3.0.dev2025041105"

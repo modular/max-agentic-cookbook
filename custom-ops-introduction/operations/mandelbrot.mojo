@@ -28,7 +28,7 @@ struct Mandelbrot:
     @staticmethod
     fn execute[
         # The kind of device this will be run on: "cpu" or "gpu"
-        target: StringLiteral,
+        target: StaticString,
     ](
         # as num_dps_outputs=1, the first argument is the "output"
         out: OutputTensor,
