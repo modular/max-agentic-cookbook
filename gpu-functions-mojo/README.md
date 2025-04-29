@@ -3,7 +3,7 @@
 In this recipe, we will cover:
 
 - Writing thread-parallel GPU functions in Mojo
-- Compiling and dispatching these functions to a GPU using the MAX Driver API
+- Compiling and dispatching these functions to a GPU
 - Translating common CUDA C programming patterns to MAX and Mojo
 
 We'll walk through four GPU programming examples:
@@ -37,10 +37,10 @@ magic self-update
 These examples require a MAX-compatible GPU satisfying
 [these requirements](https://docs.modular.com/max/faq/#gpu-requirements):
 
-- Officially supported GPUs: NVIDIA Ampere A-series (A100/A10), or Ada
-  L4-series (L4/L40) data center GPUs. Unofficially, RTX 30XX and 40XX series
-  GPUs have been reported to work well with MAX.
-- NVIDIA GPU driver version 555 or higher. [Installation guide here](https://www.nvidia.com/download/index.aspx).
+- Officially supported GPUs: NVIDIA Ampere A-series (A100/A10), Ada
+  L4-series (L4/L40), and Hopper (H100/H200) data center GPUs. Unofficially,
+  RTX 30XX and 40XX series GPUs have been reported to work well with MAX.
+- NVIDIA GPU driver version 540 or higher. [Installation guide here](https://www.nvidia.com/download/index.aspx).
 
 ## Quick start
 
@@ -76,10 +76,10 @@ All of the operations that power AI models within MAX are written in Mojo.
 
 We'll demonstrate an entry point into GPU programming with MAX allowing you to
 define, compile, and dispatch onto a GPU individual thread-based functions. This
-is powered by the [MAX Driver](https://docs.modular.com/max/api/mojo/driver/)
-API, which handles all the hardware-specific details of allocating and
-transferring memory between host and accelerator, as well as compilation and
-execution of accelerator-targeted functions.
+is powered by the [Mojo `gpu` module](https://docs.modular.com/mojo/stdlib/gpu/),
+which handles all the hardware-specific details of allocating and transferring
+memory between host and accelerator, as well as compilation and execution of
+accelerator-targeted functions.
 
 The first three examples in this recipe show common starting points for
 thread-based GPU programming. They follow the first three examples in the
@@ -106,59 +106,47 @@ implement that in MAX.
 
     The function itself is very simple, running once per thread, adding each
     element in the two input vectors that correspond to that thread ID, and
-    storing the result in the output vector at the matching location. If a block
-    of threads is dispatched that is wider than the vector length, no work is
-    performed by threads past the end of the vector.
+    storing the result in the output vector at the matching location.
 
     ```mojo
     fn vector_addition(
-        lhs: LayoutTensor[float_dtype],
-        rhs: LayoutTensor[float_dtype],
-        out: LayoutTensor[float_dtype],
+        lhs_tensor: LayoutTensor[float_dtype, layout, MutableAnyOrigin],
+        rhs_tensor: LayoutTensor[float_dtype, layout, MutableAnyOrigin],
+        out_tensor: LayoutTensor[float_dtype, layout, MutableAnyOrigin],
     ):
-        tid = block_dim.x * block_idx.x + thread_idx.x
-        if tid < out.layout.size():
-            out[tid] = lhs[tid] + rhs[tid]
+        var tid = thread_idx.x
+        out_tensor[tid] = lhs_tensor[tid] + rhs_tensor[tid]
     ```
 
-1. Obtain a reference to the host (CPU) and accelerator (GPU) devices.
+1. Obtain a reference to the accelerator (GPU) context.
 
     ```mojo
-    gpu_device = accelerator()
-    host_device = cpu()
+    var ctx = DeviceContext()
     ```
-
-    If no MAX-compatible accelerator is found, this exits with an error.
 
 1. Allocate input and output vectors.
 
-    The left-hand-side and right-hand-side vectors need to be allocated on the
-    CPU, initialized with values, and then moved to the GPU for use by our
-    function. This is done using the MAX Driver API's
-    [`Tensor`](https://docs.modular.com/max/api/mojo/driver/tensor/Tensor) type.
+    Buffers for the left-hand-side and right-hand-side vectors need to be
+    allocated on the GPU and initialized with values.
 
     ```mojo
     alias float_dtype = DType.float32
-    alias tensor_rank = 1
     alias VECTOR_WIDTH = 10
 
-    lhs_tensor = Tensor[float_dtype, 1]((VECTOR_WIDTH), host_device)
-    rhs_tensor = Tensor[float_dtype, 1]((VECTOR_WIDTH), host_device)
+    var lhs_buffer = ctx.enqueue_create_buffer[float_dtype](VECTOR_WIDTH)
+    var rhs_buffer = ctx.enqueue_create_buffer[float_dtype](VECTOR_WIDTH)
 
-    for i in range(VECTOR_WIDTH):
-        lhs_tensor[i] = 1.25
-        rhs_tensor[i] = 2.5
+    _ = lhs_buffer.enqueue_fill(1.25)
+    _ = rhs_buffer.enqueue_fill(2.5)
 
     lhs_tensor = lhs_tensor.move_to(gpu_device)
     rhs_tensor = rhs_tensor.move_to(gpu_device)
     ```
 
-    A tensor to hold the result of the calculation is allocated on the GPU:
+    A buffer to hold the result of the calculation is allocated on the GPU:
 
     ```mojo
-    out_tensor = Tensor[float_dtype, tensor_rank](
-        (VECTOR_WIDTH), gpu_device
-    )
+    var out_buffer = ctx.enqueue_create_buffer[float_dtype](VECTOR_WIDTH)
     ```
 
 1. Compile and dispatch the function.
@@ -166,23 +154,17 @@ implement that in MAX.
     The actual `vector_addition()` function we want to run on the GPU is
     compiled and dispatched across a grid, divided into blocks of threads. All
     arguments to this GPU function are provided here, in an order that
-    corresponds to their location in the function signature. Note that in MAX,
+    corresponds to their location in the function signature. Note that in Mojo,
     the GPU function is compiled for the GPU at the time of compilation of the
     Mojo file containing it.
 
     ```mojo
-    gpu_function = Accelerator.compile[vector_addition](gpu_device)
-
-    alias BLOCK_SIZE = 16
-    var num_blocks = ceildiv(VECTOR_WIDTH, BLOCK_SIZE)
-
-    gpu_function(
-        gpu_device,
-        lhs_tensor.to_layout_tensor(),
-        rhs_tensor.to_layout_tensor(),
-        out_tensor.to_layout_tensor(),
-        grid_dim=Dim(num_blocks),
-        block_dim=Dim(BLOCK_SIZE),
+    ctx.enqueue_function[vector_addition](
+        lhs_tensor,
+        rhs_tensor,
+        out_tensor,
+        grid_dim=1,
+        block_dim=VECTOR_WIDTH,
     )
     ```
 
@@ -192,9 +174,9 @@ implement that in MAX.
     host to be examined:
 
     ```mojo
-    out_tensor = out_tensor.move_to(host_device)
-
-    print("Resulting vector:", out_tensor)
+    with out_buffer.map_to_host() as host_buffer:
+        var host_tensor = LayoutTensor[float_dtype, layout](host_buffer)
+        print("Resulting vector:", host_tensor)
     ```
 
 To try out this example yourself, run it using the following command:
@@ -225,42 +207,37 @@ gray = 0.21 * red + 0.71 * green + 0.07 * blue
 And here is the per-thread function to perform this on the GPU:
 
 ```mojo
-fn color_to_grayscale_conversion(
-    width: Int,
-    height: Int,
-    image: LayoutTensor[channel_dtype],
-    out: LayoutTensor[channel_dtype],
+fn color_to_grayscale(
+    rgb_tensor: LayoutTensor[int_dtype, rgb_layout, MutableAnyOrigin],
+    gray_tensor: LayoutTensor[int_dtype, gray_layout, MutableAnyOrigin],
 ):
-    row = block_dim.y * block_idx.y + thread_idx.y
-    col = block_dim.x * block_idx.x + thread_idx.x
+    row = global_idx.y
+    col = global_idx.x
 
-    if col < width and row < height:
-        red = image[row, col, 0].cast[internal_float_dtype]()
-        green = image[row, col, 1].cast[internal_float_dtype]()
-        blue = image[row, col, 2].cast[internal_float_dtype]()
+    if col < WIDTH and row < HEIGHT:
+        red = rgb_tensor[row, col, 0].cast[float_dtype]()
+        green = rgb_tensor[row, col, 1].cast[float_dtype]()
+        blue = rgb_tensor[row, col, 2].cast[float_dtype]()
         gray = 0.21 * red + 0.71 * green + 0.07 * blue
 
-        out[row, col, 0] = gray.cast[channel_dtype]()
+        gray_tensor[row, col, 0] = gray.cast[int_dtype]()
 ```
 
 The setup, compilation, and execution of this function is much the same as in
 the previous example, but in this case we're using rank-3 instead of rank-1
-`Tensor`s to hold the values. Also, we dispatch the function over a 2-D grid
+buffers to hold the values. Also, we dispatch the function over a 2-D grid
 of block, which looks like the following:
 
 ```mojo
 alias BLOCK_SIZE = 16
-num_col_blocks = ceildiv(IMAGE_WIDTH, BLOCK_SIZE)
-num_row_blocks = ceildiv(IMAGE_HEIGHT, BLOCK_SIZE)
+num_col_blocks = ceildiv(WIDTH, BLOCK_SIZE)
+num_row_blocks = ceildiv(HEIGHT, BLOCK_SIZE)
 
-gpu_function(
-    gpu_device,
-    IMAGE_WIDTH,
-    IMAGE_HEIGHT,
-    rgb_tensor.to_layout_tensor(),
-    gray_tensor.to_layout_tensor(),
-    grid_dim=Dim(num_col_blocks, num_row_blocks),
-    block_dim=Dim(BLOCK_SIZE, BLOCK_SIZE),
+ctx.enqueue_function[color_to_grayscale](
+    rgb_tensor,
+    gray_tensor,
+    grid_dim=(num_col_blocks, num_row_blocks),
+    block_dim=(BLOCK_SIZE, BLOCK_SIZE),
 )
 ```
 
@@ -281,25 +258,21 @@ optimizations to take advantage of hardware resources. The GPU function for
 this looks like the following:
 
 ```mojo
-fn naive_matrix_multiplication[
-    m_layout: Layout,
-    n_layout: Layout,
-    p_layout: Layout,
-](
+fn naive_matrix_multiplication(
     m: LayoutTensor[float_dtype, m_layout, MutableAnyOrigin],
     n: LayoutTensor[float_dtype, n_layout, MutableAnyOrigin],
     p: LayoutTensor[float_dtype, p_layout, MutableAnyOrigin],
 ):
-    row = block_dim.y * block_idx.y + thread_idx.y
-    col = block_dim.x * block_idx.x + thread_idx.x
+    var row = global_idx.y
+    var col = global_idx.x
 
-    m_dim = p.dim(0)
-    n_dim = p.dim(1)
-    k_dim = n.dim(0)
+    var m_dim = p.dim(0)
+    var n_dim = p.dim(1)
+    var k_dim = m.dim(1)
 
     if row < m_dim and col < n_dim:
         for j_index in range(k_dim):
-            p[row, col] += m[row, j_index] * n[j_index, col]
+            p[row, col] = p[row, col] + m[row, j_index] * n[j_index, col]
 ```
 
 The overall setup and execution of this function are extremely similar to the
@@ -329,32 +302,29 @@ The per-thread GPU function for this is as follows:
 
 ```mojo
 fn mandelbrot(
-    min_x: Scalar[float_dtype],
-    min_y: Scalar[float_dtype],
-    scale_x: Scalar[float_dtype],
-    scale_y: Scalar[float_dtype],
-    max_iterations: Scalar[int_dtype],
-    out: TensorType,
+    tensor: LayoutTensor[int_dtype, layout, MutableAnyOrigin],
 ):
-    var row = block_dim.y * block_idx.y + thread_idx.y
-    var col = block_dim.x * block_idx.x + thread_idx.x
+    var row = global_idx.y
+    var col = global_idx.x
 
-    var cx = min_x + col * scale_x
-    var cy = min_y + row * scale_y
+    alias SCALE_X = (MAX_X - MIN_X) / GRID_WIDTH
+    alias SCALE_Y = (MAX_Y - MIN_Y) / GRID_HEIGHT
+
+    var cx = MIN_X + col * SCALE_X
+    var cy = MIN_Y + row * SCALE_Y
     var c = ComplexSIMD[float_dtype, 1](cx, cy)
-
     var z = ComplexSIMD[float_dtype, 1](0, 0)
     var iters = Scalar[int_dtype](0)
 
     var in_set_mask: Scalar[DType.bool] = True
-    for _ in range(max_iterations):
+    for _ in range(MAX_ITERATIONS):
         if not any(in_set_mask):
             break
         in_set_mask = z.squared_norm() <= 4
         iters = in_set_mask.select(iters + 1, iters)
         z = z.squared_add(c)
 
-    out[row, col] = iters
+    tensor[row, col] = iters
 ```
 
 This begins by calculating the complex number which represents a given location
@@ -420,10 +390,10 @@ grids, or look into different areas in the complex number space.
 ## Conclusion
 
 In this recipe, we've demonstrated how to perform the very basics of
-thread-parallel GPU programming in MAX using Mojo and the MAX Driver API. This
+thread-parallel GPU programming in Mojo. This
 is a programming model that is very familiar to those used to CUDA C, and we
 have used a series of common examples to show how to map concepts from CUDA to
-MAX.
+Mojo.
 
 MAX has far more power available for fully utilizing GPUs through
 [building computational graphs](https://docs.modular.com/max/tutorials/get-started-with-max-graph-in-python)

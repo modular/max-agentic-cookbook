@@ -28,4 +28,4 @@ naive_matrix_multiplication = "mojo naive_matrix_multiplication.mojo"
 mandelbrot = "mojo mandelbrot.mojo"
 
 [tool.pixi.dependencies]
-max = "==25.3.0.dev2025041105"
+max = "==25.3.0.dev2025042905"
