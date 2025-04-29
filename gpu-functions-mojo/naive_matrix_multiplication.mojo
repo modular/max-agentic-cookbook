@@ -35,30 +35,30 @@ def main():
         "This example requires a supported GPU",
     ]()
 
-    var ctx = DeviceContext()
-    var m_buffer = ctx.enqueue_create_buffer[float_dtype](m_layout.size())
-    var n_buffer = ctx.enqueue_create_buffer[float_dtype](n_layout.size())
-    var p_buffer = ctx.enqueue_create_buffer[float_dtype](p_layout.size())
+    ctx = DeviceContext()
+    m_buffer = ctx.enqueue_create_buffer[float_dtype](m_layout.size())
+    n_buffer = ctx.enqueue_create_buffer[float_dtype](n_layout.size())
+    p_buffer = ctx.enqueue_create_buffer[float_dtype](p_layout.size())
 
     # Map input buffers to host to fill with values from CPU
     with m_buffer.map_to_host() as host_buffer:
-        var m_tensor = LayoutTensor[float_dtype, m_layout](host_buffer)
+        m_host_tensor = LayoutTensor[float_dtype, m_layout](host_buffer)
         for m_row in range(I):
             for m_col in range(J):
-                m_tensor[m_row, m_col] = m_row - m_col
-        print("M matrix:", m_tensor)
+                m_host_tensor[m_row, m_col] = m_row - m_col
+        print("M matrix:", m_host_tensor)
 
     with n_buffer.map_to_host() as host_buffer:
-        var n_tensor = LayoutTensor[float_dtype, n_layout](host_buffer)
+        n_host_tensor = LayoutTensor[float_dtype, n_layout](host_buffer)
         for n_row in range(J):
             for n_col in range(K):
-                n_tensor[n_row, n_col] = n_row + n_col
-        print("N matrix:", n_tensor)
+                n_host_tensor[n_row, n_col] = n_row + n_col
+        print("N matrix:", n_host_tensor)
 
     # Wrap device buffers in `LayoutTensor`
-    var m_tensor = LayoutTensor[float_dtype, m_layout](m_buffer)
-    var n_tensor = LayoutTensor[float_dtype, n_layout](n_buffer)
-    var p_tensor = LayoutTensor[float_dtype, p_layout](p_buffer)
+    m_tensor = LayoutTensor[float_dtype, m_layout](m_buffer)
+    n_tensor = LayoutTensor[float_dtype, n_layout](n_buffer)
+    p_tensor = LayoutTensor[float_dtype, p_layout](p_buffer)
 
     # The grid is divided up into blocks, making sure there's an extra
     # full block for any remainder. This hasn't been tuned for any specific
@@ -80,22 +80,22 @@ def main():
 
     # Move the output tensor back onto the CPU so that we can read the results.
     with p_buffer.map_to_host() as host_buffer:
-        var host_tensor = LayoutTensor[float_dtype, p_layout](host_buffer)
+        host_tensor = LayoutTensor[float_dtype, p_layout](host_buffer)
         print("Resulting matrix:", host_tensor)
 
 
 fn naive_matrix_multiplication(
-    m: LayoutTensor[float_dtype, m_layout, MutableAnyOrigin],
-    n: LayoutTensor[float_dtype, n_layout, MutableAnyOrigin],
-    p: LayoutTensor[float_dtype, p_layout, MutableAnyOrigin],
+    m: LayoutTensor[mut=True, float_dtype, m_layout],
+    n: LayoutTensor[mut=True, float_dtype, n_layout],
+    p: LayoutTensor[mut=True, float_dtype, p_layout],
 ):
     """Naive matrix multiplication of M_ij x N_jk = P_ik."""
-    var row = global_idx.y
-    var col = global_idx.x
+    row = global_idx.y
+    col = global_idx.x
 
-    var m_dim = p.dim(0)
-    var n_dim = p.dim(1)
-    var k_dim = m.dim(1)
+    m_dim = p.dim(0)
+    n_dim = p.dim(1)
+    k_dim = m.dim(1)
 
     if row < m_dim and col < n_dim:
         for j_index in range(k_dim):

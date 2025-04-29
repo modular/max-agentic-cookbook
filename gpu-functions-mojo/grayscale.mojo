@@ -34,23 +34,23 @@ def main():
         "This examples requires a supported GPU",
     ]()
 
-    var ctx = DeviceContext()
+    ctx = DeviceContext()
 
-    var rgb_buffer = ctx.enqueue_create_buffer[int_dtype](rgb_layout.size())
-    var gray_buffer = ctx.enqueue_create_buffer[int_dtype](gray_layout.size())
+    rgb_buffer = ctx.enqueue_create_buffer[int_dtype](rgb_layout.size())
+    gray_buffer = ctx.enqueue_create_buffer[int_dtype](gray_layout.size())
 
     # Map device buffer to host to initialize values from CPU
     with rgb_buffer.map_to_host() as host_buffer:
-        var rgb_tensor = LayoutTensor[int_dtype, rgb_layout](host_buffer)
         # Fill the image with initial colors.
+        host_rgb_tensor = LayoutTensor[int_dtype, rgb_layout](host_buffer)
         for row in range(HEIGHT):
             for col in range(WIDTH):
-                rgb_tensor[row, col, 0] = row + col
-                rgb_tensor[row, col, 1] = row + col + 20
-                rgb_tensor[row, col, 2] = row + col + 40
+                host_rgb_tensor[row, col, 0] = row + col
+                host_rgb_tensor[row, col, 1] = row + col + 20
+                host_rgb_tensor[row, col, 2] = row + col + 40
 
-    var rgb_tensor = LayoutTensor[int_dtype, rgb_layout](rgb_buffer)
-    var gray_tensor = LayoutTensor[int_dtype, gray_layout](gray_buffer)
+    rgb_tensor = LayoutTensor[int_dtype, rgb_layout](rgb_buffer)
+    gray_tensor = LayoutTensor[int_dtype, gray_layout](gray_buffer)
 
     # The grid is divided up into blocks, making sure there's an extra
     # full block for any remainder. This hasn't been tuned for any specific
@@ -76,8 +76,8 @@ def main():
 
 
 fn color_to_grayscale(
-    rgb_tensor: LayoutTensor[int_dtype, rgb_layout, MutableAnyOrigin],
-    gray_tensor: LayoutTensor[int_dtype, gray_layout, MutableAnyOrigin],
+    rgb_tensor: LayoutTensor[mut=True, int_dtype, rgb_layout],
+    gray_tensor: LayoutTensor[mut=True, int_dtype, gray_layout],
 ):
     """Converting each RGB pixel to grayscale, parallelized across the output tensor on the GPU.
     """
@@ -97,7 +97,7 @@ def print_image(gray_tensor: LayoutTensor[int_dtype, gray_layout]):
     """A helper function to print out the grayscale channel intensities."""
     for row in range(HEIGHT):
         for col in range(WIDTH):
-            var v = gray_tensor[row, col]
+            v = gray_tensor[row, col]
             if v < 100:
                 print(" ", end="")
                 if v < 10:

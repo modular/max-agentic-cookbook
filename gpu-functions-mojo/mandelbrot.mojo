@@ -41,11 +41,11 @@ def main():
     ]()
 
     # Get the context for the attached GPU
-    var ctx = DeviceContext()
+    ctx = DeviceContext()
 
     # Allocate a tensor on the target device to hold the resulting set.
-    var dev_buf = ctx.enqueue_create_buffer[int_dtype](layout.size())
-    var out_tensor = LayoutTensor[int_dtype, layout](dev_buf)
+    dev_buf = ctx.enqueue_create_buffer[int_dtype](layout.size())
+    out_tensor = LayoutTensor[int_dtype, layout](dev_buf)
 
     # Compute how many blocks are needed in each dimension to fully cover the grid,
     # rounding up to ensure even partially filled blocks are launched.
@@ -63,30 +63,30 @@ def main():
 
     # Map the output tensor data to CPU so that we can read the results.
     with dev_buf.map_to_host() as host_buf:
-        var host_tensor = LayoutTensor[int_dtype, layout](host_buf)
+        host_tensor = LayoutTensor[int_dtype, layout](host_buf)
         draw_mandelbrot(host_tensor)
 
 
 fn mandelbrot(
-    tensor: LayoutTensor[int_dtype, layout, MutableAnyOrigin],
+    tensor: LayoutTensor[mut=True, int_dtype, layout],
 ):
     """The per-element calculation of iterations to escape in the Mandelbrot set.
     """
     # Obtain the position in the grid from the X, Y thread locations.
-    var row = global_idx.y
-    var col = global_idx.x
+    row = global_idx.y
+    col = global_idx.x
 
     alias SCALE_X = (MAX_X - MIN_X) / GRID_WIDTH
     alias SCALE_Y = (MAX_Y - MIN_Y) / GRID_HEIGHT
 
     # Calculate the complex C corresponding to that grid location.
-    var cx = MIN_X + col * SCALE_X
-    var cy = MIN_Y + row * SCALE_Y
-    var c = ComplexSIMD[float_dtype, 1](cx, cy)
+    cx = MIN_X + col * SCALE_X
+    cy = MIN_Y + row * SCALE_Y
+    c = ComplexSIMD[float_dtype, 1](cx, cy)
 
     # Perform the Mandelbrot iteration loop calculation.
-    var z = ComplexSIMD[float_dtype, 1](0, 0)
-    var iters = Scalar[int_dtype](0)
+    z = ComplexSIMD[float_dtype, 1](0, 0)
+    iters = Scalar[int_dtype](0)
 
     var in_set_mask: Scalar[DType.bool] = True
     for _ in range(MAX_ITERATIONS):
@@ -105,10 +105,10 @@ def draw_mandelbrot(tensor: LayoutTensor[int_dtype, layout]):
     alias sr = StringSlice("....,c8M@jawrpogOQEPGJ")
     for row in range(GRID_HEIGHT):
         for col in range(GRID_WIDTH):
-            var v = tensor[row, col]
+            v = tensor[row, col]
             if v < MAX_ITERATIONS:
-                var idx = Int(v % len(sr))
-                var p = sr[idx]
+                idx = Int(v % len(sr))
+                p = sr[idx]
                 print(p, end="")
             else:
                 print(" ", end="")

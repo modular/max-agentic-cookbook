@@ -110,18 +110,18 @@ implement that in MAX.
 
     ```mojo
     fn vector_addition(
-        lhs_tensor: LayoutTensor[float_dtype, layout, MutableAnyOrigin],
-        rhs_tensor: LayoutTensor[float_dtype, layout, MutableAnyOrigin],
-        out_tensor: LayoutTensor[float_dtype, layout, MutableAnyOrigin],
+        lhs_tensor: LayoutTensor[mut=True, float_dtype, layout],
+        rhs_tensor: LayoutTensor[mut=True, float_dtype, layout],
+        out_tensor: LayoutTensor[mut=True, float_dtype, layout],
     ):
-        var tid = thread_idx.x
+        tid = thread_idx.x
         out_tensor[tid] = lhs_tensor[tid] + rhs_tensor[tid]
     ```
 
 1. Obtain a reference to the accelerator (GPU) context.
 
     ```mojo
-    var ctx = DeviceContext()
+    ctx = DeviceContext()
     ```
 
 1. Allocate input and output vectors.
@@ -133,8 +133,8 @@ implement that in MAX.
     alias float_dtype = DType.float32
     alias VECTOR_WIDTH = 10
 
-    var lhs_buffer = ctx.enqueue_create_buffer[float_dtype](VECTOR_WIDTH)
-    var rhs_buffer = ctx.enqueue_create_buffer[float_dtype](VECTOR_WIDTH)
+    lhs_buffer = ctx.enqueue_create_buffer[float_dtype](VECTOR_WIDTH)
+    rhs_buffer = ctx.enqueue_create_buffer[float_dtype](VECTOR_WIDTH)
 
     _ = lhs_buffer.enqueue_fill(1.25)
     _ = rhs_buffer.enqueue_fill(2.5)
@@ -146,7 +146,7 @@ implement that in MAX.
     A buffer to hold the result of the calculation is allocated on the GPU:
 
     ```mojo
-    var out_buffer = ctx.enqueue_create_buffer[float_dtype](VECTOR_WIDTH)
+    out_buffer = ctx.enqueue_create_buffer[float_dtype](VECTOR_WIDTH)
     ```
 
 1. Compile and dispatch the function.
@@ -175,7 +175,7 @@ implement that in MAX.
 
     ```mojo
     with out_buffer.map_to_host() as host_buffer:
-        var host_tensor = LayoutTensor[float_dtype, layout](host_buffer)
+        host_tensor = LayoutTensor[float_dtype, layout](host_buffer)
         print("Resulting vector:", host_tensor)
     ```
 
@@ -208,8 +208,8 @@ And here is the per-thread function to perform this on the GPU:
 
 ```mojo
 fn color_to_grayscale(
-    rgb_tensor: LayoutTensor[int_dtype, rgb_layout, MutableAnyOrigin],
-    gray_tensor: LayoutTensor[int_dtype, gray_layout, MutableAnyOrigin],
+    rgb_tensor: LayoutTensor[mut=True, int_dtype, rgb_layout],
+    gray_tensor: LayoutTensor[mut=True, int_dtype, gray_layout],
 ):
     row = global_idx.y
     col = global_idx.x
@@ -259,16 +259,16 @@ this looks like the following:
 
 ```mojo
 fn naive_matrix_multiplication(
-    m: LayoutTensor[float_dtype, m_layout, MutableAnyOrigin],
-    n: LayoutTensor[float_dtype, n_layout, MutableAnyOrigin],
-    p: LayoutTensor[float_dtype, p_layout, MutableAnyOrigin],
+    m: LayoutTensor[mut=True, float_dtype, m_layout],
+    n: LayoutTensor[mut=True, float_dtype, n_layout],
+    p: LayoutTensor[mut=True, float_dtype, p_layout],
 ):
-    var row = global_idx.y
-    var col = global_idx.x
+    row = global_idx.y
+    col = global_idx.x
 
-    var m_dim = p.dim(0)
-    var n_dim = p.dim(1)
-    var k_dim = m.dim(1)
+    m_dim = p.dim(0)
+    n_dim = p.dim(1)
+    k_dim = m.dim(1)
 
     if row < m_dim and col < n_dim:
         for j_index in range(k_dim):
@@ -302,19 +302,19 @@ The per-thread GPU function for this is as follows:
 
 ```mojo
 fn mandelbrot(
-    tensor: LayoutTensor[int_dtype, layout, MutableAnyOrigin],
+    tensor: LayoutTensor[mut=True, int_dtype, layout],
 ):
-    var row = global_idx.y
-    var col = global_idx.x
+    row = global_idx.y
+    col = global_idx.x
 
     alias SCALE_X = (MAX_X - MIN_X) / GRID_WIDTH
     alias SCALE_Y = (MAX_Y - MIN_Y) / GRID_HEIGHT
 
-    var cx = MIN_X + col * SCALE_X
-    var cy = MIN_Y + row * SCALE_Y
-    var c = ComplexSIMD[float_dtype, 1](cx, cy)
-    var z = ComplexSIMD[float_dtype, 1](0, 0)
-    var iters = Scalar[int_dtype](0)
+    cx = MIN_X + col * SCALE_X
+    cy = MIN_Y + row * SCALE_Y
+    c = ComplexSIMD[float_dtype, 1](cx, cy)
+    z = ComplexSIMD[float_dtype, 1](0, 0)
+    iters = Scalar[int_dtype](0)
 
     var in_set_mask: Scalar[DType.bool] = True
     for _ in range(MAX_ITERATIONS):
