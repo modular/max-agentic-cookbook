@@ -57,7 +57,8 @@ from compiler import register
 from utils.index import IndexList
 from layout import Layout, LayoutTensor, RuntimeLayout, RuntimeTuple
 from layout.tensor_core import TensorCore
-from layout.math import exp, sum, max
+from layout.math import sum, max
+from math import exp
 from gpu.host import DeviceContext
 from gpu.id import block_idx
 from gpu.sync import barrier
