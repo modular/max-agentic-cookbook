@@ -18,7 +18,7 @@ import numpy as np
 from max.driver import CPU, Accelerator, Tensor, accelerator_count
 from max.dtype import DType
 from max.engine.api import InferenceSession
-from max.graph import Graph, TensorType, ops
+from max.graph import DeviceRef, Graph, TensorType, ops
 
 
 def main():
@@ -37,12 +37,21 @@ def main():
         BD = 8
         BN = 16
 
+    # Place the graph on a GPU, if available. Fall back to CPU if not.
+    device = CPU() if accelerator_count() == 0 else Accelerator()
+
     with Graph(
         "fused_attention",
         input_types=[
-            TensorType(dtype, shape=[N, D]),
-            TensorType(dtype, shape=[N, D]),
-            TensorType(dtype, shape=[N, D]),
+            TensorType(
+                dtype, shape=[N, D], device=DeviceRef.from_device(device)
+            ),
+            TensorType(
+                dtype, shape=[N, D], device=DeviceRef.from_device(device)
+            ),
+            TensorType(
+                dtype, shape=[N, D], device=DeviceRef.from_device(device)
+            ),
         ],
         custom_extensions=[mojo_kernels],
     ) as graph:
@@ -51,12 +60,13 @@ def main():
             name="fused_attention_custom",
             parameters={"N": N, "D": D, "BD": BD, "BN": BN},
             values=[q, k, v],
-            out_types=[TensorType(dtype, shape=[N, D])],
+            out_types=[
+                TensorType(
+                    dtype, shape=[N, D], device=DeviceRef.from_device(device)
+                )
+            ],
         )
         graph.output(*results)
-
-    # Place the graph on a GPU, if available. Fall back to CPU if not.
-    device = CPU() if accelerator_count() == 0 else Accelerator()
 
     # Set up an inference session for running the graph.
     session = InferenceSession(devices=[device])

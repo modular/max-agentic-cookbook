@@ -935,7 +935,7 @@ struct MatrixMultiplication[algorithm: StaticString]:
                 alias TN = 8
                 alias NUM_THREADS = (BM * BN) // (TM * TN)
                 gpu_ctx.enqueue_function[
-                    block_tiled_matrix_multiplication[
+                    block_tiled_vectorized_matrix_multiplication[
                         out.type,
                         a_layout.layout,
                         b_layout.layout,
