@@ -1,0 +1,17 @@
+version: 1.0
+long_title: "A template for working on Mojo CPU / GPU operations"
+short_title: "Mojo Operation Template"
+author: "Brad Larson"
+author_image: "author/bradlarson.jpg"
+author_url: "https://www.linkedin.com/in/brad-larson-3549a5291/"
+github_repo: "https://github.com/modular/max-recipes/tree/main/mojo-operations-template"
+date: "05-05-2025"
+difficulty: "beginner"
+tags:
+  - max-graph
+  - gpu-programming
+
+tasks:
+  - magic run graph
+  - magic run benchmarks
+  - magic run test
