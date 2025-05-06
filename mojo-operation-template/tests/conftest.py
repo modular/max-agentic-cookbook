@@ -18,5 +18,8 @@ from max.engine import InferenceSession
 
 @pytest.fixture(scope="session")
 def session() -> InferenceSession:
-    device = CPU() if accelerator_count() == 0 else Accelerator()
+    # Note: change this to the ID of the GPU you will use.
+    DEVICE_ID = 0
+
+    device = CPU() if accelerator_count() == 0 else Accelerator(id=DEVICE_ID)
     return InferenceSession(devices=[device])

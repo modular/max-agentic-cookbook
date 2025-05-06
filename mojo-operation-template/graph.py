@@ -91,8 +91,11 @@ if __name__ == "__main__":
     K = 256
     N = 256
 
+    # Note: change this to the ID of the GPU you will use.
+    DEVICE_ID = 0
+
     # Place the graph on a GPU, if available. Fall back to CPU if not.
-    device = CPU() if accelerator_count() == 0 else Accelerator()
+    device = CPU() if accelerator_count() == 0 else Accelerator(id=DEVICE_ID)
 
     # Set up an inference session for running the graph.
     session = InferenceSession(devices=[device])

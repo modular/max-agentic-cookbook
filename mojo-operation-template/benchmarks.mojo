@@ -31,9 +31,11 @@ from memory import UnsafePointer
 from operations.matrix_multiplication import MatrixMultiplication
 from random import rand
 from runtime.asyncrt import DeviceContextPtr
-from sys import sizeof, has_nvidia_gpu_accelerator
+from sys import sizeof, has_amd_gpu_accelerator, has_nvidia_gpu_accelerator
 from utils import IndexList
 
+# Note: change this to the ID of the GPU you will use.
+alias DEVICE_ID = 0
 
 # Wrap a ManagedTensorSlice with a DeviceBuffer which has a lifetime to use
 # Mojo's memory management, and sidestep the Python initialized garbage
@@ -137,8 +139,8 @@ def matmul():
     bench.bench_function[bench_cpu](BenchId("cpu", "naive"), flops, elements)
 
     @parameter
-    if has_nvidia_gpu_accelerator():
-        var gpu_ctx = DeviceContext()
+    if has_amd_gpu_accelerator() or has_nvidia_gpu_accelerator():
+        var gpu_ctx = DeviceContext(device_id=DEVICE_ID)
         var a_dev = _BenchTensor[Input, a_spec](gpu_ctx).rand()
         var b_dev = _BenchTensor[Input, b_spec](gpu_ctx).rand()
         var c_dev = _BenchTensor[Output, c_spec](gpu_ctx).rand()
