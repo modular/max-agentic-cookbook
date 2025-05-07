@@ -11,9 +11,8 @@
 # limitations under the License.
 # ===----------------------------------------------------------------------=== #
 
-import compiler
+
 from gpu import WARP_SIZE, barrier, block_dim, block_idx, thread_idx
-from gpu.host import DeviceBuffer, DeviceContext
 from gpu.memory import async_copy_wait_all
 from layout.layout_tensor import (
     Layout,
@@ -23,13 +22,9 @@ from layout.layout_tensor import (
 )
 from layout.math import outer_product_acc
 from layout.tensor_builder import LayoutTensorBuild as tb
-from layout.tensor_core import TensorCore
-from math import ceildiv
-from memory import UnsafePointer
-from runtime.asyncrt import DeviceContextPtr
-from sys.info import simdwidthof
 from tensor import InputTensor, ManagedTensorSlice, OutputTensor
-from utils.index import Index
+from sys.info import simdwidthof
+
 
 # ===-----------------------------------------------------------------------===#
 # Naive matrix multiplication (CPU)
@@ -177,7 +172,6 @@ fn block_tiled_vectorized_matrix_multiplication[
     var partition_col = thread_idx.x % (BN // TN)
     var partition_row = thread_idx.x // (BN // TN)
 
-
     # Get the tile of the output matrix C that this thread is responsible
     # for computing.
     var dst = c.tile[BM, BN](block_idx.y, block_idx.x).tile[TM, TN](
@@ -235,107 +229,3 @@ fn block_tiled_vectorized_matrix_multiplication[
 
     # Write the final accumulated results to the output matrix.
     dst_vec.copy_from(dst_reg_vec)
-
-
-@compiler.register("matrix_multiplication")
-struct MatrixMultiplication[algorithm: StaticString]:
-    """
-    The central custom operation that dispatches to multiple different
-    matrix multiplication implementations, depending on target hardware and
-    selected algorithm.
-    """
-
-    @staticmethod
-    fn execute[
-        # The kind of device this will be run on: "cpu" or "gpu"
-        target: StaticString,
-    ](
-        out: OutputTensor[rank=2],
-        a: InputTensor[type = out.type, rank = out.rank],
-        b: InputTensor[type = out.type, rank = out.rank],
-        # the context is needed for some GPU calls
-        ctx: DeviceContextPtr,
-    ) raises:
-        # At graph compilation time, we will know what device we are compiling
-        # this operation for, so we can specialize it for the target hardware.
-        @parameter
-        if target == "gpu":
-            a_layout = a.to_layout_tensor()
-            b_layout = b.to_layout_tensor()
-            out_layout = out.to_layout_tensor()
-
-            M = a_layout.shape[0]()
-            N = b_layout.shape[1]()
-
-            gpu_ctx = ctx.get_device_context()
-
-            # Zero out the memory in the outbound tensor.
-            gpu_ctx.enqueue_memset(
-                DeviceBuffer[out.type](
-                    gpu_ctx,
-                    rebind[UnsafePointer[Scalar[out.type]]](out_layout.ptr),
-                    M * N,
-                    owning=False,
-                ),
-                0,
-            )
-
-            # We support several compile-time variants for the matrix
-            # multiplication calculation:
-            # - "naive": A naive matrix multiplication using LayoutTensors.
-            # - "optimized": Matrix multiplication using a
-            #   further-optimized 2D block tiling strategy.
-            # In each case, the specific matrix multiplication function is
-            # compiled and enqueued to run on the GPU.
-            @parameter
-            if algorithm == "naive":
-                alias BM = 32
-                alias BN = 32
-                gpu_ctx.enqueue_function[
-                    naive_matrix_multiplication[
-                        out.type,
-                        a_layout.layout,
-                        b_layout.layout,
-                        out_layout.layout,
-                        BM,
-                        BN,
-                    ]
-                ](
-                    a_layout,
-                    b_layout,
-                    out_layout,
-                    grid_dim=(ceildiv(N, BN), ceildiv(M, BM)),
-                    block_dim=(BN, BM),
-                )
-            elif algorithm == "optimized":
-                alias BM = 128
-                alias BN = 128
-                alias BK = 8
-                alias TM = 8
-                alias TN = 8
-                alias NUM_THREADS = (BM * BN) // (TM * TN)
-                gpu_ctx.enqueue_function[
-                    block_tiled_vectorized_matrix_multiplication[
-                        out.type,
-                        a_layout.layout,
-                        b_layout.layout,
-                        out_layout.layout,
-                        BM,
-                        BN,
-                        BK,
-                        TM,
-                        TN,
-                        NUM_THREADS,
-                    ]
-                ](
-                    a_layout,
-                    b_layout,
-                    out_layout,
-                    grid_dim=(ceildiv(N, BN), ceildiv(M, BM)),
-                    block_dim=(NUM_THREADS),
-                )
-            else:
-                raise Error("No known matmul algorithm:", algorithm)
-
-        else:
-            naive_matrix_multiplication_cpu(out, a, b)

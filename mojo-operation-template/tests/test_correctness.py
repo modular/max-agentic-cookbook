@@ -26,8 +26,7 @@ def test_naive_matmul(session: InferenceSession) -> None:
     b = np.random.uniform(size=(K, N)).astype(np.float32)
     expected_result = a @ b
 
-    device = CPU() if accelerator_count() == 0 else Accelerator()
-    naive_result = matrix_multiplication(a, b, "naive", session, device)
+    naive_result = matrix_multiplication(a, b, "naive", session, session.devices[0])
 
     assert np.all(np.isclose(naive_result.to_numpy(), expected_result))
     assert naive_result.dtype == DType.float32

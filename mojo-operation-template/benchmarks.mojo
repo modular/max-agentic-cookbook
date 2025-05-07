@@ -28,7 +28,7 @@ from max.tensor import (
 )
 from memory import AddressSpace
 from memory import UnsafePointer
-from operations.matrix_multiplication import MatrixMultiplication
+from operations.graph_operation import MatrixMultiplication
 from random import rand
 from runtime.asyncrt import DeviceContextPtr
 from sys import sizeof, has_amd_gpu_accelerator, has_nvidia_gpu_accelerator

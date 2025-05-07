@@ -1,5 +1,6 @@
 # pixi environments
 .pixi
+pixi.lock
 *.egg-info
 # magic environments
 .magic
