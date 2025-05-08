@@ -1,0 +1,9 @@
+# pixi environments
+.pixi
+pixi.lock
+*.egg-info
+# magic environments
+.magic
+.env
+# build products
+operations.mojopkg
