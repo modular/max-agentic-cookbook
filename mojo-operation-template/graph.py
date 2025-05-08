@@ -124,9 +124,7 @@ if __name__ == "__main__":
         print(naive_result.to_numpy())
         print()
 
-        optimized_result = matrix_multiplication(
-            a, b, "optimized", session, device
-        )
+        optimized_result = matrix_multiplication(a, b, "optimized", session, device)
         print("Optimized matrix multiplication:")
         print(optimized_result.to_numpy())
         print()

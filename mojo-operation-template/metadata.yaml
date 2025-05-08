@@ -15,3 +15,4 @@ tasks:
   - magic run graph
   - magic run benchmarks
   - magic run test
+  - magic run pytest

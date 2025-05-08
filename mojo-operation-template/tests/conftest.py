@@ -16,6 +16,7 @@ import pytest
 from max.driver import Accelerator, CPU, accelerator_count
 from max.engine import InferenceSession
 
+
 @pytest.fixture(scope="session")
 def session() -> InferenceSession:
     # Note: change this to the ID of the GPU you will use.

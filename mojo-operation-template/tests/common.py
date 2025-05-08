@@ -20,6 +20,7 @@ from max.dtype import DType
 from max.graph import DeviceRef, Graph, TensorType, ops
 from max.engine import InferenceSession
 
+
 def matrix_multiplication(
     a: NDArray[np.float32],
     b: NDArray[np.float32],
