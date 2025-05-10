@@ -22,7 +22,6 @@ mojo build "$MOJO_FILE"
 rocprof-compute profile -n "$BINARY_NAME" -- "./${BINARY_NAME}"
 rocprof-compute analyze -q -p "workloads/${BINARY_NAME}/MI300X_A1" > "${BINARY_NAME}.log"
 
-BINARY_NAME="test_correctness"
 echo
 echo "--------------------------------------------------------------------"
 echo "Profile written, open in text editor to view: ./${BINARY_NAME}.log"
