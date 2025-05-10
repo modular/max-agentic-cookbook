@@ -5,5 +5,6 @@ pixi.lock
 # magic environments
 .magic
 .env
+.venv
 # build products
 operations.mojopkg
