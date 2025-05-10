@@ -74,6 +74,81 @@ This will compile the Mojo code for the kernel, place it in a graph, compile
 the graph, and run it. Such a graph is an example of how this operation would
 be used in a larger AI model within the MAX framework.
 
+## Profiling AMD GPU kernels ##
+
+Run the command:
+
+```sh
+magic run profile_amd test_correctness.mojo
+```
+
+This will generate a `test_correctness.log` file containing profile information.
+
+Check the script inside [profile_amd.sh](./profile_amd.sh) to see how it works.
+
+## Debugging AMD GPU kernels ##
+
+To build a binary from a Mojo file and start the debugger run:
+
+```sh
+magic run debug_amd test_correctness.mojo
+```
+
+You can now set a breakpoint inside the kernel code (press y on the "Make
+breakpoint pending" prompt):
+
+```sh
+b operations/matrix_multiplication.mojo:180
+```
+
+Cheat-sheet for debugging commands:
+
+```sh
+# Start the debug session
+run
+r
+
+# Continue to next break point
+continue
+c
+
+# Step over
+next
+n
+
+# Step into
+step
+s
+
+# List all host and GPU threads
+info threads
+
+# Switch to thread n
+thread [n]
+
+# View local variables
+info locals
+
+# view register values
+info register
+
+# view all the stack frames
+backtrace
+bt
+
+# switch to frame n
+frame [n]
+```
+
+For more commands run:
+
+```sh
+help
+help [topic]
+```
+
+Check the script inside [debug_amd.sh](./debug_amd.sh) to see how it works.
+
 ## License ##
 
 Apache License v2.0 with LLVM Exceptions.

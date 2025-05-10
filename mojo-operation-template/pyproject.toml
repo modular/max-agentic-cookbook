@@ -24,7 +24,9 @@ platforms = ["linux-64", "osx-arm64", "linux-aarch64"]
 [tool.pixi.tasks]
 graph = "python graph.py"
 benchmarks = "mojo benchmarks.mojo"
-test = "mojo -I ./operations mojo_tests/test_correctness.mojo"
+test = "mojo test_correctness.mojo"
+debug_amd = "bash debug_amd.sh"
+profile_amd = "bash profile_amd.sh"
 
 [tool.pixi.feature.pytest.tasks]
 pytest = "pytest"
