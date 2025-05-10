@@ -27,4 +27,4 @@ mandelbrot = "python mandelbrot.py"
 vector_addition = "python vector_addition.py"
 
 [tool.pixi.dependencies]
-max = "==25.3.0.dev2025042905"
+max = "==25.4.0.dev2025050919"

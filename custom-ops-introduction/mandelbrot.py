@@ -57,11 +57,21 @@ def create_mandelbrot_graph(
         result = ops.custom(
             name="mandelbrot",
             values=[
-                ops.constant(min_x, dtype=DType.float32),
-                ops.constant(min_y, dtype=DType.float32),
-                ops.constant(scale_x, dtype=DType.float32),
-                ops.constant(scale_y, dtype=DType.float32),
-                ops.constant(max_iterations, dtype=DType.int32),
+                ops.constant(
+                    min_x, dtype=DType.float32, device=DeviceRef.CPU()
+                ),
+                ops.constant(
+                    min_y, dtype=DType.float32, device=DeviceRef.CPU()
+                ),
+                ops.constant(
+                    scale_x, dtype=DType.float32, device=DeviceRef.CPU()
+                ),
+                ops.constant(
+                    scale_y, dtype=DType.float32, device=DeviceRef.CPU()
+                ),
+                ops.constant(
+                    max_iterations, dtype=DType.int32, device=DeviceRef.CPU()
+                ),
             ],
             out_types=[
                 TensorType(

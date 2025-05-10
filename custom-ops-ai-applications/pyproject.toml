@@ -22,10 +22,9 @@ channels = [
 platforms = ["linux-64", "osx-arm64", "linux-aarch64"]
 
 [tool.pixi.tasks]
-package = "mojo package operations/ -o operations.mojopkg"
-top_k = { cmd = "python top_k.py", depends-on = ["package"] }
-fused_attention = { cmd = "python fused_attention.py", depends-on = ["package"] }
-benchmarks = { cmd = "mojo benchmarks.mojo", depends-on = ["package"] }
+top_k = "python top_k.py"
+fused_attention = "python fused_attention.py"
+benchmarks = "mojo benchmarks.mojo"
 
 [tool.pixi.dependencies]
-max = "==25.3.0.dev2025042905"
+max = "==25.4.0.dev2025050919"

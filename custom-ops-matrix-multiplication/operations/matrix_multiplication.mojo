@@ -95,9 +95,9 @@ fn naive_matrix_multiplication[
     of rows in B.
     """
 
-    var M = a.dim(0)
-    var N = b.dim(1)
-    var K = b.dim(0)
+    var M = a.dim[0]()
+    var N = b.dim[1]()
+    var K = b.dim[0]()
 
     # Calculate the column and row indices for each thread.
     var row = block_dim.x * block_idx.x + thread_idx.x
@@ -158,9 +158,9 @@ fn coalescing_matrix_multiplication[
     is then stored back to the output matrix.
     """
 
-    var M = a.dim(0)
-    var N = b.dim(1)
-    var K = b.dim(0)
+    var M = a.dim[0]()
+    var N = b.dim[1]()
+    var K = b.dim[0]()
 
     # Calculate the column and row indices for each thread.
     # Have adjacent threads work on the same row to allow for memory coalescing
@@ -242,7 +242,7 @@ fn tiled_matrix_multiplication[
     var dst_reg: c.element_type = 0
 
     # Iterate over tiles of input matrices A and B
-    for block in range(b.dim(0) // BK):
+    for block in range(b.dim[0]() // BK):
         # Define the layout for loading tiles of A and B into shared memory
         alias load_a_layout = Layout.row_major(NUM_THREADS // BK, BK)
         alias load_b_layout = Layout.row_major(BK, NUM_THREADS // BK)
@@ -340,7 +340,7 @@ fn tiled_register_matrix_multiplication[
     dst_reg.copy_from(dst)
 
     # Iterate over the tiles of A and B in the K dimension.
-    for block in range(b.dim(0) // BK):
+    for block in range(b.dim[0]() // BK):
         # Define the layout for loading tiles of A and B into shared
         # memory.
         alias load_a_layout = Layout.row_major(NUM_THREADS // BK, BK)
@@ -447,7 +447,7 @@ fn block_tiled_matrix_multiplication[
     var a_reg = tb[dtype]().layout[TM]().local().alloc()
     var b_reg = tb[dtype]().layout[TN]().local().alloc()
 
-    var ntiles = b.dim(0) // BK
+    var ntiles = b.dim[0]() // BK
 
     for block in range(ntiles):
         alias load_a_layout = Layout.row_major(NUM_THREADS // BK, BK)
@@ -554,7 +554,7 @@ fn block_tiled_vectorized_matrix_multiplication[
     var a_reg = tb[dtype]().layout[TM]().local().alloc()
     var b_reg = tb[dtype]().layout[TN]().local().alloc()
 
-    var ntiles = b.dim(0) // BK
+    var ntiles = b.dim[0]() // BK
 
     # Iterate over the tiles of A and B in the K dimension.
     for block in range(ntiles):
