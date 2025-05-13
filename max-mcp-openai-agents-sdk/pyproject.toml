@@ -1,0 +1,7 @@
+[project]
+name = "max-mcp-openai-agents-sdk"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["mcp>=1.8.1", "modular>=25.3.0", "openai-agents>=0.0.14"]
