@@ -1,4 +1,4 @@
-def main():
+def main() -> None:
     print("Hello from max-mcp-openai-agents-sdk!")
 
 

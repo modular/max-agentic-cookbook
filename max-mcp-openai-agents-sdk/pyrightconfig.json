@@ -1,0 +1,4 @@
+{
+    "reportCallIssue": "error",
+    "reportUnnecessaryComparison": "warning",
+}
