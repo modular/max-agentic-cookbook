@@ -1,5 +1,5 @@
 def main() -> None:
-    print("Hello from max-mcp-openai-agents-sdk!")
+    print("Hello")
 
 
 if __name__ == "__main__":

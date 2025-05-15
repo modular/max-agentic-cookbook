@@ -5,7 +5,7 @@ from invoke import task, Context
 @task
 def max(c: Context):
     c.run("""max serve \
-	    --model-path=HuggingFaceTB/SmolLM2-1.7B-Instruct \
+        --model-path=HuggingFaceTB/SmolLM2-1.7B-Instruct \
 		--weight-path=HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF/smollm2-1.7b-instruct-q4_k_m.gguf""")
 
 
