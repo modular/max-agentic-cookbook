@@ -40,12 +40,25 @@ class MAXClient:
 
     async def query(self, query: str) -> Optional[str]:
         try:
-            messages = [{"role": "user", "content": query}]
+            # messages = [
+            #     {
+            #         "role": "system",
+            #         "content": """
+            #         Ensure that you review the available tools,
+            #         and use them whenever appropriate.""",
+            #     }
+            # ]
+            messages = []
+            messages.append({"role": "user", "content": query})
             response = self.openai_client.chat.completions.create(
                 model=self.max_model,
                 messages=messages,
                 tools=self.tools,
             )
+
+            if tool_calls := response.choices[0].message.tool_calls:
+                print(f"query - tool called: {tool_calls}")
+
             return response.choices[0].message.content
         except Exception as e:
             print(f"query failed - {e}")
@@ -77,8 +90,9 @@ class MAXClient:
 
 
 async def main() -> None:
-    async with MAXClient("unsloth/phi-4-unsloth-bnb-4bit") as client:
+    async with MAXClient("meta-llama/Llama-3.2-1B-Instruct") as client:
         response = await client.query("How many R's are in starwberry?")
+        # response = await client.query("What tools are available to you?")
         print(response)
 
 
