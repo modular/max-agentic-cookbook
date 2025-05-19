@@ -8,8 +8,8 @@ from typing import Annotated
 @task
 def max(c: Context):
     c.run("""max serve \
-        --model-path=HuggingFaceTB/SmolLM2-1.7B-Instruct \
-		--weight-path=HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF/smollm2-1.7b-instruct-q4_k_m.gguf""")
+        --model-path=unsloth/phi-4-unsloth-bnb-4bit \
+		--weight-path=bouthros/Phi_4_Medical_QA_GGUF/unsloth.Q4_K_M.gguf""")
 
 
 @task
