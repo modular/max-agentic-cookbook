@@ -5,11 +5,11 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "fastmcp>=2.3.4",
     "honcho>=2.0.0",
     "invoke>=2.2.0",
-    "mcp>=1.8.1",
     "modular>=25.3.0",
-    "openai-agents>=0.0.14",
+    "openai>=1.78.1",
 ]
 
 [dependency-groups]
@@ -40,25 +40,3 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
-
-[tool.mypy]
-# Require proper handling of Optional
-strict_optional = true
-no_implicit_optional = true
-
-# Skip errors on imports with no stubs
-ignore_missing_imports = true
-
-# Require explicit annotations (parameters & returns)
-disallow_untyped_calls = true
-disallow_untyped_decorators = true
-disallow_any_generics = true
-
-# Extra checks
-warn_unused_ignores = true
-warn_unawaited_coroutines = true
-warn_return_any = true
-
-# Ruff provides more granular control over these
-disallow_incomplete_defs = false
-disallow_untyped_defs = false
