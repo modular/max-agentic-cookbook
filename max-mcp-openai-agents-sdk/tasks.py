@@ -26,7 +26,7 @@ def mcp(_c: Context):
         ],
     ) -> int:
         """Counts the occurrences of a character within a string"""
-        return string.count(character)
+        return string.lower().count(character.lower())
 
     mcp.run(
         transport="streamable-http",
