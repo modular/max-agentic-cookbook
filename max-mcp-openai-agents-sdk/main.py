@@ -5,27 +5,28 @@ from typing import Literal, Optional, Union
 
 from fastmcp import Client as MCPClient
 from openai import OpenAI
-from openai.types import Function
+
+
+@dataclass
+class ToolCall:
+    name: str
+    arguments: Optional[dict]
 
 
 @dataclass
 class ChatMessage:
     role: Union[Literal["assistant", "user"]]
-    content: Optional[str]
-    tool_call: Optional[Function]
-
-
-@dataclass
-class ChatHistory:
-    messages: list[ChatMessage]
+    content: Optional[str] = None
+    tool_call: Optional[ToolCall] = None
 
 
 @dataclass
 class ChatSession:
     openai_client: OpenAI
+    mcp_client: MCPClient
     model: str
-    tools: Optional[list[dict]]
-    chat_history: Optional[ChatHistory]
+    messages: list[ChatMessage]
+    tools: Optional[list[dict]] = None
 
 
 async def discover_tools(mcp_client: MCPClient) -> list[dict]:
@@ -53,39 +54,39 @@ async def discover_tools(mcp_client: MCPClient) -> list[dict]:
         raise e
 
 
-async def send_message(
-    openai_client: OpenAI, model_name: str, query: str, tools: list[dict]
-) -> str:
+async def send_message(session: ChatSession) -> str:
     try:
-        messages = []
-        messages.append({"role": "user", "content": query})
-        response = openai_client.chat.completions.create(
-            model=model_name,
+        messages = [{"role": m.role, "content": m.content} for m in session.messages]
+
+        response = session.openai_client.chat.completions.create(
+            model=session.model,
             messages=messages,
-            tools=tools,
+            tools=session.tools,
         )
 
-        if tool_calls := response.choices[0].message.tool_calls:
-            print(f"query - tool called: {tool_calls}")
+        if response.choices[0].message.tool_calls is not None:
+            print(f"query - tool called: {response.choices[0].message}")
 
         return response.choices[0].message.content
     except Exception as e:
-        print(f"query failed - {e}")
+        print(f"send_message failed - {e}")
         raise e
 
 
 async def main() -> None:
-    openai_client = OpenAI(base_url="http://127.0.0.1:8000/v1", api_key="EMPTY")
-    mcp_client = MCPClient("http://127.0.0.1:8001/mcp")
+    initial_query = "How many R's are in starwberry?"
 
-    model_name = "meta-llama/Llama-3.2-1B-Instruct"
+    session = ChatSession(
+        openai_client=OpenAI(base_url="http://127.0.0.1:8000/v1", api_key="EMPTY"),
+        mcp_client=MCPClient("http://127.0.0.1:8001/mcp"),
+        model="meta-llama/Llama-3.2-1B-Instruct",
+        messages=[ChatMessage(role="user", content=initial_query)],
+    )
 
     try:
-        async with mcp_client:
-            tools = await discover_tools(mcp_client)
-            response = await send_message(
-                openai_client, model_name, "How many R's are in starwberry?", tools
-            )
+        async with session.mcp_client:
+            session.tools = await discover_tools(session.mcp_client)
+            response = await send_message(session)
             print(response)
     except:
         sys.exit(1)
