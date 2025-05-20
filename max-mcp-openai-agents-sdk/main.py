@@ -1,4 +1,5 @@
 import asyncio
+import json
 import sys
 from dataclasses import dataclass
 from typing import Literal, Optional, Union
@@ -62,10 +63,8 @@ async def discover_tools(session: ChatSession) -> ChatSession:
 async def call_tool(session: ChatSession) -> ChatSession:
     try:
         last_message = session.messages[-1]
-        if tool_call := last_message.tool_call:
-            result = await session.mcp_client.call_tool(
-                tool_call.name, tool_call.arguments
-            )
+        if (tool_call := last_message.tool_call) and (arguments := tool_call.arguments):
+            result = await session.mcp_client.call_tool(tool_call.name, arguments)
             message = ChatMessage(
                 role="tool",
                 tool_call_id=last_message.tool_call_id,
@@ -95,12 +94,13 @@ async def send_message(session: ChatSession) -> ChatSession:
         if response := response.choices[0].message:
             message = ChatMessage(role="assistant", content=response.content)
 
-            # NOTE: This only handles a single tool call in the response
+            # TODO: Support more than one tool call
             if (tool := response.tool_calls[0].function) and (
                 tool_call_id := response.tool_calls[0].id
             ):
                 message.tool_call_id = tool_call_id
-                message.tool_call = ToolCall(tool.name, tool.arguments)
+                arguments = json.loads(tool.arguments)
+                message.tool_call = ToolCall(tool.name, arguments)
 
             session.messages.append(message)
 
@@ -112,7 +112,7 @@ async def send_message(session: ChatSession) -> ChatSession:
 
 
 async def main():
-    initial_query = "How many R's are in starwberry?"
+    initial_query = "How many L's are in Elliot?"
 
     session = ChatSession(
         openai_client=OpenAI(base_url="http://127.0.0.1:8000/v1", api_key="EMPTY"),
@@ -123,15 +123,25 @@ async def main():
 
     try:
         async with session.mcp_client:
+            # NOTE: For clarity, we are not implementing a full chat loop,
+            #   so send_message only handles a single tool call,
+            #   and we simply display the tool call result.
+
+            print(initial_query)
+
             session = await discover_tools(session)
             session = await send_message(session)
             response = session.messages[-1]
+
             if response.tool_call is not None:
                 session = await call_tool(session)
-                response = session.messages.pop()
-            print(response)
+                response = session.messages[-1]
+
+            print(response.content)
+
     except:
         sys.exit(1)
+
     finally:
         sys.exit(0)
 
