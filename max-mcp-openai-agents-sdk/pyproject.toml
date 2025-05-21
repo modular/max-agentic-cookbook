@@ -1,5 +1,5 @@
 [project]
-name = "max-mcp-openai-agents-sdk"
+name = "max-mcp-reflex"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -10,6 +10,7 @@ dependencies = [
     "invoke>=2.2.0",
     "modular>=25.3.0",
     "openai>=1.78.1",
+    "reflex>=0.7.6.post1",
     "requests>=2.32.3",
     "tenacity>=9.1.2",
 ]
