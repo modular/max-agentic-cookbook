@@ -14,6 +14,23 @@ HOST = "127.0.0.1"
 
 
 @task
+def app(c: Context):
+    print("Freeing up ports before starting services...")
+    clean(c, MAX_PORT, MCP_PORT)
+
+    m = Manager()
+
+    m.add_process("web", "invoke web", quiet=False)
+    m.add_process("max", "invoke max", quiet=False)
+    m.add_process("mcp", "invoke mcp", quiet=False)
+
+    m.loop()
+
+    print("Cleaning up ports before exiting...")
+    clean(c, MAX_PORT, MCP_PORT)
+
+
+@task
 def mcp(_c: Context):
     mcp_server.mcp.run(
         transport="streamable-http",
@@ -35,7 +52,7 @@ def max(c: Context):
 
 
 @task
-def ui(c: Context):
+def web(c: Context):
     health_urls = [
         f"http://{HOST}:{MAX_PORT}/v1/health",
         f"http://{HOST}:{MCP_PORT}/health",
@@ -47,23 +64,6 @@ def ui(c: Context):
 
     print("All services are available. Starting web app...", flush=True)
     c.run("python -m max_mcp")
-
-
-@task
-def app(c: Context):
-    print("Freeing up ports before starting services...")
-    clean(c, MAX_PORT, MCP_PORT)
-
-    m = Manager()
-
-    m.add_process("ui", "invoke ui", quiet=False)
-    m.add_process("max", "invoke max", quiet=False)
-    m.add_process("mcp", "invoke mcp", quiet=False)
-
-    m.loop()
-
-    print("Cleaning up ports before exiting...")
-    clean(c, MAX_PORT, MCP_PORT)
 
 
 @task
