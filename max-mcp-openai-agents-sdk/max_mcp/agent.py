@@ -1,32 +1,5 @@
 import json
-from dataclasses import dataclass
-from typing import Literal, Optional, Union
-
-from fastmcp import Client as MCPClient
-from openai import OpenAI
-
-
-@dataclass
-class ToolCall:
-    name: str
-    arguments: Optional[dict]
-
-
-@dataclass
-class ChatMessage:
-    role: Union[Literal["assistant", "user", "tool"]]
-    content: Optional[str] = None
-    tool_call_id: Optional[str] = None
-    tool_call: Optional[ToolCall] = None
-
-
-@dataclass
-class ChatSession:
-    openai_client: OpenAI
-    mcp_client: MCPClient
-    model: str
-    messages: list[ChatMessage]
-    tools: Optional[list[dict]] = None
+from .models import ChatMessage, ChatSession, ToolCall
 
 
 async def discover_tools(session: ChatSession) -> ChatSession:
@@ -93,8 +66,10 @@ async def send_message(session: ChatSession) -> ChatSession:
             message = ChatMessage(role="assistant", content=response.content)
 
             # TODO: Support more than one tool call
-            if (tool := response.tool_calls[0].function) and (
-                tool_call_id := response.tool_calls[0].id
+            if (
+                response.tool_calls
+                and (tool := response.tool_calls[0].function)
+                and (tool_call_id := response.tool_calls[0].id)
             ):
                 message.tool_call_id = tool_call_id
                 arguments = json.loads(tool.arguments)

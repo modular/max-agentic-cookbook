@@ -1,12 +1,11 @@
 import os
 import requests
-from fastapi import Request, Response
-from fastmcp import FastMCP
+
 from honcho.manager import Manager
 from invoke import task, Context
-from pydantic import Field
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
-from typing import Annotated
+
+from max_mcp import mcp as mcp_server
 
 
 MAX_PORT = 8001
@@ -16,25 +15,7 @@ HOST = "127.0.0.1"
 
 @task
 def mcp(_c: Context):
-    mcp = FastMCP("Demo MCP Server")
-
-    @mcp.tool()
-    def count_characters(
-        character: Annotated[
-            str, Field(description="Character to count the occurrences of")
-        ],
-        string: Annotated[
-            str, Field(description="String within which to search for the character")
-        ],
-    ) -> int:
-        """Counts the occurrences of a character within a string"""
-        return string.lower().count(character.lower())
-
-    @mcp.custom_route("/health", methods=["GET"])
-    async def health_check(_request: Request) -> Response:
-        return Response()
-
-    mcp.run(
+    mcp_server.mcp.run(
         transport="streamable-http",
         host=HOST,
         port=MCP_PORT,
@@ -54,7 +35,7 @@ def max(c: Context):
 
 
 @task
-def ui(_c: Context):
+def ui(c: Context):
     health_urls = [
         f"http://{HOST}:{MAX_PORT}/v1/health",
         f"http://{HOST}:{MCP_PORT}/health",
@@ -65,8 +46,7 @@ def ui(_c: Context):
         return
 
     print("All services are available. Starting web app...", flush=True)
-    while True:
-        pass
+    c.run("python -m max_mcp")
 
 
 @task
