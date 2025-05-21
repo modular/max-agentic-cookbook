@@ -115,8 +115,8 @@ async def main():
     initial_query = "How many L's are in Elliot?"
 
     session = ChatSession(
-        openai_client=OpenAI(base_url="http://127.0.0.1:8000/v1", api_key="EMPTY"),
-        mcp_client=MCPClient("http://127.0.0.1:8001/mcp"),
+        openai_client=OpenAI(base_url="http://127.0.0.1:8001/v1", api_key="EMPTY"),
+        mcp_client=MCPClient("http://127.0.0.1:8002/mcp"),
         model="meta-llama/Llama-3.2-1B-Instruct",
         messages=[ChatMessage(role="user", content=initial_query)],
     )
