@@ -9,9 +9,9 @@ from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 from typing import Annotated
 
 
-HOST = "127.0.0.1"
 MAX_PORT = 8001
 MCP_PORT = 8002
+HOST = "127.0.0.1"
 
 
 @task
@@ -53,25 +53,6 @@ def max(c: Context):
     )
 
 
-@retry(
-    retry=retry_if_result(lambda ok: not ok),
-    stop=stop_after_attempt(500),
-    wait=wait_fixed(2),
-)
-def wait_for_services(*urls: str) -> bool:
-    services_ready = True
-    for url in urls:
-        try:
-            response = requests.get(url)
-            response.raise_for_status()
-            print(f"Service at {url} is ready", flush=True)
-        except:
-            print(f"Service at {url} is not ready, will check again...", flush=True)
-            services_ready = False
-            break
-    return services_ready
-
-
 @task
 def ui(_c: Context):
     health_urls = [
@@ -79,7 +60,7 @@ def ui(_c: Context):
         f"http://{HOST}:{MCP_PORT}/health",
     ]
 
-    if not wait_for_services(*health_urls):
+    if not services_ready(*health_urls):
         print("One or more services did not start after multiple retries.", flush=True)
         return
 
@@ -114,3 +95,22 @@ def clean(c: Context, *ports: int):
             pty=False,
             in_stream=False,
         )
+
+
+@retry(
+    retry=retry_if_result(lambda ok: not ok),
+    stop=stop_after_attempt(500),
+    wait=wait_fixed(2),
+)
+def services_ready(*urls: str) -> bool:
+    services_ready = True
+    for url in urls:
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            print(f"Service at {url} is ready", flush=True)
+        except:
+            print(f"Service at {url} is not ready, will check again...", flush=True)
+            services_ready = False
+            break
+    return services_ready
