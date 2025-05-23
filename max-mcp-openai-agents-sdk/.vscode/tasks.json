@@ -6,9 +6,14 @@
         {
             "label": "Install Package",
             "type": "shell",
-            "command": "pip",
-            "args": ["install", "-e", "."],
+            "command": "python",
+            "args": ["-m", "pip", "install", "-e", "."],
             "group": "build",
+            "options": {
+                "env": {
+                    "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}"
+                }
+            },
             "presentation": {
                 "echo": true,
                 "reveal": "always",
@@ -18,6 +23,6 @@
                 "clear": false
             },
             "problemMatcher": []
-        }
+        },
     ]
 } 

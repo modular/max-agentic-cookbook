@@ -10,13 +10,14 @@ from max_mcp import mcp as mcp_server
 
 MAX_PORT = 8001
 MCP_PORT = 8002
+WEB_PORT = 8000
 HOST = "127.0.0.1"
 
 
 @task
 def app(c: Context):
     print("Freeing up ports before starting services...")
-    clean(c, MAX_PORT, MCP_PORT)
+    clean(c, ports=f"{MAX_PORT},{MCP_PORT},{WEB_PORT}")
 
     m = Manager()
 
@@ -27,7 +28,7 @@ def app(c: Context):
     m.loop()
 
     print("Cleaning up ports before exiting...")
-    clean(c, MAX_PORT, MCP_PORT)
+    clean(c, ports=f"{MAX_PORT},{MCP_PORT}")
 
 
 @task
@@ -67,8 +68,15 @@ def web(c: Context):
 
 
 @task
-def clean(c: Context, *ports: int):
-    for port in ports:
+def clean(c: Context, ports: str):
+    if not ports:
+        print(
+            "No ports specified. Use --ports to specify ports to clean (comma-separated)"
+        )
+        return
+
+    port_list = [int(p.strip()) for p in ports.split(",")]
+    for port in port_list:
         c.run(
             f"lsof -ti :{port} | xargs kill -9 || true",
             warn=True,
