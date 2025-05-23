@@ -10,7 +10,25 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "preLaunchTask": "Install Package"
+        },
+        {
+            "name": "Python Debugger: max_mcp module",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "max_mcp",
+            "console": "integratedTerminal",
+            "preLaunchTask": "Install Package"
+        },
+        {
+            "name": "Python Debugger: Full App (invoke app)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/tasks.py",
+            "args": ["app"],
+            "console": "integratedTerminal",
+            "preLaunchTask": "Install Package"
         }
     ]
 }
