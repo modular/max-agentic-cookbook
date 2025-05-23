@@ -58,24 +58,6 @@ async def discover_tools(session: ChatSession) -> ChatSessionResult:
         handle_failure(e, "Discovering tools")
 
 
-async def call_tool(session: ChatSession) -> ChatSessionResult:
-    try:
-        async with session.mcp_client:
-            last_message = session.messages[-1]
-            if (tool_call := last_message.tool_call) and (arguments := tool_call.arguments):
-                result = await session.mcp_client.call_tool(tool_call.name, arguments)
-                message = ChatMessage(
-                    role="tool",
-                    tool_call_id=last_message.tool_call_id,
-                    content=result[0].text,
-                )
-                session.messages.append(message)
-            return Success(session)
-
-    except Exception as e:
-        handle_failure(e, "Calling tool")
-
-
 async def send_message(session: ChatSession) -> ChatSessionResult:
     try:
         messages = [
@@ -107,6 +89,24 @@ async def send_message(session: ChatSession) -> ChatSessionResult:
 
     except Exception as e:
         handle_failure(e, "Sending message")
+
+
+async def call_tool(session: ChatSession) -> ChatSessionResult:
+    try:
+        async with session.mcp_client:
+            last_message = session.messages[-1]
+            if (tool_call := last_message.tool_call) and (arguments := tool_call.arguments):
+                result = await session.mcp_client.call_tool(tool_call.name, arguments)
+                message = ChatMessage(
+                    role="tool",
+                    tool_call_id=last_message.tool_call_id,
+                    content=result[0].text,
+                )
+                session.messages.append(message)
+            return Success(session)
+
+    except Exception as e:
+        handle_failure(e, "Calling tool")
     
 
 def handle_failure(exception: Exception, what_failed: str) -> Failure:
