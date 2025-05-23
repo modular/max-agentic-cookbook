@@ -87,7 +87,7 @@ magic global install -u max-pipelines
 
     In this demo, we upload [The Little Book of Deep Learning](https://fleuret.org/public/lbdl.pdf), which contains 185 pages that are parsed as images for question answering:
 
-    <img src="multimodal-rag-demo.gif" alt="Multi-Modal RAG" width="100%" style="max-width: 800px;">
+    <img src="https://cdn.githubraw.com/modular/devrel-extras/main/gifs/multimodal-rag-demo.gif" alt="Multi-Modal RAG" width="100%" style="max-width: 800px;">
 
 4. To clean up resources when done:
 
