@@ -73,7 +73,7 @@ async def send_message(session: ChatSession) -> ChatSession:
             ):
                 message.tool_call_id = tool_call_id
                 arguments = json.loads(tool.arguments)
-                message.tool_call = ToolCall(tool.name, arguments)
+                message.tool_call = ToolCall(name=tool.name, arguments=arguments)
 
             session.messages.append(message)
 
