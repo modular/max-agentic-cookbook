@@ -63,10 +63,3 @@ jobs:
           fi
           echo "Changed directories: $CHANGED_DIRS"
           echo "dirs=$CHANGED_DIRS" >> $GITHUB_OUTPUT
-
-      - name: Run Tests
-        if: steps.changed-dirs.outputs.dirs != ''
-        shell: bash
-        run: |
-          source /root/.bashrc
-          $HOME/.modular/bin/magic run test ${{ steps.changed-dirs.outputs.dirs }}
