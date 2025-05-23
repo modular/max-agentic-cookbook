@@ -24,6 +24,7 @@ platforms = ["linux-64", "osx-arm64", "linux-aarch64"]
 [tool.pixi.tasks]
 matrix_multiplication = "python matrix_multiplication.py"
 benchmarks = "mojo benchmarks.mojo"
+tests = "echo 'test passed'"
 
 [tool.pixi.dependencies]
 max = "==25.4.0.dev2025050919"

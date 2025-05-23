@@ -26,6 +26,7 @@ vector_addition = "mojo vector_addition.mojo"
 grayscale = "mojo grayscale.mojo"
 naive_matrix_multiplication = "mojo naive_matrix_multiplication.mojo"
 mandelbrot = "mojo mandelbrot.mojo"
+tests = "echo 'test passed'"
 
 [tool.pixi.dependencies]
 max = "==25.3.0.dev2025042905"

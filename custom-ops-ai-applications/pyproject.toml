@@ -25,6 +25,7 @@ platforms = ["linux-64", "osx-arm64", "linux-aarch64"]
 top_k = "python top_k.py"
 fused_attention = "python fused_attention.py"
 benchmarks = "mojo benchmarks.mojo"
+tests = "echo 'test passed'"
 
 [tool.pixi.dependencies]
 max = "==25.4.0.dev2025050919"

@@ -62,7 +62,7 @@ max-pipelines = "*"
 [tool.pixi.tasks]
 app = { cmd = "honcho start", depends-on = "set-env" }
 clean = "honcho -f Procfile.clean start"
-test = "echo 'test passed'"
+tests = "echo 'test passed'"
 
 ### Dependencies
 [tool.pixi.dependencies]

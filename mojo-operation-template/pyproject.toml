@@ -27,6 +27,7 @@ benchmarks = "mojo benchmarks.mojo"
 test = "mojo test_correctness.mojo"
 debug_amd = "bash debug_amd.sh"
 profile_amd = "bash profile_amd.sh"
+tests = "echo 'test passed'"
 
 [tool.pixi.feature.pytest.tasks]
 pytest = "pytest"

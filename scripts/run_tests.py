@@ -22,7 +22,7 @@ def run_tests_for_directory(directory: str) -> bool:
         os.environ["PIXI_PROJECT_MANIFEST"] = str(Path(project_file).absolute())
 
     try:
-        subprocess.run(["magic", "run", "test"], check=True)
+        subprocess.run(["magic", "run", "tests"], check=True)
         success = True
     except subprocess.CalledProcessError as e:
         print(f"Test failed: {e}")

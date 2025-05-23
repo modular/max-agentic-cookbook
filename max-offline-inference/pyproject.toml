@@ -28,8 +28,8 @@ max_offline_inference = { path = ".", editable = true }
 
 [tool.pixi.tasks]
 app = "python main.py"
-test = "echo 'test passed'"
+tests = "python main.py"
 
 [tool.pixi.dependencies]
 python-dotenv = ">=1.0.1,<2"
-max-pipelines = "==25.2.0.dev2025031705"
+max-pipelines = "*"

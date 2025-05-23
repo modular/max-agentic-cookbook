@@ -9,12 +9,12 @@ version = "0.0.0"
 python = ">=3.10,<3.13"
 
 [tasks]
-test = "python scripts/run_tests.py $1"
+tests = "python scripts/run_tests.py max-offline-inference max-serve-openai-embeddings"
 
 [environments]
 default = { solve-group = "default" }
 lint = { features = ["lint"], solve-group = "default" }
-test = { features = ["test"], solve-group = "default" }
+tests = { features = ["tests"], solve-group = "default" }
 
 [feature.lint.tasks]
 lint = """
@@ -25,5 +25,5 @@ python scripts/validate_metadata.py
 pyyaml = "*"
 jsonschema = "*"
 
-[feature.test.pypi-dependencies]
+[feature.tests.pypi-dependencies]
 pyyaml = "*"

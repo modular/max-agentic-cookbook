@@ -41,4 +41,4 @@ autodoc_repo_chat_agent = { path = ".", editable = true }
 server = "MAX_SERVE_PORT=8010 max-pipelines serve --model-path Qwen/Qwen2.5-7B-Instruct-1M --max-batch-size 100 --enable-prefix-caching"
 agent = "TOKENIZERS_PARALLELISM=false magic run python main.py"
 clean = "rm -rf ./docs repo_content.json || true"
-test = "echo 'test passed'"
+tests = "echo 'test passed'"

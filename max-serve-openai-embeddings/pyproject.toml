@@ -32,9 +32,12 @@ max_embeddings = { path = ".", editable = true }
 [tool.pixi.tasks]
 server = "MAX_SERVE_PORT=8000 max-pipelines serve --model-path sentence-transformers/all-mpnet-base-v2"
 main = "magic run python main.py"
-test = "echo 'test passed'"
+tests = "bash wait_and_run.sh"
 
 [tool.pixi.dependencies]
 docker-compose = ">=2.32.4,<3"
 bash = ">=5.2.21,<6"
 honcho = ">=2.0.0,<3"
+max-pipelines = "*"
+pydantic = ">=2.11.4,<3"
+lsof = ">=4.99.4,<5"

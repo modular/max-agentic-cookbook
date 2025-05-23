@@ -2,7 +2,6 @@ from dotenv import load_dotenv
 from max.entrypoints.llm import LLM
 from max.pipelines import PipelineConfig
 from max.pipelines.architectures import register_all_models
-from max.serve.config import Settings
 
 MODEL_NAME = "modularai/Llama-3.1-8B-Instruct-GGUF"
 
@@ -12,9 +11,8 @@ def main():
     register_all_models()
 
     print(f"Loading model: {MODEL_NAME}")
-    settings = Settings()
     pipeline_config = PipelineConfig(model_path=MODEL_NAME)
-    llm = LLM(settings, pipeline_config)
+    llm = LLM(pipeline_config)
 
     prompts = [
         "The winner of the World Series in 2016 was: ",

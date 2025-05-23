@@ -36,7 +36,7 @@ max-serve-continuous-chat = { path = ".", editable = true }
 [tool.pixi.tasks]
 app = "honcho start"
 clean = "honcho -f Procfile.clean start"
-test = "echo 'test passed'"
+tests = "echo 'test passed'"
 
 [tool.pixi.dependencies]
 docker-compose = ">=2.32.4,<3"
