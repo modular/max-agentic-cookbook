@@ -87,7 +87,7 @@ The agents will be ready when you see the welcome message in your terminal.
 
 ### Chat agent with visible thinking
 
-<img src="chat_agent.gif" alt="Chat interface" width="100%" style="max-width: 800px;">
+<img src="https://cdn.githubraw.com/modular/devrel-extras/main/gifs/chat_agent.gif" alt="Chat interface" width="100%" style="max-width: 800px;">
 
 *Demo shows:*
 
@@ -99,7 +99,7 @@ The agents will be ready when you see the welcome message in your terminal.
 
 ### Screenplay development team
 
-<img src="screenplay_agents.gif" alt="Screenplay agents" width="100%" style="max-width: 800px;">
+<img src="https://cdn.githubraw.com/modular/devrel-extras/main/gifs/screenplay_agents.gif" alt="Screenplay agents" width="100%" style="max-width: 800px;">
 
 *Demo shows:*
 

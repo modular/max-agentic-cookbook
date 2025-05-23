@@ -109,7 +109,7 @@ The demo below shows the agent in action, demonstrating:
 * Beautiful output formatting with syntax highlighting
 * Clear explanations of the code and results
 
-<img src="code-execution-agent.gif" alt="Demo agent" width="100%" style="max-width: 800px;">
+<img src="https://cdn.githubraw.com/modular/devrel-extras/main/gifs/code-execution-agent.gif" alt="Demo agent" width="100%" style="max-width: 800px;">
 
 ## System architecture
 
