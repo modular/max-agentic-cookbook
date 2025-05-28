@@ -2,13 +2,11 @@ import os
 import requests
 
 from honcho.manager import Manager
-from invoke import task, Context
+from invoke.tasks import task
+from invoke.context import Context
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 
 from max_mcp import mcp as mcp_server
-
-from max.entrypoints import pipelines
-
 
 MAX_PORT = 8001
 MCP_PORT = 8002
@@ -19,7 +17,7 @@ HOST = "127.0.0.1"
 @task
 def app(c: Context):
     print("Freeing up ports before starting services...")
-    clean(c, ports=f"{MAX_PORT},{MCP_PORT},{WEB_PORT}")
+    clean(c)
 
     m = Manager()
 
@@ -30,7 +28,7 @@ def app(c: Context):
     m.loop()
 
     print("Cleaning up ports before exiting...")
-    clean(c, ports=f"{MAX_PORT},{MCP_PORT}")
+    clean(c)
 
 
 @task
@@ -70,11 +68,9 @@ def web(c: Context):
 
 
 @task
-def clean(c: Context, ports: str):
+def clean(c: Context, ports: str=f"{MAX_PORT},{MCP_PORT},{WEB_PORT}"):
     if not ports:
-        print(
-            "No ports specified. Use --ports to specify ports to clean (comma-separated)"
-        )
+        print("No ports specified. Use --ports to specify ports (comma-separated)")
         return
 
     port_list = [int(p.strip()) for p in ports.split(",")]
