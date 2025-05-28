@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 
-from .agent import run
+from .agent import process_query
 from .models import CountRequest, CountResult
 
 
@@ -11,7 +11,7 @@ api = FastAPI()
 async def handle_count(request: CountRequest) -> CountResult:
     try:
         query = request.query
-        result = await run(query)
+        result = await process_query(query)
         return result
     except ValueError as e:
         raise HTTPException(status_code=400, detail=e)

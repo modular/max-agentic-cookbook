@@ -1,7 +1,7 @@
 from fastmcp import Client as MCPClient
 from openai import OpenAI
 from pydantic import BaseModel, Field
-from typing import Literal, Optional, Union
+from typing import Literal, Optional
 
 
 class CountRequest(BaseModel):
@@ -22,7 +22,7 @@ class ToolCall(BaseModel):
 
 
 class ChatMessage(BaseModel):
-    role: Union[Literal["assistant", "user", "tool"]]
+    role: Literal["assistant", "user", "tool"]
     content: Optional[str] = None
     tool_call_id: Optional[str] = None
     tool_call: Optional[ToolCall] = None
