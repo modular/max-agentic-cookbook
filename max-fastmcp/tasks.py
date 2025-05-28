@@ -32,6 +32,13 @@ def app(c: Context):
 
 
 @task
+def setup(_c: Context):
+    os.environ["MAX_BASE"] = HOST
+    os.environ["MAX_SERVE_HOST"] = HOST
+    os.environ["MAX_SERVE_PORT"] = str(MAX_PORT)
+
+
+@task
 def mcp(_c: Context):
     mcp_server.mcp.run(
         transport="streamable-http",
@@ -68,7 +75,7 @@ def web(c: Context):
 
 
 @task
-def clean(c: Context, ports: str=f"{MAX_PORT},{MCP_PORT},{WEB_PORT}"):
+def clean(c: Context, ports: str = f"{MAX_PORT},{MCP_PORT},{WEB_PORT}"):
     if not ports:
         print("No ports specified. Use --ports to specify ports (comma-separated)")
         return

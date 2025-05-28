@@ -1,4 +1,5 @@
 import json
+import inspect
 from typing import Union
 
 from fastmcp import Client as MCPClient
@@ -27,10 +28,10 @@ async def process_query(query: str) -> CountResult:
                 result = CountResult.model_validate_json(content)
                 return result
             else:
-                raise _exception("run", "Unexpected message contents")
+                raise _exception("Unexpected message contents")
 
     except Exception as e:
-        raise e
+        raise _exception(e)
 
 
 async def _init_session(
@@ -47,7 +48,7 @@ async def _init_session(
         return session
 
     except Exception as e:
-        raise _exception("_init_session", e)
+        raise _exception(e)
 
 
 async def _discover_tools(session: ChatSession) -> ChatSession:
@@ -75,12 +76,12 @@ async def _discover_tools(session: ChatSession) -> ChatSession:
         return session
 
     except Exception as e:
-        raise _exception("_discover_tools", e)
+        raise _exception(e)
 
 
 async def _send_message(session: ChatSession) -> ChatSession:
     if session.messages is None:
-        raise _exception("_send_message", "Session contains no messages")
+        raise _exception("Session contains no messages")
 
     messages = [
         {"role": m.role, "content": m.content, "tool_call_id": m.tool_call_id}
@@ -95,7 +96,7 @@ async def _send_message(session: ChatSession) -> ChatSession:
         )
 
     except Exception as e:
-        raise _exception("_send_message", "OpenAI client:", e)
+        raise _exception("OpenAI client:", e)
 
     try:
         if response := response.choices[0].message:
@@ -115,12 +116,12 @@ async def _send_message(session: ChatSession) -> ChatSession:
         return session
 
     except Exception as e:
-        raise _exception("_send_message", "Processing response:", e)
+        raise _exception("Processing response:", e)
 
 
 async def _call_tool(session: ChatSession) -> ChatSession:
     if session.messages is None:
-        raise _exception("_call_tool", "Session contains no messages")
+        raise _exception("Session contains no messages")
 
     try:
         last_message = session.messages[-1]
@@ -135,12 +136,18 @@ async def _call_tool(session: ChatSession) -> ChatSession:
             return session
 
     except Exception as e:
-        raise _exception("_call_tool", e)
+        raise _exception(e)
 
     return session
 
 
-def _exception(loc: str, *note: Union[str, Exception]) -> ValueError:
-    msg = f"[max-fastmcp {loc}] {repr(note).join(' ')}"
-    print(msg)
-    return ValueError(msg)
+def _exception(*note: Union[str, Exception]) -> ValueError:
+    frame = inspect.currentframe()
+    header = "[max-fastmcp"
+    header += f" {frame.f_back.f_code.co_name}]" if (frame and frame.f_back) else "]"
+    components = [header]
+    notes = " ".join(repr(n) for n in note if n is not None)
+    components.append(notes)
+    message = " ".join(components).strip()
+    print(message)
+    return ValueError(message)
