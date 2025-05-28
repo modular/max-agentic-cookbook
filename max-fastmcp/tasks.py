@@ -7,6 +7,8 @@ from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 
 from max_mcp import mcp as mcp_server
 
+from max.entrypoints import pipelines
+
 
 MAX_PORT = 8001
 MCP_PORT = 8002

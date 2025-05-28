@@ -1,20 +1,31 @@
 import json
-from typing import TypeAlias
+from typing import Optional
 
 from fastmcp import Client as MCPClient
 from openai import OpenAI
-from returns.result import Result, Success, Failure
 
-from .models import ChatMessage, ChatSession, ToolCall
+from .models import ChatMessage, ChatSession, ToolCall, CountResult
 
 
 openai_client = OpenAI(base_url="http://127.0.0.1:8001/v1", api_key="EMPTY")
 mcp_client = MCPClient("http://127.0.0.1:8002/mcp")
 model = "meta-llama/Llama-3.2-1B-Instruct"
 
-ChatSessionResult: TypeAlias = Result["ChatSession", str]
 
-async def start_session(query: str) -> ChatSessionResult:
+async def run(query: str) -> CountResult:
+    try:
+        session = await _start_session(query)
+        session = await _discover_tools(session)
+        session = await _send_message(session)
+        session = await _call_tool(session)
+        content = session.messages[-1].content
+        result = CountResult.model_validate_json(content)
+        return result
+    except Exception as e:
+        raise ValueError(e)
+
+
+async def _start_session(query: str) -> Optional[ChatSession]:
     try:
         message = ChatMessage(role="user", content=query)
         async with mcp_client:
@@ -24,12 +35,12 @@ async def start_session(query: str) -> ChatSessionResult:
                 model=model,
                 messages=[message],
             )
-        return Success(session)
-    except Exception as e:
-        handle_failure(e, "Starting session")
+        return session
+    except:
+        None
 
 
-async def discover_tools(session: ChatSession) -> ChatSessionResult:
+async def _discover_tools(session: ChatSession) -> Optional[ChatSession]:
     try:
         async with session.mcp_client:
             mcp_tools = await session.mcp_client.list_tools()
@@ -52,13 +63,13 @@ async def discover_tools(session: ChatSession) -> ChatSessionResult:
                     tools.append(formatted_tool)
 
             session.tools = tools
-            return Success(session)
+            return session
 
-    except Exception as e:
-        handle_failure(e, "Discovering tools")
+    except:
+        return None
 
 
-async def send_message(session: ChatSession) -> ChatSessionResult:
+async def _send_message(session: ChatSession) -> Optional[ChatSession]:
     try:
         messages = [
             {"role": m.role, "content": m.content, "tool_call_id": m.tool_call_id}
@@ -85,13 +96,13 @@ async def send_message(session: ChatSession) -> ChatSessionResult:
 
             session.messages.append(message)
 
-        return Success(session)
+        return session
 
-    except Exception as e:
-        handle_failure(e, "Sending message")
+    except:
+        return None
 
 
-async def call_tool(session: ChatSession) -> ChatSessionResult:
+async def _call_tool(session: ChatSession) -> Optional[ChatSession]:
     try:
         async with session.mcp_client:
             last_message = session.messages[-1]
@@ -103,13 +114,7 @@ async def call_tool(session: ChatSession) -> ChatSessionResult:
                     content=result[0].text,
                 )
                 session.messages.append(message)
-            return Success(session)
+            return session
 
-    except Exception as e:
-        handle_failure(e, "Calling tool")
-    
-
-def handle_failure(exception: Exception, what_failed: str) -> Failure:
-    message = f"{what_failed} failed: {exception}"
-    print(message)
-    return Failure(message)
+    except:
+        return None

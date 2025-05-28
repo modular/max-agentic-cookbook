@@ -9,7 +9,6 @@ dependencies = [
     "fastui>=0.7.0",
     "modular>=25.3.0",
     "openai>=1.78.1",
-    "returns>=0.25.0",
 ]
 
 [dependency-groups]
