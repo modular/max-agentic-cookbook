@@ -16,8 +16,6 @@ packages = ["."]
 channels = [
     "conda-forge",
     "https://conda.modular.com/max-nightly",
-    "https://conda.modular.com/max",
-    "https://repo.prefix.dev/modular-community",
 ]
 platforms = ["linux-64", "linux-aarch64"]
 

@@ -27,10 +27,8 @@ packages = ["."]
 
 [tool.pixi.project]
 channels = [
-  "https://conda.modular.com/max-nightly",
-  "https://conda.modular.com/max",
-  "https://repo.prefix.dev/modular-community",
   "conda-forge",
+  "https://conda.modular.com/max-nightly",
 ]
 platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
 
