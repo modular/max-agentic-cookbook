@@ -7,7 +7,7 @@ mcp = FastMCP("Demo MCP Server")
 
 
 class ToolResponse(BaseModel):
-    character_found: str = Field(description="The character that was counted")
+    char_found: str = Field(description="The character that was counted")
     in_string: str = Field(description="The string that was searched")
     num_times: int = Field(
         description="Number of times the character appears in the string"
@@ -26,7 +26,7 @@ def count_characters(
     """Counts the occurrences of a character within a string"""
     count = string.lower().count(character.lower())
 
-    return ToolResponse(character_found=character, in_string=string, num_times=count)
+    return ToolResponse(char_found=character, in_string=string, num_times=count)
 
 
 @mcp.custom_route("/health", methods=["GET"])

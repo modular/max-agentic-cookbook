@@ -9,7 +9,7 @@ class CountRequest(BaseModel):
 
 
 class CountResult(BaseModel):
-    character_found: str
+    char_found: str
     in_string: str
     num_times: int
 
