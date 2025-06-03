@@ -24,7 +24,7 @@ max_serve_multimodal_structured_output = { path = ".", editable = true }
 
 [tool.pixi.tasks]
 server = "MAX_SERVE_PORT=8010 max-pipelines serve --model-path meta-llama/Llama-3.2-11B-Vision-Instruct --max-length=1000 --max-batch-size=1 --enable-structured-output"
-main = "magic run python main.py"
+main = "python main.py"
 tests = "echo 'test passed'"
 
 [tool.pixi.dependencies]

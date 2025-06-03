@@ -24,6 +24,6 @@ deepseek_qwen_autogen_agent = { path = ".", editable = true }
 
 [tool.pixi.tasks]
 server = "MAX_SERVE_PORT=8010 max-pipelines serve --model-path deepseek-ai/DeepSeek-R1-Distill-Qwen-7B --max-length 16384 --max-batch-size 1"
-chat_agent = "magic run python chat_agent.py"
-screenplay_agents = "magic run python screenplay_agents.py"
+chat_agent = "python chat_agent.py"
+screenplay_agents = "python screenplay_agents.py"
 tests = "echo 'test passed'"

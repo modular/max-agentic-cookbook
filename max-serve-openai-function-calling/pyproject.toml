@@ -34,9 +34,9 @@ max_serve_openai_function_calling = { path = ".", editable = true }
 
 [tool.pixi.tasks]
 server = "MAX_SERVE_PORT=8077 max-pipelines serve --model-path modularai/Llama-3.1-8B-Instruct-GGUF --max-length=2048"
-single_function_call = "magic run python single_function_call.py"
-multi_function_calls = "magic run python multi_function_calls.py"
-app = "magic run python app.py"
+single_function_call = "python single_function_call.py"
+multi_function_calls = "python multi_function_calls.py"
+app = "python app.py"
 tests = "echo 'test passed'"
 
 [tool.pixi.dependencies]
