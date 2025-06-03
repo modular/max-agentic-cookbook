@@ -1,6 +1,6 @@
 from fastmcp import Client as MCPClient
 from openai import OpenAI
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import Literal, Optional
 
 
@@ -9,11 +9,9 @@ class CountRequest(BaseModel):
 
 
 class CountResult(BaseModel):
-    character_found: str = Field(description="The character that was counted")
-    in_string: str = Field(description="The string that was searched")
-    num_times: int = Field(
-        description="Number of times the character appears in the string"
-    )
+    character_found: str
+    in_string: str
+    num_times: int
 
 
 class ToolCall(BaseModel):

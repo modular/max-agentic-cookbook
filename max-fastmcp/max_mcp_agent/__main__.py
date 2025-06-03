@@ -1,5 +1,5 @@
 import uvicorn
-from max_mcp import app
+from max_mcp_agent import app
 
 
 if __name__ == "__main__":

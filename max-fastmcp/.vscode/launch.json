@@ -15,11 +15,11 @@
             "preLaunchTask": "Install Package"
         },
         {
-            "name": "Python Debugger: max_mcp module",
+            "name": "Python Debugger: max_mcp_agent module",
             "type": "debugpy",
             "justMyCode": false,
             "request": "launch",
-            "module": "max_mcp",
+            "module": "max_mcp_agent",
             "console": "integratedTerminal",
             "preLaunchTask": "Install Package"
         }
