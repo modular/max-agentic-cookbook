@@ -29,7 +29,7 @@ max_embeddings = { path = ".", editable = true }
 
 [tool.pixi.tasks]
 server = "MAX_SERVE_PORT=8000 max-pipelines serve --model-path sentence-transformers/all-mpnet-base-v2"
-main = "magic run python main.py"
+main = "python main.py"
 tests = "bash wait_and_run.sh"
 
 [tool.pixi.dependencies]
