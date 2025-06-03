@@ -1,19 +1,38 @@
+import os
 import json
 import inspect
 from typing import Union
 
+from dotenv import load_dotenv
 from fastmcp import Client as MCPClient
 from openai import OpenAI
 
 from .models import ChatMessage, ChatSession, ToolCall, CountResult
 
 
-MODEL_NAME = "meta-llama/Llama-3.2-1B-Instruct"
+load_dotenv()
+
+
+def _make_url(host: str, port: int, path: str, protocol: str = "http") -> str:
+    return f"{protocol}://{host}:{port}{path}"
+
+
+MAX_SERVE_HOST = os.getenv("MAX_SERVE_HOST", "0.0.0.0")
+MAX_SERVE_PORT = int(os.getenv("MAX_SERVE_PORT", 8001))
+MAX_SERVE_API_PATH = os.getenv("MAX_SERVE_API_PATH", "/v1")
+MAX_SERVE_URL = _make_url(MAX_SERVE_HOST, MAX_SERVE_PORT, MAX_SERVE_API_PATH)
+
+MCP_HOST = os.getenv("MCP_HOST", "0.0.0.0")
+MCP_PORT = int(os.getenv("MCP_PORT", 8002))
+MCP_API_PATH = os.getenv("MCP_API_PATH", "/mcp")
+MCP_URL = _make_url(MCP_HOST, MCP_PORT, MCP_API_PATH)
+
+MODEL_NAME = os.getenv("MODEL_NAME", "meta-llama/Llama-3.2-1B-Instruct")
 
 
 async def process_query(query: str) -> CountResult:
-    openai_client = OpenAI(base_url="http://127.0.0.1:8001/v1", api_key="EMPTY")
-    mcp_client = MCPClient("http://127.0.0.1:8002/mcp")
+    openai_client = OpenAI(base_url=MAX_SERVE_URL, api_key="EMPTY")
+    mcp_client = MCPClient(MCP_URL)
 
     try:
         async with mcp_client:

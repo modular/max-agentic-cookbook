@@ -4,10 +4,10 @@ from .agent import process_query
 from .models import CountRequest, CountResult
 
 
-app = FastAPI()
+api = FastAPI()
 
 
-@app.post("/api/count")
+@api.post("/api/count")
 async def handle_count(request: CountRequest) -> CountResult:
     try:
         query = request.query

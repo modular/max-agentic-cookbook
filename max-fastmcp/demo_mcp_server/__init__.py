@@ -34,10 +34,21 @@ async def health_check(_request: Request) -> Response:
     return Response()
 
 
-if __name__ == "__main__":
+def main():
+    host = os.getenv("MCP_HOST", "0.0.0.0")
+    port = int(os.getenv("MCP_PORT", 8002))
+
     mcp.run(
         transport="streamable-http",
-        host="0.0.0.0",
-        port=8002,
+        host=host,
+        port=port,
         log_level="debug",
     )
+
+
+if __name__ == "__main__":
+    import os
+    from dotenv import load_dotenv
+
+    load_dotenv()
+    main()

@@ -1,15 +1,22 @@
 import os
 import requests
 
+from dotenv import load_dotenv
 from honcho.manager import Manager
 from invoke.tasks import task
 from invoke.context import Context
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 
-MAX_PORT = 8001
-MCP_PORT = 8002
-WEB_PORT = 8000
-HOST = "127.0.0.1"
+load_dotenv()
+
+MAX_SERVE_HOST = os.getenv("MAX_SERVE_HOST", "0.0.0.0")
+MAX_SERVE_PORT = int(os.getenv("MAX_SERVE_PORT", 8001))
+
+MCP_HOST = os.getenv("MCP_HOST", "0.0.0.0")
+MCP_PORT = int(os.getenv("MCP_PORT", 8002))
+
+API_HOST = os.getenv("API_HOST", "0.0.0.0")
+API_PORT = int(os.getenv("API_PORT", 8000))
 
 
 @task
@@ -19,7 +26,7 @@ def app(c: Context):
 
     m = Manager()
 
-    m.add_process("web", "invoke web", quiet=False)
+    m.add_process("api", "invoke api", quiet=False)
     m.add_process("max", "invoke max", quiet=False)
     m.add_process("mcp", "invoke mcp", quiet=False)
 
@@ -30,19 +37,12 @@ def app(c: Context):
 
 
 @task
-def setup(_c: Context):
-    os.environ["MAX_BASE"] = HOST
-    os.environ["MAX_SERVE_HOST"] = HOST
-    os.environ["MAX_SERVE_PORT"] = str(MAX_PORT)
-
-
-@task
 def mcp(_c: Context):
     import demo_mcp_server
 
     demo_mcp_server.mcp.run(
         transport="streamable-http",
-        host=HOST,
+        host=MCP_HOST,
         port=MCP_PORT,
         log_level="debug",
     )
@@ -50,8 +50,6 @@ def mcp(_c: Context):
 
 @task
 def max(c: Context):
-    os.environ["MAX_SERVE_HOST"] = HOST
-    os.environ["MAX_SERVE_PORT"] = str(MAX_PORT)
     c.run(
         """max serve \
         --model-path=meta-llama/Llama-3.2-1B-Instruct \
@@ -60,10 +58,12 @@ def max(c: Context):
 
 
 @task
-def web(c: Context):
+def api(c: Context):
+    max_health_path = os.getenv("MAX_SERVE_HEALTH_PATH", "/v1/health")
+    mcp_health_path = os.getenv("MCP_HEALTH_PATH", "/health")
     health_urls = [
-        f"http://{HOST}:{MAX_PORT}/v1/health",
-        f"http://{HOST}:{MCP_PORT}/health",
+        f"http://{MAX_SERVE_HOST}:{MAX_SERVE_PORT}{max_health_path}",
+        f"http://{MCP_HOST}:{MCP_PORT}{mcp_health_path}",
     ]
 
     if not services_ready(*health_urls):
@@ -71,11 +71,11 @@ def web(c: Context):
         return
 
     print("All services are available. Starting web app...", flush=True)
-    c.run("python -m max_mcp")
+    c.run("python -m max_mcp_agent")
 
 
 @task
-def clean(c: Context, ports: str = f"{MAX_PORT},{MCP_PORT},{WEB_PORT}"):
+def clean(c: Context, ports: str = f"{MAX_SERVE_PORT},{MCP_PORT},{API_PORT}"):
     if not ports:
         print("No ports specified. Use --ports to specify ports (comma-separated)")
         return
