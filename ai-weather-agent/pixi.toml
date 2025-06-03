@@ -1,10 +1,8 @@
 [project]
 authors = ["Modular <hello@modular.com>"]
 channels = [
-    "https://conda.modular.com/max-nightly",
-    "https://conda.modular.com/max",
     "conda-forge",
-    "https://repo.prefix.dev/modular-community",
+    "https://conda.modular.com/max-nightly",
 ]
 description = "Add a short description here"
 name = "frontend"
