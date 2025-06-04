@@ -35,23 +35,20 @@ jobs:
           apt-get update
           apt-get install -y curl git
 
-      - name: Install Magic CLI
-        shell: bash
-        run: |
-          curl -ssL https://magic.modular.com/ | bash
-          . /root/.bashrc
-          echo "/root/.modular/bin" >> $GITHUB_PATH
-          export PATH="/root/.modular/bin:$PATH"
-
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           fetch-depth: 0
 
+      - uses: prefix-dev/setup-pixi@v0.8.8
+        with:
+          pixi-version: v0.47.0
+          cache: false
+          post-cleanup: false
+
       - name: Run Metadata Validation
         shell: bash
         run: |
-          source /root/.bashrc
-          $HOME/.modular/bin/magic run lint
+          pixi run lint
 
       - name: Get changed directories
         id: changed-dirs
