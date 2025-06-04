@@ -22,7 +22,7 @@ def run_tests_for_directory(directory: str) -> bool:
         os.environ["PIXI_PROJECT_MANIFEST"] = str(Path(project_file).absolute())
 
     try:
-        subprocess.run(["magic", "run", "tests"], check=True)
+        subprocess.run(["pixi", "run", "tests"], check=True)
         success = True
     except subprocess.CalledProcessError as e:
         print(f"Test failed: {e}")
@@ -37,7 +37,7 @@ def main():
         directories = [
             d
             for d in os.listdir()
-            if os.path.isdir(d) and d not in [".git", "scripts", ".github", ".magic"]
+            if os.path.isdir(d) and d not in [".git", "scripts", ".github", ".magic", ".pixi"]
         ]
     else:
         directories = sys.argv[1:]

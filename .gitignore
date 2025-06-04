@@ -3,4 +3,6 @@ __pycache__
 .env
 .magic
 magic.lock
+.pixi
+pixi.lock
 *.log
