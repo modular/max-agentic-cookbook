@@ -27,62 +27,54 @@ While this recipe focuses on Python code, the patterns demonstrated here can be 
 
 Please make sure your system meets our [system requirements](https://docs.modular.com/max/get-started).
 
+This recipe assumes you are using `uv` to work with Python. Install `uv` if you don't have it already by visiting [`docs.astral.sh/uv/`](https://docs.astral.sh/uv/).
+
 ### Important: GPU requirements
 
 This recipe requires a GPU with CUDA 12.5 support. Recommended GPUs:
 
 * NVIDIA H100 / H200, A100, A40, L40
 
-To proceed, ensure you have the `magic` CLI installed with the `magic --version` to be **0.7.2** or newer:
-
-```bash
-curl -ssL https://magic.modular.com/ | bash
-```
-
-or update it via:
-
-```bash
-magic self-update
-```
-
-Then install `max-pipelines` via:
-
-```bash
-magic global install -u max-pipelines
-```
-
 ## Quick start
 
-1. Download the code for this recipe using `magic` CLI:
+1. Download the code for this recipe using the `git` CLI:
 
     ```bash
-    magic init autodoc-repo-chat-agent --from modular/max-recipes/autodoc-repo-chat-agent
+    git clone --filter=tree:0 --no-checkout https://github.com/modular/max-recipes.git my-recipe-project
+    cd my-recipe-project
+    git sparse-checkout set autodoc-repo-chat-agent && git checkout
     cd autodoc-repo-chat-agent
     ```
 
-2. Start the LLM server:
+2. Create and activate virtual environment:
+
+    ```bash
+    uv venv && source .venv/bin/activate
+    ```
+
+3. Start the LLM server:
 
     **Make sure the port `8010` is available. You can adjust the port settings in [pyproject.toml](./pyproject.toml).**
 
     ```bash
-    magic run server
+    poe run server
     ```
 
-3. In a new terminal, run the agent:
+4. In a new terminal, run the agent:
 
     ```bash
-    magic run agent
+    poe run agent
     ```
 
-4. When prompted, you can:
+5. When prompted, you can:
    * Ask questions about a specific repository
    * Include URL of a GitHub repository and start asking questions about it
    * Ask to generate documentation for a Python GitHub repository (larger code bases are more time consuming)
 
-5. To clean up generated files:
+6. To clean up generated files:
 
 ```bash
-magic run clean
+poe run clean
 ```
 
 ## System architecture
