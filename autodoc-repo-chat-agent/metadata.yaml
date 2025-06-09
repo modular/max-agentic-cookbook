@@ -14,6 +14,6 @@ tags:
   - embeddings
 
 tasks:
-  - magic run server
-  - magic run agent
-  - magic run clean
+  - uv run poe server
+  - uv run poe agent
+  - uv run poe clean
