@@ -31,51 +31,41 @@ This recipe assumes you are using `uv` to work with Python. Install `uv` if you 
 
 ### Important: GPU requirements
 
-This recipe requires a GPU with CUDA 12.5 support. Recommended GPUs:
-
-* NVIDIA H100 / H200, A100, A40, L40
+**This recipe requires a GPU.** Please visit [MAX GPU requirements](https://docs.modular.com/max/faq/#gpu-requirements) to view compatible GPUs.
 
 ## Quick start
 
 1. Download the code for this recipe using the `git` CLI:
 
     ```bash
-    git clone --filter=tree:0 --no-checkout https://github.com/modular/max-recipes.git my-recipe-project
-    cd my-recipe-project
-    git sparse-checkout set autodoc-repo-chat-agent && git checkout
-    cd autodoc-repo-chat-agent
+    git clone https://github.com/modular/max-recipes.git
+    cd max-recipes/autodoc-repo-chat-agent
     ```
 
-2. Create and activate virtual environment:
-
-    ```bash
-    uv venv && source .venv/bin/activate
-    ```
-
-3. Start the LLM server:
+2. Start the LLM server:
 
     **Make sure the port `8010` is available. You can adjust the port settings in [pyproject.toml](./pyproject.toml).**
 
     ```bash
-    poe run server
+    uv run poe server
     ```
 
-4. In a new terminal, run the agent:
+3. In a new terminal, run the agent:
 
     ```bash
-    poe run agent
+    uv run poe agent
     ```
 
-5. When prompted, you can:
+4. When prompted, you can:
    * Ask questions about a specific repository
    * Include URL of a GitHub repository and start asking questions about it
    * Ask to generate documentation for a Python GitHub repository (larger code bases are more time consuming)
 
-6. To clean up generated files:
+5. To clean up generated files:
 
-```bash
-poe run clean
-```
+    ```bash
+    uv run poe clean
+    ```
 
 ## System architecture
 

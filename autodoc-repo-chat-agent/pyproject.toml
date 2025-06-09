@@ -16,8 +16,8 @@ dependencies = [
   "rich>=13.9.4,<14",
   "docutils>=0.21.2,<0.22",
   "aiofiles>=24.1.0,<25",
-  "poethepoet>=0.35.0",
   "modular>=25.3.0",
+  "poethepoet>=0.35.0",
 ]
 
 [build-system]
