@@ -1,4 +1,3 @@
-# Learn How to Run Offline Inference with MAX Pipelines
+# Learn How to Run Offline Inference with MAX Pipelines (MOVED)
 
-This offline inference recipe has moved to the
-[Modular docs](https://docs.modular.com/max/serve/offline-inference/).
+This recipe has moved to the MAX docs for [Offline inference](https://docs.modular.com/max/serve/offline-inference/).
