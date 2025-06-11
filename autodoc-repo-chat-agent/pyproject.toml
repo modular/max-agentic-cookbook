@@ -28,7 +28,7 @@ requires = ["hatchling"]
 packages = ["."]
 
 [tool.poe.tasks]
-server = "MAX_SERVE_PORT=8010 max serve --model-path Qwen/Qwen2.5-7B-Instruct-1M --max-batch-size 100 --enable-prefix-caching"
-agent = "TOKENIZERS_PARALLELISM=false python main.py"
+server = { cmd = "max serve --model-path Qwen/Qwen2.5-7B-Instruct-1M --max-batch-size 100 --enable-prefix-caching", env = { MAX_SERVE_PORT = "8010", MODULAR_STRUCTURED_LOGGING="False" } }
+agent = { cmd = "python main.py", env = { TOKENIZERS_PARALLELISM = "false" } }
 clean = "rm -rf ./docs repo_content.json || true"
 tests = "echo 'test passed'"
