@@ -173,7 +173,7 @@ To enable structured output in MAX Serve, simply include `--enable-structured-ou
 To see other options, make sure to check out the help:
 
 ```bash
-max-pipelines serve --help
+max serve --help
 ```
 
 ## Conclusion

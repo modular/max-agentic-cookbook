@@ -340,7 +340,7 @@ You can explore various configuration options by running:
 
 ```bash
 magic global install -u max-pipelines
-max-pipelines serve --help
+max serve --help
 ```
 
 On the serving side, make sure to check out the [benchmarking tutorial](https://docs.modular.com/max/tutorials/benchmark-max-serve)
