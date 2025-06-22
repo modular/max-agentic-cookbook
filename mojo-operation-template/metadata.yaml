@@ -12,7 +12,7 @@ tags:
   - gpu-programming
 
 tasks:
-  - magic run graph
-  - magic run benchmarks
-  - magic run test
-  - magic run pytest
+  - pixi run graph
+  - pixi run benchmarks
+  - pixi run test
+  - pixi run pytest

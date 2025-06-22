@@ -70,6 +70,7 @@ def matrix_multiplication(
                 )
             ],
             parameters={"algorithm": algorithm},
+            device=DeviceRef.from_device(device),
         )[0].tensor
         graph.output(output)
 

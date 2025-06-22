@@ -32,9 +32,9 @@ from sys.info import simdwidthof
 
 
 fn naive_matrix_multiplication_cpu(
-    out: ManagedTensorSlice,
-    a: ManagedTensorSlice[type = out.type, rank = out.rank],
-    b: ManagedTensorSlice[type = out.type, rank = out.rank],
+    output: ManagedTensorSlice,
+    a: ManagedTensorSlice[dtype = output.dtype, rank = output.rank],
+    b: ManagedTensorSlice[dtype = output.dtype, rank = output.rank],
 ):
     """A naive matrix multiplication used as a fallback on CPU hardware."""
     var M = a.shape()[0]
@@ -44,7 +44,7 @@ fn naive_matrix_multiplication_cpu(
     for row in range(M):
         for col in range(N):
             for k in range(K):
-                out[row, col] = out[row, col] + a[row, k] * b[k, col]
+                output[row, col] = output[row, col] + a[row, k] * b[k, col]
 
 
 # ===-----------------------------------------------------------------------===#
