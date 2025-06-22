@@ -2,7 +2,7 @@
 
 # Check if a file path was provided
 if [ $# -ne 1 ]; then
-    echo "Usage: magic run debug_amd file_path.mojo"
+    echo "Usage: pixi run debug_amd file_path.mojo"
     exit 1
 fi
 

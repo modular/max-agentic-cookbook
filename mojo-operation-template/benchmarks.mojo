@@ -15,7 +15,6 @@ from benchmark import ThroughputMeasure, BenchId, BenchMetric, Bench, Bencher
 from buffer.dimlist import DimList
 from gpu.host import DeviceContext, DeviceBuffer
 from math import iota
-from max.driver import cpu
 from max.tensor import (
     ManagedTensorSlice,
     InputTensor,
@@ -37,16 +36,17 @@ from utils import IndexList
 # Note: change this to the ID of the GPU you will use.
 alias DEVICE_ID = 0
 
+
 # Wrap a ManagedTensorSlice with a DeviceBuffer which has a lifetime to use
 # Mojo's memory management, and sidestep the Python initialized garbage
 # collected version.
-@value
+@fieldwise_init
 struct _BenchTensor[
     dtype: DType,
     rank: Int, //,
     io_spec: IOSpec,
     static_spec: StaticTensorSpec[dtype, rank],
-]:
+](Copyable, Movable):
     alias tensor_type = ManagedTensorSlice[
         io_spec=io_spec, static_spec=static_spec
     ]
