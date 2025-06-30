@@ -2,13 +2,12 @@
 
 This recipe demonstrates how to create AI agents that leverage Model Context Protocol (MCP) servers using MAX. You'll learn how to build an agent that discovers and uses MCP tools dynamically, enabling your AI models to interact with external systems through a standardized protocol.
 
-## What You'll Learn
+## What You'll Build
 
-- Build AI agents that can discover and use MCP tools at runtime
-- Create FastAPI services that bridge MAX models with MCP servers
-- Implement proper error handling and exception management
-- Structure async code for efficient tool calling
-- Deploy MCP-enabled agents with proper configuration
+- AI agent that can discover and use MCP tools at runtime
+- Simple MCP server with FastMCP
+- FastAPI service that bridges a MAX model with an MCP server
+- Web UI for interacting with your agent, using Alpine.js and Pico CSS
 
 ## Requirements
 

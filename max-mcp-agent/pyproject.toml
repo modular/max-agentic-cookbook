@@ -1,7 +1,7 @@
 [project]
 name = "max-mcp-agent"
 version = "0.1.0"
-description = "Add your description here"
+description = "AI agent that uses Model Context Protocol (MCP) to interact with external tools"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
