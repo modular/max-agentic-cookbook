@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from honcho.manager import Manager
 from invoke.tasks import task
 from invoke.context import Context
+from max.driver import accelerator_count
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 
 load_dotenv()
@@ -50,11 +51,14 @@ def mcp(_c: Context):
 
 @task
 def max(c: Context):
-    c.run(
-        """max serve \
-        --model-path=meta-llama/Llama-3.2-1B-Instruct \
-		--weight-path=bartowski/Llama-3.2-1B-Instruct-GGUF/Llama-3.2-1B-Instruct-Q4_K_M.gguf"""
-    )
+    if accelerator_count == 0:
+        c.run(
+            """max serve \
+            --model-path=meta-llama/Llama-3.2-1B-Instruct \
+            --weight-path=bartowski/Llama-3.2-1B-Instruct-GGUF/Llama-3.2-1B-Instruct-Q4_K_M.gguf"""
+        )
+    else:
+        c.run("max serve --model-path=meta-llama/Llama-3.2-1B-Instruct")
 
 
 @task
