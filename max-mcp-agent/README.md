@@ -40,7 +40,7 @@ Create a `.env` file with your configuration:
 
 ```bash
 cp .sample.env .env
-echo "HUGGING_FACE_HUB_TOKEN=your_hf_token" > .env
+echo "HUGGING_FACE_HUB_TOKEN=your_hf_token" >> .env
 ```
 
 ### 3. Start the Services
