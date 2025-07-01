@@ -256,30 +256,58 @@ class RepoQAHandler(BaseHandler):
             with self.console.status(
                 "[bold green]Processing repository...", spinner="dots"
             ):
-                summary, tree, raw_content = await ingest_async(context.repo_url)
-                context.repo_content = self._process_raw_content(raw_content)
-                self._save_repo_content(context.repo_content)
+                try:
+                    summary, tree, raw_content = await ingest_async(context.repo_url)
+                    context.repo_content = self._process_raw_content(raw_content)
+                    self._save_repo_content(context.repo_content)
 
-                repo_info = extract_repo_info(context.repo_url)
+                    repo_info = extract_repo_info(context.repo_url)
 
-                await code_parse(
-                    context.repo_content,
-                    self.collection_name,
-                    console=self.console,
-                    use_progress=False,
-                )
-                self.embeddings_created = True
-
-                self.console.print(
-                    Panel(
-                        f"[bold]Repository:[/bold] {repo_info['user']}/{repo_info['repo']}\n"
-                        f"[bold]Files:[/bold] {len(context.repo_content)} files processed\n"
-                        f"[bold]Languages:[/bold] {', '.join(self._detect_languages(context.repo_content))}",
-                        title="Repository Information",
-                        border_style="blue",
-                        expand=False,
+                    await code_parse(
+                        context.repo_content,
+                        self.collection_name,
+                        console=self.console,
+                        use_progress=False,
                     )
-                )
+                    self.embeddings_created = True
+
+                    self.console.print(
+                        Panel(
+                            f"[bold]Repository:[/bold] {repo_info['user']}/{repo_info['repo']}\n"
+                            f"[bold]Files:[/bold] {len(context.repo_content)} files processed\n"
+                            f"[bold]Languages:[/bold] {', '.join(self._detect_languages(context.repo_content))}",
+                            title="Repository Information",
+                            border_style="blue",
+                            expand=False,
+                        )
+                    )
+                except FileNotFoundError as e:
+                    if "curl" in str(e):
+                        self.console.print(
+                            Panel(
+                                "[bold red]Error:[/bold red] The 'curl' command is not available in your system.\n"
+                                "Please install curl to enable repository processing:\n"
+                                "- Ubuntu/Debian: sudo apt-get install curl\n"
+                                "- macOS: brew install curl\n"
+                                "- Windows: Download from https://curl.se/windows/",
+                                title="Missing Dependency",
+                                border_style="red",
+                                expand=False,
+                            )
+                        )
+                        return "Repository processing failed due to missing curl dependency. Please install curl and try again."
+                    else:
+                        raise
+                except Exception as e:
+                    self.console.print(
+                        Panel(
+                            f"[bold red]Error processing repository:[/bold red] {str(e)}",
+                            title="Processing Error",
+                            border_style="red",
+                            expand=False,
+                        )
+                    )
+                    return f"Failed to process repository: {str(e)}"
         elif not context.repo_content:
             context.repo_content = self._load_repo_content()
 
@@ -395,11 +423,39 @@ class DocGenHandler(BaseHandler):
         with self.console.status("[bold green]Ingesting repository...", spinner="dots"):
             self.console.print(f"[bold]Repository URL:[/bold] {repo_url}")
             start_time = time.time()
-            summary, tree, raw_content = await ingest_async(repo_url)
-            elapsed = time.time() - start_time
-            self.console.print(
-                f"[bold green]Repository ingested in {elapsed:.2f} seconds[/bold green]"
-            )
+            try:
+                summary, tree, raw_content = await ingest_async(repo_url)
+                elapsed = time.time() - start_time
+                self.console.print(
+                    f"[bold green]Repository ingested in {elapsed:.2f} seconds[/bold green]"
+                )
+            except FileNotFoundError as e:
+                if "curl" in str(e):
+                    self.console.print(
+                        Panel(
+                            "[bold red]Error:[/bold red] The 'curl' command is not available in your system.\n"
+                            "Please install curl to enable repository processing:\n"
+                            "- Ubuntu/Debian: sudo apt-get install curl\n"
+                            "- macOS: brew install curl\n"
+                            "- Windows: Download from https://curl.se/windows/",
+                            title="Missing Dependency",
+                            border_style="red",
+                            expand=False,
+                        )
+                    )
+                    return "Repository processing failed due to missing curl dependency. Please install curl and try again."
+                else:
+                    raise
+            except Exception as e:
+                self.console.print(
+                    Panel(
+                        f"[bold red]Error ingesting repository:[/bold red] {str(e)}",
+                        title="Ingestion Error",
+                        border_style="red",
+                        expand=False,
+                    )
+                )
+                return f"Failed to ingest repository: {str(e)}"
 
         with self.console.status("[bold green]Processing files...", spinner="dots"):
             content = {}
@@ -672,6 +728,14 @@ Primary language: {language}"""
 
 async def determine_query_type(query: str, client) -> Tuple[QueryType, Optional[str]]:
     """Determine if this is a chat, doc generation, or repo QA query."""
+    # First, check if the query is just a URL or contains a URL
+    github_url = extract_github_url(query)
+    
+    # If it's just a URL without any context, treat it as a chat query
+    # but still extract the URL for context
+    if github_url and query.strip() == github_url:
+        return QueryType.CHAT, github_url
+    
     prompt = """Analyze this query and determine if it's:
     1. A request to generate documentation (if it contains words like 'gendoc', 'generate docs', 'create documentation')
     2. A question about a specific repository (if it asks about code in a specific repo)
@@ -715,6 +779,31 @@ async def determine_query_type(query: str, client) -> Tuple[QueryType, Optional[
                 query_type = QueryType.CHAT
 
     return query_type, repo_url
+
+
+def extract_github_url(text: str) -> Optional[str]:
+    """Extract GitHub URL from text using regex patterns."""
+    github_patterns = [
+        r"https?://github\.com/[^/\s]+/[^/\s]+(?:\.git)?/?",
+        r"git@github\.com:[^/\s]+/[^/\s]+(?:\.git)?/?",
+    ]
+    
+    for pattern in github_patterns:
+        match = re.search(pattern, text)
+        if match:
+            return match.group(0)
+    
+    return None
+
+
+def check_curl_available() -> bool:
+    """Check if curl is available in the system."""
+    try:
+        import subprocess
+        result = subprocess.run(['curl', '--version'], capture_output=True, text=True)
+        return result.returncode == 0
+    except (FileNotFoundError, subprocess.SubprocessError):
+        return False
 
 
 def extract_repo_info(repo_url: str) -> Dict[str, str]:
@@ -1656,6 +1745,23 @@ async def main():
     """Main entry point for the application."""
     console = Console()
     client = AsyncOpenAI(base_url=LLM_SERVER_URL, api_key=LLM_API_KEY)
+    
+    # Check if curl is available
+    if not check_curl_available():
+        console.print(
+            Panel(
+                "[bold yellow]Warning:[/bold yellow] 'curl' is not available in your system.\n"
+                "Repository processing features will not work.\n\n"
+                "To install curl:\n"
+                "- Ubuntu/Debian: sudo apt-get install curl\n"
+                "- macOS: brew install curl\n"
+                "- Windows: Download from https://curl.se/windows/\n\n"
+                "You can still use chat features without repository processing.",
+                title="Missing Dependency",
+                border_style="yellow",
+                expand=False,
+            )
+        )
 
     handlers = {
         QueryType.CHAT: ChatHandler(client, console),
@@ -1700,6 +1806,38 @@ async def main():
             repo_url = current_repo_url  # Keep the current repo context
         else:
             query_type, repo_url = await determine_query_type(query, client)
+            
+            # If it's just a URL, provide helpful guidance
+            if query_type == QueryType.CHAT and repo_url and query.strip() == repo_url:
+                if not check_curl_available():
+                    console.print(
+                        Panel(
+                            "[bold blue]I see you've shared a GitHub repository URL![/bold blue]\n\n"
+                            "[bold red]However, 'curl' is not available in your system.[/bold red]\n"
+                            "To process repositories, please install curl:\n"
+                            "- Ubuntu/Debian: sudo apt-get install curl\n"
+                            "- macOS: brew install curl\n"
+                            "- Windows: Download from https://curl.se/windows/\n\n"
+                            "You can still ask general programming questions without repository processing.",
+                            title="Repository Detected (curl required)",
+                            border_style="red",
+                            expand=False,
+                        )
+                    )
+                else:
+                    console.print(
+                        Panel(
+                            "[bold blue]I see you've shared a GitHub repository URL![/bold blue]\n\n"
+                            "You can:\n"
+                            "- [green]Ask questions[/green] about the code (e.g., 'What does this function do?')\n"
+                            "- [green]Generate documentation[/green] (e.g., 'Generate docs for this repo')\n"
+                            "- [green]Get a summary[/green] (e.g., 'Summarize this repository')\n\n"
+                            "What would you like to know about this repository?",
+                            title="Repository Detected",
+                            border_style="blue",
+                            expand=False,
+                        )
+                    )
 
         # If we have a current repo URL and no new one was detected, use the current one
         if (
@@ -1734,6 +1872,22 @@ async def main():
             query_type in [QueryType.DOC_GEN, QueryType.REPO_QA]
             and not context.repo_url
         ):
+            if not check_curl_available():
+                console.print(
+                    Panel(
+                        "[bold red]Error:[/bold red] Repository processing requires 'curl' to be installed.\n"
+                        "Please install curl first:\n"
+                        "- Ubuntu/Debian: sudo apt-get install curl\n"
+                        "- macOS: brew install curl\n"
+                        "- Windows: Download from https://curl.se/windows/",
+                        title="Missing Dependency",
+                        border_style="red",
+                        expand=False,
+                    )
+                )
+                conversation_history.append({"role": "assistant", "content": "Repository processing is not available due to missing curl dependency."})
+                continue
+            
             console.print(
                 "[bold yellow]Please provide a GitHub repository URL:[/bold yellow] ",
                 end="",
