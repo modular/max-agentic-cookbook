@@ -1,6 +1,13 @@
-FROM modular/max-full
+FROM modular/max-nvidia-base
 
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    build-essential \
+    git \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY pyproject.toml ./
 COPY main.py ./
