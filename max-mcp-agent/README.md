@@ -1,4 +1,4 @@
-# MAX FastMCP: Build AI Agents with Model Context Protocol
+# Connect MAX to an MCP Server for Tool Use
 
 This recipe demonstrates how to create AI agents that leverage Model Context Protocol (MCP) servers using MAX. You'll learn how to build an agent that discovers and uses MCP tools dynamically, enabling your AI models to interact with external systems through a standardized protocol.
 
@@ -29,7 +29,7 @@ For this recipe, you will need:
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source ~/.bashrc  # or ~/.zshrc
 
-# Clone the repository
+# Clone the recipe
 git clone https://github.com/modularml/max-recipes.git
 cd max-recipes/max-fastmcp
 ```
@@ -40,12 +40,12 @@ Create a `.env` file with your configuration:
 
 ```bash
 cp .env.sample .env
-echo "HUGGING_FACE_HUB_TOKEN=your_hf_token" >> .env
+printf "\nHUGGING_FACE_HUB_TOKEN=your_token_here" >> .env
 ```
 
 #### Optional: Configure Model Weights
 
-The `.env.sample` file includes an optional `MODEL_WEIGHTS` configuration for quantized CPU weights. If you don't have a GPU available or want to use CPU-only inference, uncomment this line:
+The `.env.sample` file includes an optional `MODEL_WEIGHTS` configuration for quantized CPU weights. If you don't have a GPU available or want to use CPU-only inference, uncomment this line in your `.env` file:
 
 ```bash
 MODEL_WEIGHTS="bartowski/Llama-3.2-1B-Instruct-GGUF/Llama-3.2-1B-Instruct-Q4_K_M.gguf"
@@ -62,20 +62,29 @@ The easiest way to run all services is using the [Invoke](https://www.pyinvoke.o
 uv run invoke app
 ```
 
-Or run services individually:
+#### Troubleshooting uv Build Errors
 
+If the launch fails with an error ending with `help: sentencepiece (v0.2.0) was included because...`, it is because the project's dependency chain requires `pkg-config` and `cmake`. 
+
+To fix this on an Ubuntu Linux machine, run:
 ```bash
-# Terminal 1: Start MAX model server
-uv run invoke max
-
-# Terminal 2: Start the demo MCP server  
-uv run invoke mcp
-
-# Terminal 3: Start the agent API
-uv run invoke api
+sudo apt update && sudo apt install -y pkg-config cmake build-essential
 ```
 
-Note: The `demo_mcp_server` is a separate module that runs independently from the agent, demonstrating how MCP servers and agents maintain clean separation of concerns.
+To fix this on a macOS machine, run:
+```bash
+xcode-select --install  # For Xcode Command Line Tools
+brew install pkg-config cmake  # Using Homebrew - https://brew.sh/
+```
+
+#### Run Services Individually
+You can also launch the individual services by running the following commands:
+
+```bash
+uv run invoke max  # Terminal 1: Start MAX model server
+uv run invoke mcp  # Terminal 2: Start the demo MCP server  
+uv run invoke api  # Terminal 3: Start the agent API
+```
 
 ### 4. Test the Agent
 
@@ -83,7 +92,7 @@ The agent provides both a web UI and REST API for interaction:
 
 #### Using the Web UI
 
-1. Open your browser to http://localhost:8000
+1. Open your browser to http://localhost:8080
 2. Enter a natural language query (e.g., "How many R's are in strawberry?")
 3. Click "Send" to see the results
 
@@ -183,6 +192,20 @@ async def _discover_tools(session: ChatSession) -> ChatSession:
     session.tools = tools
     return session
 ```
+
+### OpenAI API Limitation: Tool Formatting
+
+**⚠️ Important**: While MAX is fully compatible with the OpenAI Chat Completions API, there's a crucial limitation to understand. Tools exposed by an MCP server that are discovered by an MCP client **cannot be passed directly** to the OpenAI Python client - they require specific formatting.
+
+The code block above shows the essential transformation that bridges MCP tools to the OpenAI format:
+
+1. **MCP Tool Discovery**: `await session.mcp_client.list_tools()` retrieves raw MCP tool definitions
+2. **Format Conversion**: Each MCP tool is reformatted into the OpenAI function calling format with:
+   - `"type": "function"` - Required by OpenAI's function calling API
+   - `"function"` object containing `name`, `description`, and `parameters`
+3. **Validation**: The code ensures all required fields (`name`, `description`, `parameters`) are present before formatting
+
+This formatting step is **essential** for making MCP tools compatible with MAX's OpenAI-compatible interface. Without this transformation, the tools would not be recognized by the OpenAI Python client used here to connect with MAX.
 
 ## Extending the Agent
 
