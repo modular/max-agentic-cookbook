@@ -1,27 +1,19 @@
-import os
 import requests
 
-from dotenv import load_dotenv
 from honcho.manager import Manager
 from invoke.tasks import task
 from invoke.context import Context
-from max.driver import accelerator_count
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_result
 
-load_dotenv()
+from env_config import EnvConfig
 
-MAX_SERVE_HOST = os.getenv("MAX_SERVE_HOST", "0.0.0.0")
-MAX_SERVE_PORT = int(os.getenv("MAX_SERVE_PORT", 8001))
-
-MCP_HOST = os.getenv("MCP_HOST", "0.0.0.0")
-MCP_PORT = int(os.getenv("MCP_PORT", 8002))
-
-API_HOST = os.getenv("API_HOST", "0.0.0.0")
-API_PORT = int(os.getenv("API_PORT", 8000))
+# Create environment configuration instance
+env = EnvConfig()
 
 
 @task
 def app(c: Context):
+    """Start all services (MAX, MCP, and API) using honcho process manager."""
     print("Freeing up ports before starting services...")
     clean(c)
 
@@ -31,43 +23,44 @@ def app(c: Context):
     m.add_process("max", "invoke max", quiet=False)
     m.add_process("mcp", "invoke mcp", quiet=False)
 
-    m.loop()
-
-    print("Cleaning up ports before exiting...")
-    clean(c)
+    try:
+        m.loop()
+    except KeyboardInterrupt:
+        print("\nShutting down services...")
+    finally:
+        print("Cleaning up ports before exiting...")
+        clean(c)
 
 
 @task
 def mcp(_c: Context):
+    """Start the MCP (Model Context Protocol) server."""
     import demo_mcp_server
 
     demo_mcp_server.mcp.run(
         transport="streamable-http",
-        host=MCP_HOST,
-        port=MCP_PORT,
+        host=env.mcp_host,
+        port=env.mcp_port,
         log_level="debug",
     )
 
 
 @task
 def max(c: Context):
-    if accelerator_count == 0:
-        c.run(
-            """max serve \
-            --model-path=meta-llama/Llama-3.2-1B-Instruct \
-            --weight-path=bartowski/Llama-3.2-1B-Instruct-GGUF/Llama-3.2-1B-Instruct-Q4_K_M.gguf"""
-        )
-    else:
-        c.run("max serve --model-path=meta-llama/Llama-3.2-1B-Instruct")
+    """Start the MAX model serving component."""
+    cmd = f"max serve --model-path={env.model_name}"
+    if env.model_weights is not None:
+        cmd += f" --weight-path={env.model_weights}"
+
+    c.run(cmd)
 
 
 @task
 def api(c: Context):
-    max_health_path = os.getenv("MAX_SERVE_HEALTH_PATH", "/v1/health")
-    mcp_health_path = os.getenv("MCP_HEALTH_PATH", "/health")
+    """Start the web app after ensuring all services are ready."""
     health_urls = [
-        f"http://{MAX_SERVE_HOST}:{MAX_SERVE_PORT}{max_health_path}",
-        f"http://{MCP_HOST}:{MCP_PORT}{mcp_health_path}",
+        f"http://{env.max_serve_host}:{env.max_serve_port}{env.max_serve_health_path}",
+        f"http://{env.mcp_host}:{env.mcp_port}{env.mcp_health_path}",
     ]
 
     if not services_ready(*health_urls):
@@ -79,7 +72,10 @@ def api(c: Context):
 
 
 @task
-def clean(c: Context, ports: str = f"{MAX_SERVE_PORT},{MCP_PORT},{API_PORT}"):
+def clean(
+    c: Context, ports: str = f"{env.max_serve_port},{env.mcp_port},{env.api_port}"
+):
+    """Kill processes using the specified ports."""
     if not ports:
         print("No ports specified. Use --ports to specify ports (comma-separated)")
         return
@@ -100,14 +96,15 @@ def clean(c: Context, ports: str = f"{MAX_SERVE_PORT},{MCP_PORT},{API_PORT}"):
     wait=wait_fixed(2),
 )
 def services_ready(*urls: str) -> bool:
+    """Check if all services are ready by making health check requests."""
     services_ready = True
     for url in urls:
         try:
-            response = requests.get(url)
+            response = requests.get(url, timeout=5)
             response.raise_for_status()
             print(f"Service at {url} is ready", flush=True)
-        except:
-            print(f"Service at {url} is not ready, will check again...", flush=True)
+        except Exception as e:
+            print(f"Service at {url} is not ready: {e}", flush=True)
             services_ready = False
             break
     return services_ready

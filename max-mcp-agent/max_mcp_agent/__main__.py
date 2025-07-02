@@ -1,13 +1,8 @@
-import os
 import uvicorn
-from dotenv import load_dotenv
+from env_config import EnvConfig
 from max_mcp_agent import app
 
 
 if __name__ == "__main__":
-    load_dotenv()
-
-    host = os.getenv("API_HOST", "0.0.0.0")
-    port = int(os.getenv("API_PORT", 8000))
-
-    uvicorn.run(app, host=host, port=port)
+    env = EnvConfig()
+    uvicorn.run(app, host=env.api_host, port=env.api_port)

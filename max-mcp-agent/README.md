@@ -39,13 +39,23 @@ cd max-recipes/max-fastmcp
 Create a `.env` file with your configuration:
 
 ```bash
-cp .sample.env .env
+cp .env.sample .env
 echo "HUGGING_FACE_HUB_TOKEN=your_hf_token" >> .env
 ```
 
+#### Optional: Configure Model Weights
+
+The `.env.sample` file includes an optional `MODEL_WEIGHTS` configuration for quantized CPU weights. If you don't have a GPU available or want to use CPU-only inference, uncomment this line:
+
+```bash
+MODEL_WEIGHTS="bartowski/Llama-3.2-1B-Instruct-GGUF/Llama-3.2-1B-Instruct-Q4_K_M.gguf"
+```
+
+For GPU requirements and compatibility information, see the [MAX GPU Requirements](https://docs.modular.com/max/faq#gpu-requirements) documentation.
+
 ### 3. Start the Services
 
-The easiest way to run all services is using the invoke task runner:
+The easiest way to run all services is using the [Invoke](https://www.pyinvoke.org/) task runner:
 
 ```bash
 # Start all services (MAX server, demo MCP server, and Agent API)
@@ -83,10 +93,11 @@ The agent provides both a web UI and REST API for interaction:
 # Query the agent with a counting task
 curl -X POST http://localhost:8000/api/count \
     -H "Content-Type: application/json" \
-    -d '{"query": "How many L's are in Hello World"}'
+    -d '{"query": "Count the letter L in Hello World"}'
 ```
 
 Example response:
+
 ```json
 {
   "char_found": "l",
@@ -101,7 +112,7 @@ Example response:
 
 ```mermaid
 graph LR
-    Client[Client] --> API[Agent API]
+    Client[Web Client] --> API[Agent API]
     API --> MAX[MAX Serve]
     API --> MCP[MCP Server]
 ```
@@ -175,16 +186,16 @@ async def _discover_tools(session: ChatSession) -> ChatSession:
 
 ## Extending the Agent
 
-The following are a few ways you migth consider building upon this recipe for your own use cases.
+The following are a couple ways you can build upon this recipe for your own use cases.
 
 ### Implementing Multi-Turn Conversations
 
-The current implementation in `agent.py` provides a clean foundation that demonstrates a single tool call workflow:
+The current implementation in `agent.py` provides a clean foundation that demonstrates a **single-tool workflow**:
 
 1. Receives a user query
 2. Discovers available tools
 3. Sends the query to the LLM with tools
-4. Executes ONE tool call if requested
+4. Executes **ONE** tool call if requested
 5. Returns the result
 
 This architecture is intentionally simple to showcase the core MCP integration. You can enhance it to support:
@@ -215,11 +226,10 @@ def count_characters(
     return ToolResponse(char_found=character, in_string=string, num_times=count)
 ```
 
-This demonstrates the simplicity of creating MCP tools - just a Python function with a decorator. The separation between `demo_mcp_server` and `max_mcp_agent` is intentional, showing how:
+This demonstrates the simplicity of creating MCP tools - just a Python function with a decorator. The separation between the `demo_mcp_server` and `max_mcp_agent` modules is intentional, showing how:
 
-- MCP servers can be developed independently
-- Agents discover tools dynamically at runtime
-- Multiple MCP servers can be integrated with a single agent
+1. MCP servers can be developed independently from MCP clients
+2. Agents can discover tools and use dynamically at runtime
 
 You can extend this by:
 
@@ -230,28 +240,6 @@ You can extend this by:
 3. **Integrating existing MCP servers**: Connect to any MCP-compatible server by updating the `MCP_URL` in your configuration
 
 4. **Running multiple MCP servers**: Modify the agent to connect to multiple MCP endpoints for access to diverse tool sets
-
-Example of a more complex MCP server:
-
-```python
-from fastmcp import FastMCP
-import aiohttp
-
-mcp = FastMCP("Weather Tools")
-
-@mcp.tool()
-async def get_weather(city: str) -> dict:
-    """Fetch current weather for a city"""
-    async with aiohttp.ClientSession() as session:
-        # Add code here to get the current weather...
-        pass
-
-@mcp.tool()
-async def get_forecast(city: str, days: int = 5) -> dict:
-    """Get weather forecast for multiple days"""
-    # Implementation...
-    pass
-```
 
 ## Task Automation with Invoke
 
