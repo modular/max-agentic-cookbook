@@ -1,0 +1,22 @@
+version: 1.0
+long_title: "AI agent that uses Model Context Protocol (MCP) to interact with external tools"
+short_title: "Build an Agent That Uses MCP Tools"
+author: "Bill Welense"
+author_image: "author/billw.jpg"
+author_url: "https://www.linkedin.com/in/welense/"
+github_repo: "https://github.com/modular/max-recipes/tree/main/max-mcp-agent"
+date: "30-06-2025"
+difficulty: "intermediate"
+tags:
+  - max-serve
+  - mcp
+  - fastmcp
+  - fastapi
+  - llama3
+
+tasks:
+  - uv run invoke app
+  - uv run invoke clean
+  - uv run invoke max
+  - uv run invoke mcp
+  - uv run invoke api
