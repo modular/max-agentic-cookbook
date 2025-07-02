@@ -16,19 +16,20 @@ async function submitQuery() {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const message = "The agent encountered a problem trying to handle your query:"
+            throw new Error(`${message} ${response.status}`);
         }
 
         const data = await response.json();
         console.log('Response:', data);
-        
+
         this.char_found = data.char_found;
         this.in_string = data.in_string;
         this.num_times = data.num_times;
-        
+
     } catch (error) {
         console.error('Error:', error);
-        alert('Error making request: ' + error.message);
+        alert(error.message);
     } finally {
         this.loading = false;
     }
