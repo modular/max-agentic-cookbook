@@ -31,7 +31,7 @@ source ~/.bashrc  # or ~/.zshrc
 
 # Clone the recipe
 git clone https://github.com/modularml/max-recipes.git
-cd max-recipes/max-fastmcp
+cd max-recipes/max-mcp-agent
 ```
 
 ### 2. Configure Environment
