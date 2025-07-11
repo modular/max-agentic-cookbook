@@ -6,7 +6,7 @@ Building on the solid foundation MAX provides, adding a robust user interface is
 
 In this recipe you will:
 
-- Use MAX Serve to provide an OpenAI-compatible endpoint for [Llama 3.1](https://ai.meta.com/blog/meta-llama-3-1/)
+- Use MAX to serve an OpenAI-compatible endpoint for [Llama 3.1](https://ai.meta.com/blog/meta-llama-3-1/)
 - Set up [Open WebUI](https://github.com/open-webui/open-webui) to provide a robust chat interface
 - Learn how Open WebUI's RAG and Web search functionality works
 - Learn how to reconfigure this recipe for use with multiple users
@@ -19,55 +19,43 @@ Open WebUI is a powerful platform offering a familiar chat interface for interac
 
 Please make sure your system meets our [system requirements](https://docs.modular.com/max/get-started).
 
-To proceed, ensure you have the `magic` CLI installed with the `magic --version` to be **0.7.2** or newer:
+To proceed, ensure you have the `pixi` CLI installed:
 
 ```bash
-curl -ssL https://magic.modular.com/ | bash
+curl -fsSL https://pixi.sh/install.sh | sh
 ```
 
 ...and updated to the latest version:
 
 ```bash
-magic self-update
-```
-
-Then install `max-pipelines` via:
-
-```bash
-magic global install -u max-pipelines
+pixi self-update
 ```
 
 For this recipe, you will need a valid [Hugging Face token](https://huggingface.co/settings/tokens) to access the model.
 Once you have obtained the token, include it in `.env` by running:
 
 ```bash
-cp .env.example .env
-```
-
-...then add your token in the `.env` file:
-
-```bash
-HUGGING_FACE_HUB_TOKEN=
+echo "HUGGING_FACE_HUB_TOKEN=your_token_here" >> .env
 ```
 
 ## Quick start
 
-1. Download the code for this recipe using the `magic` CLI:
+1. Download the code for this recipe using the `pixi` CLI:
 
     ```bash
-    magic init max-serve-open-webui --from modular/max-recipes/max-serve-open-webui
-    cd max-serve-open-webui
+    git clone https://github.com/modularml/max-recipes.git
+    cd max-recipes/max-serve-open-webui
     ```
 
 2. Start MAX and Open WebUI with one command:
 
     ```bash
-    magic run app
+    pixi run app
     ```
 
 This command is defined in the `pyproject.toml` file which we cover later.
 
-MAX Serve is ready once you see a line containing the following in the log output:
+MAX is ready once you see a line containing the following in the log output:
 
 ```plaintext
 Server running on http://0.0.0.0:8000/
@@ -111,15 +99,13 @@ To chat with real-time access to information from the Web, simply start a new ch
 
 ### Environments
 
-This project is configured in the `pyproject.toml` file, and the tasks executed with `magic run app` are defined in the [Procfile](https://judoscale.com/blog/six-tips-for-mastering-your-procfile). The project uses [Honcho](https://honcho.readthedocs.io/en/latest/) to run and monitor MAX and Open WebUI concurrently.
+This project is configured in the `pyproject.toml` file, and the tasks executed with `pixi run app` are defined in the [Procfile](https://judoscale.com/blog/six-tips-for-mastering-your-procfile). The project uses [Honcho](https://honcho.readthedocs.io/en/latest/) to run and monitor MAX and Open WebUI concurrently.
 
-Because MAX and Open WebUI each depend on different versions of several common libraries, we use the `magic` CLI to define separate environments for each; this is why you'll see `ui` and `max` throughout the `pyproject.toml`. Further notes on this configuration are contained within code comments in `pyproject.toml`.
-
-**Note:** In the future, we plan to update this recipe to use Docker Compose.
+Because MAX and Open WebUI each depend on different versions of several common libraries, we use the `pixi` CLI to define separate environments for each; this is why you'll see `ui` and `max` throughout the `pyproject.toml`. Further notes on this configuration are contained within code comments in `pyproject.toml`.
 
 ### Multi-user support
 
-**Important:** If you decide to use this recipe to deploy Open WebUI  for multiple users, we recommend the following:
+**Important:** If you decide to use this recipe to deploy Open WebUI for multiple users, we recommend the following:
 
 1. Delete the `data` folder
 2. Open `pyproject.toml`, locate the `tool.pixi.feature.ui.tasks` section, and change `WEBUI_AUTH = "false"` to `"true"`
@@ -129,6 +115,5 @@ Because MAX and Open WebUI each depend on different versions of several common l
 Now that you're up and running with Open WebUI on MAX, you can explore more features and join our developer community. Here are some resources to help you continue your journey:
 
 - [Get started with MAX](https://docs.modular.com/max/get-started)
-- Explore [MAX Serve](https://docs.modular.com/max/serve) and [MAX Container](https://docs.modular.com/max/container/)
-- Learn more about `magic` CLI in this [Magic tutorial](https://docs.modular.com/max/tutorials/magic)
+- Explore [MAX serving](https://docs.modular.com/max/serve) and the [MAX container](https://docs.modular.com/max/container/)
 - Join the [Modular forum](https://forum.modular.com/)

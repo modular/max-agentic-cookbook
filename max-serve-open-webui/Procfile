@@ -1,2 +1,2 @@
-max: magic run max
-ui: magic run ui
+max: pixi run max
+ui: pixi run ui
