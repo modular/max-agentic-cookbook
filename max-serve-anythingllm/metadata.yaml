@@ -12,5 +12,5 @@ tags:
   - anythingllm
 
 tasks:
-  - magic run app
-  - magic run clean
+  - pixi run app
+  - pixi run clean
