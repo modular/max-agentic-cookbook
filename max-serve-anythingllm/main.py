@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 @click.option("--pre", multiple=True, help="Tasks to run sequentially before app tasks.")
 @click.option("--post", multiple=True, help="Tasks to run sequentially after app tasks complete.")
 def main(tasks, pre, post):
-    """Run multiple Magic tasks concurrently, preceded and/or followed by other tasks."""
+    """Run multiple Pixi tasks concurrently, preceded and/or followed by other tasks."""
     if not tasks:
         click.echo("Error: At least one task must be specified.", err=True)
         click.echo("Example: python main.py llm ui --pre setup --post clean", err=True)
@@ -44,7 +44,7 @@ def run_app(tasks: list[str]):
         manager = honcho.manager.Manager()
 
         for task in tasks:
-            manager.add_process(task, f"magic run {task}", env=env)
+            manager.add_process(task, f"pixi run {task}", env=env)
 
         manager.loop()
         sys.exit(manager.returncode)
@@ -57,7 +57,7 @@ def run_app(tasks: list[str]):
 
 
 def run_task(task: str):
-    """Runs a Magic task."""
+    """Runs a Pixi task."""
 
     with open("pyproject.toml", "rb") as f:
         pyproject_data = tomli.load(f)
@@ -65,7 +65,7 @@ def run_task(task: str):
         
         if task in tasks:
             print(f"Running {task} task...")
-            subprocess.run(["magic", "run", task])
+            subprocess.run(["pixi", "run", task])
 
 
 if __name__ == "__main__":

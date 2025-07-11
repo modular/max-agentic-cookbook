@@ -1,5 +1,5 @@
 # Project files
-.magic
+# Pixi
 .pixi
 pixi.lock
 *.egg-info
