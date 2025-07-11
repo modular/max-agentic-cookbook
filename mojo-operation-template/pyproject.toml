@@ -14,8 +14,8 @@ packages = ["."]
 
 [tool.pixi.project]
 channels = [
-    "conda-forge",
     "https://conda.modular.com/max-nightly",
+    "conda-forge",
 ]
 platforms = ["linux-64", "osx-arm64", "linux-aarch64"]
 
@@ -34,7 +34,7 @@ pytest = "pytest"
 pytest = ">=8.3.2, <9"
 
 [tool.pixi.dependencies]
-max = "==25.5.0.dev2025062205"
+max = ">=25.5.0.dev2025070905,<26"
 
 [tool.pixi.environments]
 default = { solve-group = "default" }

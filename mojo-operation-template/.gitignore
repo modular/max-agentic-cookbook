@@ -1,9 +1,7 @@
-# pixi environments
+# Pixi environments
 .pixi
 pixi.lock
 *.egg-info
-# magic environments
-.magic
 .env
 .venv
 # build products
