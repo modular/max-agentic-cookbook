@@ -37,7 +37,7 @@ setup = "python setup.py"
 llm = "max serve  --max-length=$MAX_CONTEXT_LENGTH --max-batch-size=$MAX_BATCH_SIZE --model-path=modularai/Llama-3.1-8B-Instruct-GGUF"
 ui = "docker run -p $UI_PORT:3001 --name $UI_CONTAINER_NAME --cap-add SYS_ADMIN -v $UI_STORAGE_LOCATION:/app/server/storage -v $UI_STORAGE_LOCATION/.env:/app/server/.env -e STORAGE_DIR=\"/app/server/storage\" mintplexlabs/anythingllm"
 clean = "pkill -f \"max serve\" || true && lsof -ti:$MAX_SERVE_PORT,$UI_PORT | xargs -r kill -9 2>/dev/null || true && docker rm -f $UI_CONTAINER_NAME 2>/dev/null || true"
-tests = "echo 'test passed'"
+tests = "python test.py"
 
 [tool.pixi.dependencies]
 modular = ">=25.5.0.dev2025070905,<26"
