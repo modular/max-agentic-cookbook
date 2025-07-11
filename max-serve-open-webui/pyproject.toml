@@ -60,7 +60,7 @@ modular = ">=25.5.0.dev2025070905,<26"
 [tool.pixi.tasks]
 app = { cmd = "honcho start", depends-on = "set-env" }
 clean = "honcho -f Procfile.clean start"
-tests = "echo 'test passed'"
+tests = "python test.py"
 
 ### Dependencies
 [tool.pixi.dependencies]

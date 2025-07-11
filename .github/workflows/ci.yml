@@ -53,10 +53,34 @@ jobs:
       - name: Get changed directories
         id: changed-dirs
         run: |
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            CHANGED_DIRS=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep -v '^\.github/' | cut -d'/' -f1 | sort -u | tr '\n' ' ')
+          # Fix Git security issue with repository ownership
+          git config --global --add safe.directory $(pwd)
+          
+          # Debug: show current directory and git status
+          echo "Current directory: $(pwd)"
+          echo "Git status check:"
+          git status --porcelain || echo "Git status failed"
+          
+          # Get changed directories based on event type
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Processing pull request event"
+            # For PR, use origin/main as base
+            CHANGED_DIRS=$(git diff --name-only origin/main..HEAD | grep -v '^\.github/' | cut -d'/' -f1 | sort -u | tr '\n' ' ')
           else
-            CHANGED_DIRS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -v '^\.github/' | cut -d'/' -f1 | sort -u | tr '\n' ' ')
+            echo "Processing push event"
+            # For push, use the before commit if available, otherwise use HEAD~1
+            if [ -n "${{ github.event.before }}" ] && git cat-file -e "${{ github.event.before }}" 2>/dev/null; then
+              CHANGED_DIRS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -v '^\.github/' | cut -d'/' -f1 | sort -u | tr '\n' ' ')
+            else
+              CHANGED_DIRS=$(git diff --name-only HEAD~1..HEAD | grep -v '^\.github/' | cut -d'/' -f1 | sort -u | tr '\n' ' ')
+            fi
           fi
+          
           echo "Changed directories: $CHANGED_DIRS"
           echo "dirs=$CHANGED_DIRS" >> $GITHUB_OUTPUT
+
+      - name: Run tests for changed directories
+        if: steps.changed-dirs.outputs.dirs != ''
+        run: |
+          echo "Running tests for directories: ${{ steps.changed-dirs.outputs.dirs }}"
+          pixi run -e default python scripts/run_tests.py ${{ steps.changed-dirs.outputs.dirs }}
