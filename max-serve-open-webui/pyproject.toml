@@ -14,7 +14,7 @@ requires = ["hatchling"]
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
-# MAGIC CONFIGURATION
+# PIXI CONFIGURATION
 [tool.pixi.project]
 platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
 channels = [
@@ -27,7 +27,7 @@ max_serve_open_webui = { path = ".", editable = true }
 
 # ENVIRONMENTS
 ## Open WebUI has transitive dependencies that conflict with MAX
-## So we use Magic to define separate environments for each
+## So we use Pixi to define separate environments for each
 [tool.pixi.environments]
 ui = ["ui"]
 max = ["max"]
