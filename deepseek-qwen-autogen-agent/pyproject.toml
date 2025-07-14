@@ -1,6 +1,6 @@
 [project]
 authors = [{ name = "Modular Inc", email = "hello@modular.com" }]
-dependencies = ["autogen-agentchat==0.4.7", "autogen-ext[openai]==0.4.7", "rich>=13.9.4,<14", "python-chess>=1.999,<2", "tenacity>=9.0.0,<10", "requests>=2.32.3,<3"]
+dependencies = ["autogen-agentchat==0.4.7", "autogen-ext[openai]==0.4.7", "rich>=13.9.4,<15", "python-chess>=1.999,<2", "tenacity>=9.0.0,<10", "requests>=2.32.3,<3"]
 name = "deepseek-qwen-autogen-agent"
 requires-python = ">=3.10,<3.13"
 version = "0.0.0"
