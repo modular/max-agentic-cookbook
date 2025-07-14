@@ -7,7 +7,7 @@ dependencies = [
     "openai>=1.65.1,<2",
     "e2b-code-interpreter>=1.0.5,<2",
     "python-dotenv>=1.0.1,<2",
-    "rich>=13.9.4,<14",
+    "rich>=13.9.4,<15",
 ]
 
 [build-system]
