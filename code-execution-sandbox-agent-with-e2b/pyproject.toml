@@ -4,8 +4,8 @@ name = "code-execution-sandbox-agent-with-e2b"
 requires-python = ">=3.10,<3.13"
 version = "0.0.0"
 dependencies = [
-    "python-dotenv>=1.0.1,<2",
-    "rich>=13.9.4,<15",
+    "python-dotenv>=1.0.1",
+    "rich>=13.9.4",
 ]
 
 [build-system]
@@ -28,25 +28,29 @@ code_execution_sandbox_agent_with_e2b = { path = ".", editable = true }
 [tool.pixi.dependencies]
 python = ">=3.10,<3.13"
 
-# Feature for MAX server (needs modular package with newer protobuf)
-[tool.pixi.feature.server.dependencies]
-modular = ">=25.5.0.dev2025070905,<26"
-
-[tool.pixi.feature.server.pypi-dependencies]
-openai = ">=1.65.1,<2"
-
-# Feature for e2b agent (needs older protobuf)
-[tool.pixi.feature.agent.pypi-dependencies]
-openai = ">=1.65.1,<2"
-e2b-code-interpreter = ">=1.0.5,<2"
-
 # Define environments
 [tool.pixi.environments]
 server = ["server"]
 agent = ["agent"]
 
-[tool.pixi.tasks]
-hello = "python hello.py"
-tests = "echo 'test passed'"
+# Feature for MAX server (needs modular package with newer protobuf)
+[tool.pixi.feature.server.dependencies]
+modular = ">=25.5.0.dev2025070905"
+
+[tool.pixi.feature.server.pypi-dependencies]
+openai = ">=1.65.1"
+
+[tool.pixi.feature.server.tasks]
 server = "MAX_SERVE_PORT=8010 max serve --model-path modularai/Llama-3.1-8B-Instruct-GGUF --enable-structured-output"
+
+# Feature for e2b agent (needs older protobuf)
+[tool.pixi.feature.agent.pypi-dependencies]
+openai = ">=1.65.1"
+e2b-code-interpreter = ">=1.0.5"
+
+[tool.pixi.feature.agent.tasks]
 agent = "python agent.py"
+hello = "python hello.py"
+
+[tool.pixi.tasks]
+tests = "echo 'test passed'"
