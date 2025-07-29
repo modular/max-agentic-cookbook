@@ -5,13 +5,13 @@ name = "max-serve-continuous-chat"
 requires-python = ">= 3.9,<3.13"
 version = "0.0.0"
 dependencies = [
-    "gradio>=5.8.0,<6",
-    "fastapi>=0.115.6,<0.116",
-    "requests>=2.32.3,<3",
-    "openai>=1.57.3,<2",
-    "tenacity>=9.0.0,<10",
-    "transformers>=4.47.0,<5",
-    "click>=8.1.7,<9",
+    "gradio>=5.8.0",
+    "fastapi>=0.115.6",
+    "requests>=2.32.3",
+    "openai>=1.57.3",
+    "tenacity>=9.0.0",
+    "transformers>=4.47.0",
+    "click>=8.1.7",
 ]
 
 [build-system]
@@ -37,7 +37,7 @@ clean = "honcho -f Procfile.clean start"
 tests = "echo 'test passed'"
 
 [tool.pixi.dependencies]
-docker-compose = ">=2.32.4,<3"
-bash = ">=5.2.21,<6"
-honcho = ">=2.0.0,<3"
-modular = ">=25.5.0.dev2025070905,<26"
+docker-compose = ">=2.32.4"
+bash = ">=5.2.21"
+honcho = ">=2.0.0"
+modular = ">=25.5.0.dev2025070905"

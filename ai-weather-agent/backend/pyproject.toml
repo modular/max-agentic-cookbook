@@ -6,16 +6,16 @@ requires-python = ">= 3.11,<3.13"
 version = "0.0.0"
 dependencies = [
     "pydantic",
-    "fastapi>=0.115.6,<0.116",
-    "uvicorn>=0.34.0,<0.35",
-    "openai>=1.59.9,<2",
-    "python-dotenv>=1.0.1,<2",
-    "httpx>=0.28.1,<0.29",
-    "tenacity>=9.0.0,<10",
-    "huggingface-hub>=0.27.1,<0.28",
-    "hf-transfer>=0.1.9,<0.2",
-    "psutil>=6.1.1,<7",
-    "numpy>=2.2.2,<3",
+    "fastapi>=0.115.6",
+    "uvicorn>=0.34.0",
+    "openai>=1.59.9",
+    "python-dotenv>=1.0.1",
+    "httpx>=0.28.1",
+    "tenacity>=9.0.0",
+    "huggingface-hub>=0.27.1",
+    "hf-transfer>=0.1.9",
+    "psutil>=6.1.1",
+    "numpy>=2.2.2",
 ]
 
 [build-system]
