@@ -39,7 +39,7 @@ ui = { cmd = "open-webui serve", env = { DATA_DIR = "./data", WEBUI_AUTH = "fals
 
 ### Dependencies
 [dependency-groups]
-ui = ["open-webui>=0.5.10,<0.6.0"]
+ui = ["open-webui>=0.5.10"]
 #### Open WebUI is available on PyPI, not conda-forge
 #### So we use dependency groups to install it (see PEP 735)
 
@@ -52,7 +52,7 @@ max = "max serve --model-path modularai/Llama-3.1-8B-Instruct-GGUF --max-length 
 
 ### Dependencies
 [tool.pixi.feature.max.dependencies]
-modular = ">=25.5.0.dev2025070905,<26"
+modular = ">=25.5.0.dev2025070905"
 
 
 ## ENVIRONMENT: BASE
@@ -64,4 +64,4 @@ tests = "python test.py"
 
 ### Dependencies
 [tool.pixi.dependencies]
-honcho = ">=2.0.0,<3"
+honcho = ">=2.0.0"
