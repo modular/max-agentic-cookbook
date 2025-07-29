@@ -26,6 +26,8 @@ multimodal_rag_with_colpali_llamavision_reranker = { path = ".", editable = true
 agent = ["agent"]
 
 [tool.pixi.feature.agent.pypi-dependencies]
+torch = { version = ">=2.7.0", index = "https://download.pytorch.org/whl/cu128" }
+torchvision = { version = ">=0.22.0", index = "https://download.pytorch.org/whl/cu128" }
 openai = ">=1.64.0"
 qdrant-client = ">=1.13.2"
 colpali-engine = ">=0.3.8"
@@ -36,13 +38,6 @@ pillow = ">=11.1.0"
 pymupdf = ">=1.25.3"
 rerankers = ">=0.8.0"
 transformers = ">=4.47.1"
-
-[tool.pixi.feature.agent.dependencies]
-pytorch = ">=2.7.0"
-torchvision = ">=0.22.0"
-
-[tool.pixi.feature.agent.tasks]
-agent = "python app.py"
 
 [tool.pixi.dependencies]
 modular = ">=25.5.0.dev2025070905"
