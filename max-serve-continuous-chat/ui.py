@@ -47,8 +47,8 @@ def is_not_healthy(response):
 
 def wait_for_healthy(base_url: str):
     @retry(
-        stop=stop_after_attempt(20),
-        wait=wait_fixed(60),
+        stop=stop_after_attempt(100),
+        wait=wait_fixed(10),
         retry=(
             retry_if_exception_type(requests.RequestException)
             | retry_if_result(is_not_healthy)
