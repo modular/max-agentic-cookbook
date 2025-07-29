@@ -39,7 +39,7 @@ EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "vidore/colpali-v1.3")
 COLLECTION_NAME = "pdf_images"
 VECTOR_DIM = 128
 BATCH_SIZE = 8
-DEVICE = "cuda"
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 SYSTEM_PROMPT = """
 You are a helpful document-answering assistant that answers questions about the PDF document content.
 When responding to queries, consider the context and intent of the question.
@@ -128,18 +128,21 @@ class EmbedData:
         return embed_model, processor
 
     def get_query_embedding(self, query):
-        with torch.amp.autocast(device_type='cuda'), torch.no_grad():
+        device_type = 'cuda' if torch.cuda.is_available() else 'cpu'
+        with torch.amp.autocast(device_type=device_type), torch.no_grad():
             query = self.processor.process_queries([query]).to(self.embed_model.device)
             query_embedding = self.embed_model(**query)
 
         return query_embedding[0].cpu().float().numpy().tolist()
 
     def generate_embedding(self, images):
-        with torch.amp.autocast(device_type='cuda'), torch.no_grad():
+        device_type = 'cuda' if torch.cuda.is_available() else 'cpu'
+        with torch.amp.autocast(device_type=device_type), torch.no_grad():
             batch_images = self.processor.process_images(images).to(self.embed_model.device)
             image_embeddings = self.embed_model(**batch_images).cpu().float().numpy().tolist()
 
-        torch.cuda.empty_cache()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
         return image_embeddings
 
     def batch_iterate(self, lst, batch_size):
