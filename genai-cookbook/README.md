@@ -1,41 +1,17 @@
 # Modular GenAI Cookbook
 
-A collection of fullstack recipes demonstrating how to build modern generative AI applications using Modular MAX, Next.js, and the Vercel AI SDK. Unlike other recipes in this repository that are Python-based, the GenAI Cookbook provides TypeScript-based, production-ready patterns for building interactive AI experiences.
+A collection of fullstack recipes demonstrating how to build modern generative AI applications using MAX, Next.js, and the Vercel AI SDK. Unlike other recipes in this repository that are Python-based, the GenAI Cookbook provides TypeScript-based, production-ready patterns for building interactive AI experiences. Each recipe demonstrates end-to-end workflows with both frontend and backend implementations, including detailed documentation.
 
-## Overview
-
-The GenAI Cookbook showcases best practices for integrating Modular MAX's high-performance inference capabilities with modern web frameworks. Each recipe demonstrates end-to-end workflows with both frontend and backend implementations, complete with detailed inline documentation explaining the architecture and design decisions.
-
-### Featured Recipes
-
-#### 1. **Multi-turn Chat**
-
-Build a streaming chat interface that maintains conversation context across multiple exchanges. This recipe demonstrates:
-
-- Real-time token streaming using Vercel AI SDK
-- Seamless switching between Modular MAX and OpenAI-compatible endpoints
-- Auto-scrolling message display with Mantine UI components
-- Persistent conversation history management
-- Route-aware API handling for modular deployment
-
-#### 2. **Image Captioning**
-
-Create an intelligent image captioning system that generates natural language descriptions for uploaded images. Features include:
-
-- Drag-and-drop image upload with Mantine Dropzone
-- Base64 image encoding for API transport
-- Customizable prompting for caption generation
-- Gallery view with loading states and progress indicators
-- Support for multiple concurrent caption requests
+<img src="https://github.com/user-attachments/assets/e2302038-a950-41a8-acec-47c0d9c09ed6" />
 
 ## Requirements
 
 - **Node.js** 18.x or higher
 - **npm** or **yarn** package manager
-- **Modular MAX** server running locally or remotely
+- **MAX** server running locally or remotely—see the [MAX quickstart](https://docs.modular.com/max/get-started/)
 - Optional: OpenAI API key for comparing with OpenAI models
 
-## Quick Start
+## Get Started
 
 1. **Clone the repository**
 
@@ -97,6 +73,28 @@ Create an intelligent image captioning system that generates natural language de
 
     Navigate to [http://localhost:3000](http://localhost:3000) in your browser
 
+## Featured Recipes
+
+### 1. **Multi-turn Chat**
+
+Build a streaming chat interface that maintains conversation context across multiple exchanges. This recipe demonstrates:
+
+- Real-time token streaming using Vercel AI SDK
+- Seamless switching between Modular MAX and OpenAI-compatible endpoints
+- Auto-scrolling message display with Mantine UI components
+- Persistent conversation history management
+- Route-aware API handling for modular deployment
+
+### 2. **Image Captioning**
+
+Create an intelligent image captioning system that generates natural language descriptions for uploaded images. Features include:
+
+- Drag-and-drop image upload with Mantine Dropzone
+- Base64 image encoding for API transport
+- Customizable prompting for caption generation
+- Gallery view with loading states and progress indicators
+- Support for multiple concurrent caption requests
+
 ## Architecture
 
 The GenAI Cookbook follows a modern fullstack architecture optimized for AI applications:
@@ -128,14 +126,6 @@ genai-cookbook/
     └── EndpointStore.ts    # Endpoint configuration
 ```
 
-### Key Technologies
-
-- **[Modular MAX](https://docs.modular.com/max/)**: High-performance AI inference engine
-- **[Next.js 14](https://nextjs.org/)**: React framework with App Router for modern web applications
-- **[Vercel AI SDK](https://sdk.vercel.ai/)**: Unified interface for AI model providers
-- **[Mantine UI](https://mantine.dev/)**: Professional React component library
-- **[TypeScript](https://www.typescriptlang.org/)**: Type-safe development experience
-
 ## Development
 
 ### Adding a New Recipe
@@ -155,15 +145,17 @@ Each recipe follows consistent patterns for maintainability:
 - **Backend (`api/route.ts`)**: Implements OpenAI-compatible protocol using Vercel AI SDK for model abstraction
 - **Type Safety**: Full TypeScript coverage with explicit interfaces for data structures
 
-## Running with Modular MAX
+## Running with MAX
 
-To use the cookbook with Modular MAX:
+To use the cookbook with MAX:
 
-1. **Start MAX server** (in a separate terminal):
+1. **Start the model server** (in a separate terminal):
 
     ```bash
     max serve --model meta-llama/Llama-3.1-8B-Instruct
     ```
+
+    For more details, see the [MAX quickstart](https://docs.modular.com/max/get-started/).
 
 2. **Configure the endpoint** in `.env.local`:
 
@@ -204,10 +196,9 @@ The best way to learn is by exploring the live cookbook:
 
 ### Documentation Resources
 
-- [Modular MAX Documentation](https://docs.modular.com/max/)
-- [MAX Serving Guide](https://docs.modular.com/max/serve/)
-- [Vercel AI SDK Documentation](https://sdk.vercel.ai/docs)
-- [Next.js Documentation](https://nextjs.org/docs)
+- [Modular](https://docs.modular.com/)
+- [Vercel AI SDK](https://sdk.vercel.ai/docs)
+- [Next.js](https://nextjs.org/docs)
 - [Mantine Components](https://mantine.dev/core/getting-started/)
 
 ## Contributing
