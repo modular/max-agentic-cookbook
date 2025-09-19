@@ -9,7 +9,9 @@ The GenAI Cookbook showcases best practices for integrating Modular MAX's high-p
 ### Featured Recipes
 
 #### 1. **Multi-turn Chat**
+
 Build a streaming chat interface that maintains conversation context across multiple exchanges. This recipe demonstrates:
+
 - Real-time token streaming using Vercel AI SDK
 - Seamless switching between Modular MAX and OpenAI-compatible endpoints
 - Auto-scrolling message display with Mantine UI components
@@ -17,7 +19,9 @@ Build a streaming chat interface that maintains conversation context across mult
 - Route-aware API handling for modular deployment
 
 #### 2. **Image Captioning**
+
 Create an intelligent image captioning system that generates natural language descriptions for uploaded images. Features include:
+
 - Drag-and-drop image upload with Mantine Dropzone
 - Base64 image encoding for API transport
 - Customizable prompting for caption generation
@@ -34,58 +38,64 @@ Create an intelligent image captioning system that generates natural language de
 ## Quick Start
 
 1. **Clone the repository**
-   ```bash
-   git clone https://github.com/modular/max-recipes.git
-   cd max-recipes/genai-cookbook
-   ```
+
+    ```bash
+    git clone https://github.com/modular/max-recipes.git
+    cd max-recipes/genai-cookbook
+    ```
 
 2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+
+    ```bash
+    npm install
+    ```
 
 3. **Configure environment variables**
 
-   Copy the sample environment file and configure your endpoints:
-   ```bash
-   cp .sample.env .env.local
-   ```
+    Copy the sample environment file and configure your endpoints:
 
-   Edit `.env.local` to add your Modular MAX endpoint configuration:
-   ```env
-   COOKBOOK_ENDPOINTS='[
-     {
-       "id": "max-local",
-       "baseUrl": "http://127.0.0.1:8000/v1",
-       "apiKey": "EMPTY"
-     }
-   ]'
-   ```
+    ```bash
+    cp .sample.env .env.local
+    ```
 
-   For multiple endpoints or comparison with OpenAI and compatible servers:
-   ```env
-   COOKBOOK_ENDPOINTS='[
-     {
-       "id": "max-local",
-       "baseUrl": "http://127.0.0.1:8000/v1",
-       "apiKey": "EMPTY"
-     },
-     {
-       "id": "openai",
-       "baseUrl": "https://api.openai.com/v1",
-       "apiKey": "your-openai-api-key"
-     }
-   ]'
-   ```
+    Edit `.env.local` to add your Modular MAX endpoint configuration:
+
+    ```env
+    COOKBOOK_ENDPOINTS='[
+      {
+        "id": "max-local",
+        "baseUrl": "http://127.0.0.1:8000/v1",
+        "apiKey": "EMPTY"
+      }
+    ]'
+    ```
+
+    For multiple endpoints or comparison with OpenAI and compatible servers:
+
+    ```env
+    COOKBOOK_ENDPOINTS='[
+      {
+        "id": "max-local",
+        "baseUrl": "http://127.0.0.1:8000/v1",
+        "apiKey": "EMPTY"
+      },
+      {
+        "id": "openai",
+        "baseUrl": "https://api.openai.com/v1",
+        "apiKey": "your-openai-api-key"
+      }
+    ]'
+    ```
 
 4. **Start the development server**
-   ```bash
-   npm run dev
-   ```
+
+    ```bash
+    npm run dev
+    ```
 
 5. **Open the cookbook**
 
-   Navigate to [http://localhost:3000](http://localhost:3000) in your browser
+    Navigate to [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Architecture
 
@@ -132,9 +142,9 @@ genai-cookbook/
 
 1. Create a new directory under `app/recipes/your-recipe-name/`
 2. Add the following files:
-   - `page.tsx`: Frontend component
-   - `api/route.ts`: Backend API handler
-   - `recipe.json`: Recipe metadata
+    - `page.tsx`: Frontend component
+    - `api/route.ts`: Backend API handler
+    - `recipe.json`: Recipe metadata
 3. The recipe will be automatically discovered and added to the navigation
 
 ### Code Structure Guidelines
@@ -150,20 +160,22 @@ Each recipe follows consistent patterns for maintainability:
 To use the cookbook with Modular MAX:
 
 1. **Start MAX server** (in a separate terminal):
-   ```bash
-   max serve --model meta-llama/Llama-3.1-8B-Instruct
-   ```
+
+    ```bash
+    max serve --model meta-llama/Llama-3.1-8B-Instruct
+    ```
 
 2. **Configure the endpoint** in `.env.local`:
-   ```env
-   COOKBOOK_ENDPOINTS='[
-     {
-       "id": "max",
-       "baseUrl": "http://127.0.0.1:8000/v1",
-       "apiKey": "EMPTY"
-     }
-   ]'
-   ```
+
+    ```env
+    COOKBOOK_ENDPOINTS='[
+      {
+        "id": "max",
+        "baseUrl": "http://127.0.0.1:8000/v1",
+        "apiKey": "EMPTY"
+      }
+    ]'
+    ```
 
 3. **Select MAX** in the cookbook UI endpoint selector
 
@@ -185,10 +197,10 @@ The best way to learn is by exploring the live cookbook:
 1. **Run the cookbook** and browse through the recipes
 2. **Toggle "Show Code"** in the UI to see the implementation alongside the demo
 3. **Read the inline comments** - each recipe contains extensive documentation explaining:
-   - Architecture decisions
-   - Data flow patterns
-   - Integration points with Modular MAX
-   - UI/UX considerations
+    - Architecture decisions
+    - Data flow patterns
+    - Integration points with Modular MAX
+    - UI/UX considerations
 
 ### Documentation Resources
 

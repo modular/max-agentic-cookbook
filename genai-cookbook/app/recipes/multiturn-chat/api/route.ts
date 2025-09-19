@@ -31,6 +31,7 @@ export async function POST(req: Request) {
     const openai = createOpenAI({
         // baseURL can point at Modular MAX, OpenAI, or any OpenAI-compatible host.
         baseURL,
+        apiKey,
     })
 
     const result = streamText({

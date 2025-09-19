@@ -24,7 +24,7 @@ export async function POST(req: Request) {
     const openai = createOpenAI({
         // baseURL identifies which provider should fulfill the request.
         baseURL: baseUrl,
-        // Swap the API key via environment variables to target different providers.
+        apiKey,
     })
 
     try {
