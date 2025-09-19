@@ -1,0 +1,12 @@
+{
+    "debug.javascript.autoAttachFilter": "onlyWithFlag",
+    "debug.javascript.terminalOptions": {
+        "skipFiles": [
+            "<node_internals>/**",
+            "**/node_modules/**",
+            "**/.next/**"
+        ]
+    },
+    "debug.showInlineBreakpointCandidates": true,
+    "debug.allowBreakpointsEverywhere": false
+}
