@@ -1,3 +1,5 @@
+@use '../lib/partials/_base' as *;
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,3 +9,5 @@
         text-wrap: balance;
     }
 }
+
+@include base;

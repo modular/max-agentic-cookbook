@@ -1,0 +1,18 @@
+.onHover:hover {
+  border-color: var(--button-bd-hover, transparent);
+  text-decoration: none;
+}
+
+.onActive.onActive:active {
+  background-color: var(--button-bg);
+  border: var(--button-bd);
+  color: var(--button-color);
+  transform: translateY(0);
+}
+
+.section * {
+  // Otherwise the button's icon and the button's text transition at different times.
+  transition:
+    transform 0.15s ease,
+    opacity 0.1s ease;
+}

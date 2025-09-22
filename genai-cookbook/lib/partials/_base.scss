@@ -1,0 +1,106 @@
+@use './_font' as *;
+@use './_colors' as *;
+@use './_mantine' as *;
+@use './_breakpoints' as *;
+
+@mixin base {
+    .page-load {
+        position: absolute;
+        top: -5px;
+        width: 100vw;
+        z-index: 100;
+        left: 0;
+    }
+
+    html {
+        font-size: 16px; // Sets the font size for rem.
+    }
+
+    // https://rsms.me/inter/#features
+    .root {
+        @include applyFonts;
+        font-feature-settings:
+            'dlig' 1,
+            'cv05' 1,
+            'ss03' 1,
+            'ss07' 1,
+            'ss08' 1,
+            'ss01' 0;
+    }
+
+    body {
+        @extend .body-12;
+        --error-text: #{$Red100};
+        --success-text: #{$GreenAlpha30};
+        // This would get overwritten by Mantine base styles, which is especially important
+        // during initial load where the mantine variables have not loaded yet.
+        background: var(--Elements-Twilight-0-90) !important;
+        font-family: $inter;
+        color: var(--Black);
+        letter-spacing: -0.32px;
+        max-width: 100vw;
+        overflow-x: hidden;
+
+        :where(*):not(.no-transition *) {
+            transition:
+                background-color 200ms ease-in-out,
+                border-color 200ms ease-in-out,
+                color 200ms ease-in-out,
+                fill 200ms ease-in-out,
+                stroke 200ms ease-in-out,
+                opacity 200ms ease-in-out;
+        }
+        @media (prefers-reduced-motion) {
+            transition: all 0s ease !important;
+        }
+
+        @include lightMode;
+    }
+
+    body.darkMode {
+        @include darkMode;
+    }
+
+    .forceDarkMode {
+        color: var(--Black);
+        @include darkMode;
+    }
+
+    // Use where to reduce specificty. Only target divs because SVGs sometimes become
+    // invisible when transform: translateY(0) is set.
+    :where(div):focus-visible {
+        outline: 2px solid var(--Elements-Neb-Ultra);
+        outline-offset: -2px;
+    }
+
+    // Default focus styles for elements with tabindex but no default focus styles
+    :where([tabindex]:not(input):not(textarea):not(select)):focus-visible {
+        outline: 2px solid var(--Elements-Neb-Ultra);
+        outline-offset: -2px;
+    }
+
+    // Style scrollbars
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--Elements-Twilight-5-80);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--Elements-Twilight-30-60);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--Elements-Twilight-40-60);
+    }
+
+    // Firefox scrollbar styling
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--Elements-Twilight-30-60) var(--Elements-Twilight-5-80);
+    }
+}

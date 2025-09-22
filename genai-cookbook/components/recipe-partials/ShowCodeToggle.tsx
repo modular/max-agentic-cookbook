@@ -24,7 +24,7 @@ export function ShowCodeToggle() {
         icon?: React.ReactNode
     }) => {
         return (
-            <Button size="compact-sm" radius="xl" variant="light">
+            <Button size="compact-sm" radius="xl">
                 <>
                     {icon}
                     <Text size="sm" fw="500" p="6px">
