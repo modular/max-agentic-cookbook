@@ -1,9 +1,11 @@
 import CookbookShell from '@/components/cookbook-shell'
-import loadRecipes from '@/lib/loadRecipes'
-import { fileURLToPath } from 'url'
-
-const basePath = fileURLToPath(import.meta.url)
+import recipeStore from '@/store/RecipeStore'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-    return <CookbookShell recipes={loadRecipes(basePath)}>{children}</CookbookShell>
+    const recipes = recipeStore.getAll()
+    if (!recipes) {
+        throw new Error('No Recipes Loaded')
+    }
+
+    return <CookbookShell recipes={recipes}>{children}</CookbookShell>
 }

@@ -9,9 +9,9 @@ type ServerSideEndpoints = EndpointWithApiKey[] | null
 
 // Store endpoints server-side in memory to access them across routes
 class EndpointStore {
-    _endpoints: ServerSideEndpoints = null
+    private _endpoints: ServerSideEndpoints = null
 
-    get(): ServerSideEndpoints {
+    getAll(): ServerSideEndpoints {
         return this._endpoints
     }
 
