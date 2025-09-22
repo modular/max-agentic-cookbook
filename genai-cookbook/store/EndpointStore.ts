@@ -1,19 +1,21 @@
 import { Endpoint } from '@/lib/types'
 
+// Only store the API key server side
 interface EndpointWithApiKey extends Endpoint {
     apiKey: string
 }
 
-type EndpointCollection = EndpointWithApiKey[] | null
+type ServerSideEndpoints = EndpointWithApiKey[] | null
 
+// Store endpoints server-side in memory to access them across routes
 class EndpointStore {
-    _endpoints: EndpointCollection = null
+    _endpoints: ServerSideEndpoints = null
 
-    get(): EndpointCollection {
+    get(): ServerSideEndpoints {
         return this._endpoints
     }
 
-    set(newEndpoints: EndpointCollection) {
+    set(newEndpoints: ServerSideEndpoints) {
         this._endpoints = newEndpoints
     }
 
@@ -23,6 +25,7 @@ class EndpointStore {
     }
 }
 
+// Persist store across hot-reload when running in dev mode
 declare global {
     // eslint-disable-next-line no-var
     var __endpointStore__: EndpointStore | undefined
