@@ -49,12 +49,12 @@ export default function Recipe() {
         // We must supply a chat id tied to the pathname, endpoint, and model so
         // useChat recreates its transport once selections load instead of staying
         // bound to the initially null values.
-        id: `${pathname}::${selectedEndpoint?.id ?? '?'}::${selectedModel?.id ?? '?'}`,
+        id: `${pathname}|${selectedEndpoint?.id ?? '?'}|${selectedModel?.id ?? '?'}`,
         transport: new DefaultChatTransport({
             api: `${pathname}/api`,
             body: {
-                baseURL: selectedEndpoint?.baseUrl,
-                model: selectedModel?.name,
+                endpointId: selectedEndpoint?.id,
+                modelName: selectedModel?.name,
             },
         }),
     })

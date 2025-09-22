@@ -115,9 +115,6 @@ export default function Recipe() {
 
             if (queue.length === 0) return
 
-            const baseUrl = selectedEndpoint.baseUrl
-            const model = selectedModel.name
-
             // Optimistically mark queued images as processing so the gallery overlays spinners immediately.
             setImages((data) =>
                 data.map((prev) =>
@@ -134,8 +131,7 @@ export default function Recipe() {
                         image,
                         prompt,
                         endpointId: selectedEndpoint.id,
-                        baseUrl,
-                        model,
+                        modelName: selectedModel.name,
                         api: `${pathname}/api`,
                     })
 
@@ -151,7 +147,7 @@ export default function Recipe() {
 
             setError(null)
         } catch (error) {
-            setError('Unable to generate captions: ' + (error as Error)?.message)
+            setError('Unable to generate captions. ' + (error as Error)?.message)
             setImages((data) => data.map((img) => ({ ...img, processing: false })))
         } finally {
             setProcessing(false)
@@ -162,30 +158,32 @@ export default function Recipe() {
         <Stack flex={1} h="100%" style={{ overflow: 'hidden', minHeight: 0 }}>
             <ErrorAlert error={error} />
 
-            <Stack flex={1} style={{ overflow: 'hidden', minHeight: 0 }}>
-                <SimpleGrid cols={{ base: 1, md: 2 }}>
-                    <FileDrop onDrop={onFileDroppped} maxSizeMb={maxSizeMb} />
-                    <Textarea
-                        label="Prompt"
-                        autosize
-                        minRows={4}
-                        maxRows={4}
-                        w="100%"
-                        value={prompt}
-                        onChange={(event) => setPrompt(event.currentTarget.value)}
-                    />
-                </SimpleGrid>
-                <FormActions
-                    title={selectedRecipe?.title}
-                    actionsDisabled={images.length < 1 || processing}
-                    generateClicked={onGenerateClicked}
-                    resetClicked={() => {
-                        setImages([])
-                        setError(null)
-                    }}
-                />
-                <Gallery images={images} />
-            </Stack>
+            <ScrollArea flex={1} h="100%" w="100%">
+                <Stack>
+                    <SimpleGrid cols={{ base: 1, md: 2 }}>
+                        <FileDrop onDrop={onFileDroppped} maxSizeMb={maxSizeMb} />
+                        <Textarea
+                            label="Prompt"
+                            autosize
+                            minRows={4}
+                            maxRows={4}
+                            w="100%"
+                            value={prompt}
+                            onChange={(event) => setPrompt(event.currentTarget.value)}
+                        />
+                    </SimpleGrid>
+                    <Gallery images={images} />
+                </Stack>
+            </ScrollArea>
+            <FormActions
+                title={selectedRecipe?.title}
+                actionsDisabled={images.length < 1 || processing}
+                generateClicked={onGenerateClicked}
+                resetClicked={() => {
+                    setImages([])
+                    setError(null)
+                }}
+            />
         </Stack>
     )
 }
@@ -356,13 +354,11 @@ function Gallery({ images }: { images: ImageData[] }) {
     }
 
     return (
-        <ScrollArea flex={1} h="100%" w="100%">
-            <SimpleGrid cols={{ base: 1, sm: 2, lg: 4, xl: 5 }}>
-                {images.map((image) => (
-                    <ImageBox key={image.id} image={image} />
-                ))}
-            </SimpleGrid>
-        </ScrollArea>
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 4, xl: 5 }}>
+            {images.map((image) => (
+                <ImageBox key={image.id} image={image} />
+            ))}
+        </SimpleGrid>
     )
 }
 
@@ -375,8 +371,7 @@ interface CaptionRequest {
     image: ImageData
     prompt: string
     endpointId: string
-    baseUrl: string
-    model: string
+    modelName: string
     api: string
 }
 
@@ -389,8 +384,7 @@ async function generateCaption({
     image,
     prompt,
     endpointId,
-    baseUrl,
-    model,
+    modelName,
     api,
 }: CaptionRequest): Promise<string> {
     // Vercel AI SDK uses OpenAI-style message arrays
@@ -413,14 +407,13 @@ async function generateCaption({
         method: 'POST',
         body: JSON.stringify({
             endpointId,
-            baseUrl,
-            model,
+            modelName,
             messages,
         }),
     })
 
     if (!response.ok) {
-        throw new Error(response.statusText)
+        throw new Error(await response.text())
     }
 
     // The API route relays Vercel AI SDK streaming back into JSON with the generated text.

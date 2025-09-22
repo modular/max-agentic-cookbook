@@ -23,6 +23,11 @@ class EndpointStore {
         const endpoint = this._endpoints?.find((e) => e.id === endpointId)
         return endpoint?.apiKey
     }
+
+    baseUrl(endpointId: string | null | undefined): string | undefined {
+        const endpoint = this._endpoints?.find((e) => e.id === endpointId)
+        return endpoint?.baseUrl
+    }
 }
 
 // Persist store across hot-reload when running in dev mode
