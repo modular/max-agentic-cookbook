@@ -1,6 +1,5 @@
 import { generateText } from 'ai'
-import { createOpenAI } from '@ai-sdk/openai'
-import endpointStore from '@/store/EndpointStore'
+import { ModelPreparationError, prepareModel } from '@/lib/prepareModel'
 
 /*
  * The captioning API mirrors our multi-turn chat route but returns a single
@@ -14,32 +13,31 @@ import endpointStore from '@/store/EndpointStore'
 // ============================================================================
 /** Processes caption requests for either Modular MAX or OpenAI. */
 export async function POST(req: Request) {
-    const { messages, modelName, endpointId } = await req.json()
-    const apiKey = endpointStore.apiKey(endpointId)
-    const baseURL = endpointStore.apiKey(endpointId)
-
-    if (!baseURL || !apiKey || !modelName) {
-        return new Response('Problem with baseURL, apiKey, or modelName', {
-            status: 422,
-        })
+    const { messages, endpointId, modelName } = await req.json()
+    if (!messages) {
+        return new Response('Client did not provide messages', { status: 400 })
     }
 
-    const openai = createOpenAI({
-        // baseURL identifies which provider should fulfill the request.
-        baseURL,
-        apiKey,
-    })
+    let model
+    try {
+        model = await prepareModel(endpointId, modelName)
+    } catch (error) {
+        const modelError = error as ModelPreparationError
+        return new Response(modelError.message, { status: modelError.status })
+    }
 
     try {
         const { text } = await generateText({
             // generateText handles the familiar chat-completions format via the Vercel AI SDK.
-            model: openai.chat(modelName),
-            messages,
+            model: model,
+            messages: messages,
         })
 
         return Response.json({ text })
     } catch (error) {
-        console.error('OpenAI API error:', error)
-        return new Response('Failed to generate caption', { status: 500 })
+        const errorMessage = error instanceof Error ? `(${error.message})` : ''
+        return new Response(`Failed to generate caption ${errorMessage}`, {
+            status: 424,
+        })
     }
 }

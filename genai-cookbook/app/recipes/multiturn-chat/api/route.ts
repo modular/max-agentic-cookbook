@@ -1,6 +1,5 @@
-import { streamText, convertToModelMessages } from 'ai'
-import { createOpenAI } from '@ai-sdk/openai'
-import endpointStore from '@/store/EndpointStore'
+import { convertToModelMessages, streamText } from 'ai'
+import { prepareModel, ModelPreparationError } from '@/lib/prepareModel'
 
 /*
  * This API route is the bridge between our chat surface and the provider that
@@ -19,36 +18,34 @@ import endpointStore from '@/store/EndpointStore'
 /** Handles chat completions for Modular MAX via compatibility with OpenAI. */
 export async function POST(req: Request) {
     const { messages, endpointId, modelName } = await req.json()
-
-    let apiKey, baseURL
-    try {
-        // Pull the endpoint ID from the ID that we created for the useChat hook
-        apiKey = endpointStore.apiKey(endpointId)
-        baseURL = endpointStore.baseUrl(endpointId)
-
-        if (!baseURL || !apiKey || !modelName) {
-            throw new Error('Missing baseUrl, apiKey, or modelName')
-        }
-    } catch (error) {
-        return new Response((error as Error)?.message, { status: 422 })
+    if (!messages) {
+        return new Response('Client did not provide messages', { status: 400 })
     }
 
-    const openai = createOpenAI({
-        // baseURL can point at Modular MAX, OpenAI, or any OpenAI-compatible host.
-        baseURL,
-        apiKey,
-    })
+    let model
+    try {
+        model = await prepareModel(endpointId, modelName)
+    } catch (error) {
+        const modelError = error as ModelPreparationError
+        return new Response(modelError.message, { status: modelError.status })
+    }
 
-    const result = streamText({
-        // `openai.chat(model)` returns a model handle that stays compatible across providers.
-        model: openai.chat(modelName),
-        // model: openai.chat('google/gemma-3-27b-it'),
-        // Normalize incoming UI messages into the format the SDK expects.
-        messages: convertToModelMessages(messages),
-        // Respect the same stop sequence used by Modular MAX models.
-        stopSequences: ['<end_of_turn>'],
-    })
+    try {
+        const result = streamText({
+            model: model,
+            messages: convertToModelMessages(messages),
+            // Respect the same stop sequence used by the model.
+            stopSequences: ['<end_of_turn>'],
+        })
 
-    // Convert the streaming result into the structure the React UI consumes.
-    return result.toUIMessageStreamResponse({ originalMessages: messages })
+        // Convert the streaming result into the structure the React UI consumes.
+        return result.toUIMessageStreamResponse({
+            originalMessages: messages,
+        })
+    } catch (error) {
+        const errorMessage = error instanceof Error ? `(${error.message})` : ''
+        return new Response(`Failed to generate caption ${errorMessage}`, {
+            status: 424,
+        })
+    }
 }
