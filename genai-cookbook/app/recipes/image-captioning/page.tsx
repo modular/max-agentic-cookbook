@@ -115,9 +115,6 @@ export default function Recipe() {
 
             if (queue.length === 0) return
 
-            const baseUrl = selectedEndpoint.baseUrl
-            const model = selectedModel.name
-
             // Optimistically mark queued images as processing so the gallery overlays spinners immediately.
             setImages((data) =>
                 data.map((prev) =>
@@ -134,8 +131,7 @@ export default function Recipe() {
                         image,
                         prompt,
                         endpointId: selectedEndpoint.id,
-                        baseUrl,
-                        model,
+                        modelName: selectedModel.name,
                         api: `${pathname}/api`,
                     })
 
@@ -375,8 +371,7 @@ interface CaptionRequest {
     image: ImageData
     prompt: string
     endpointId: string
-    baseUrl: string
-    model: string
+    modelName: string
     api: string
 }
 
@@ -389,8 +384,7 @@ async function generateCaption({
     image,
     prompt,
     endpointId,
-    baseUrl,
-    model,
+    modelName,
     api,
 }: CaptionRequest): Promise<string> {
     // Vercel AI SDK uses OpenAI-style message arrays
@@ -413,8 +407,7 @@ async function generateCaption({
         method: 'POST',
         body: JSON.stringify({
             endpointId,
-            baseUrl,
-            model,
+            modelName,
             messages,
         }),
     })

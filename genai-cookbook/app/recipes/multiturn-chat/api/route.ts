@@ -18,14 +18,19 @@ import endpointStore from '@/store/EndpointStore'
 // ============================================================================
 /** Handles chat completions for Modular MAX via compatibility with OpenAI. */
 export async function POST(req: Request) {
-    const { messages, baseURL, model, id } = await req.json()
+    const { messages, endpointId, modelName } = await req.json()
 
-    // Pull the endpoint ID from the ID that we created for the useChat hook
-    const endpointId = id.split('::')[1]
-    const apiKey = endpointStore.apiKey(endpointId)
+    let apiKey, baseURL
+    try {
+        // Pull the endpoint ID from the ID that we created for the useChat hook
+        apiKey = endpointStore.apiKey(endpointId)
+        baseURL = endpointStore.baseUrl(endpointId)
 
-    if (!baseURL || !apiKey || !model) {
-        return new Response('Missing required configuration', { status: 400 })
+        if (!baseURL || !apiKey || !modelName) {
+            throw new Error('Missing baseUrl, apiKey, or modelName')
+        }
+    } catch (error) {
+        return new Response((error as Error)?.message, { status: 422 })
     }
 
     const openai = createOpenAI({
@@ -36,7 +41,7 @@ export async function POST(req: Request) {
 
     const result = streamText({
         // `openai.chat(model)` returns a model handle that stays compatible across providers.
-        model: openai.chat(model),
+        model: openai.chat(modelName),
         // model: openai.chat('google/gemma-3-27b-it'),
         // Normalize incoming UI messages into the format the SDK expects.
         messages: convertToModelMessages(messages),
