@@ -15,7 +15,14 @@ import { useCallback, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { nanoid } from 'nanoid'
 import { SystemModelMessage, UserModelMessage } from 'ai'
-import { Stack, SimpleGrid, Textarea } from '@mantine/core'
+import {
+    Stack,
+    SimpleGrid,
+    Textarea,
+    Space,
+    ScrollArea,
+    AspectRatio,
+} from '@mantine/core'
 
 import { useCookbook } from '@/hooks'
 
@@ -152,11 +159,11 @@ export default function Recipe() {
     }, [selectedEndpoint, selectedModel, images, pathname, prompt])
 
     return (
-        <Stack>
+        <Stack flex={1} h="100%" style={{ overflow: 'hidden', minHeight: 0 }}>
             <ErrorAlert error={error} />
 
-            <SimpleGrid cols={{ base: 1, md: 2 }}>
-                <Stack>
+            <Stack flex={1} style={{ overflow: 'hidden', minHeight: 0 }}>
+                <SimpleGrid cols={{ base: 1, md: 2 }}>
                     <FileDrop onDrop={onFileDroppped} maxSizeMb={maxSizeMb} />
                     <Textarea
                         label="Prompt"
@@ -167,18 +174,18 @@ export default function Recipe() {
                         value={prompt}
                         onChange={(event) => setPrompt(event.currentTarget.value)}
                     />
-                    <FormActions
-                        title={selectedRecipe?.title}
-                        actionsDisabled={images.length < 1 || processing}
-                        generateClicked={onGenerateClicked}
-                        resetClicked={() => {
-                            setImages([])
-                            setError(null)
-                        }}
-                    />
-                </Stack>
+                </SimpleGrid>
+                <FormActions
+                    title={selectedRecipe?.title}
+                    actionsDisabled={images.length < 1 || processing}
+                    generateClicked={onGenerateClicked}
+                    resetClicked={() => {
+                        setImages([])
+                        setError(null)
+                    }}
+                />
                 <Gallery images={images} />
-            </SimpleGrid>
+            </Stack>
         </Stack>
     )
 }
@@ -205,13 +212,15 @@ function FormActions({
     resetClicked,
 }: FormActionsProps) {
     return (
-        <Group>
+        <Group bg="var(--mantine-color-default)" p="sm">
+            <Space ml="auto" />
             <Button disabled={actionsDisabled} onClick={generateClicked}>
-                Generate
+                Generate Captions
             </Button>
             <Button variant="outline" disabled={actionsDisabled} onClick={resetClicked}>
                 Reset
             </Button>
+            <Space mr="auto" />
         </Group>
     )
 }
@@ -320,29 +329,40 @@ function FileDrop({ onDrop, maxSizeMb, disabled }: FileDropProps) {
 // ============================================================================
 import { Box, Image, LoadingOverlay } from '@mantine/core'
 
-/** Renders each uploaded image alongside its streaming caption status. */
+/**
+ * Renders each uploaded image alongside its streaming caption status inside a
+ * scrollable grid. The local `ImageBox` helper keeps the loading overlay and
+ * aspect ratio consistent per card, while `ScrollArea` + `SimpleGrid` stretch to
+ * the available height so overflow is handled without breaking the outer flex
+ * layout.
+ */
 function Gallery({ images }: { images: ImageData[] }) {
+    const ImageBox = ({ image }: { image: ImageData }) => {
+        return (
+            <Box>
+                {/* Mantine Box + LoadingOverlay show spinner on top of the image while captioning. */}
+                <AspectRatio pos="relative" ratio={4 / 3}>
+                    <LoadingOverlay visible={image.processing} zIndex={1000} />
+                    <Image
+                        src={image.imageData}
+                        alt={image.caption ?? 'Image has not been captioned yet'}
+                    />
+                </AspectRatio>
+                <Text c={!image.caption ? 'dimmed' : ''}>
+                    {image.caption ?? 'Image not yet captioned'}
+                </Text>
+            </Box>
+        )
+    }
+
     return (
-        <SimpleGrid>
-            {images.map((img) => {
-                return (
-                    <Box key={img.id}>
-                        {/* Mantine Box + LoadingOverlay show spinner on top of the image while captioning. */}
-                        <Box pos="relative">
-                            <LoadingOverlay visible={img.processing} zIndex={1000} />
-                            <Image
-                                src={img.imageData}
-                                h="200px"
-                                alt={img.caption ?? 'Image has not been captioned yet'}
-                            />
-                        </Box>
-                        <Text c={!img.caption ? 'dimmed' : ''}>
-                            {img.caption ?? 'Image not yet captioned'}
-                        </Text>
-                    </Box>
-                )
-            })}
-        </SimpleGrid>
+        <ScrollArea flex={1} h="100%" w="100%">
+            <SimpleGrid cols={{ base: 1, sm: 2, lg: 4, xl: 5 }}>
+                {images.map((image) => (
+                    <ImageBox key={image.id} image={image} />
+                ))}
+            </SimpleGrid>
+        </ScrollArea>
     )
 }
 
