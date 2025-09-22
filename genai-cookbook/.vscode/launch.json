@@ -18,6 +18,14 @@
                 "action": "debugWithChrome",
                 "webRoot": "${workspaceFolder}"
             }
+        },
+        {
+            "name": "Launch Chrome with DevTools",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}",
+            "runtimeArgs": ["--auto-open-devtools-for-tabs"]
         }
     ]
 }
