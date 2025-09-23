@@ -1,0 +1,58 @@
+// Breakpoint definitions
+$xs: '36em';
+$sm: '640px';
+$md: '768px';
+$lg: '1024px';
+$xl: '1280px';
+$xxl: '1400px';
+$cbl: '900px';
+$cbm: '590px';
+
+// Breakpoint mixins
+@mixin xs-up {
+    @media (min-width: $xs) {
+        @content;
+    }
+}
+
+@mixin sm-up {
+    @media (min-width: $sm) {
+        @content;
+    }
+}
+
+@mixin md-up {
+    @media (min-width: $md) {
+        @content;
+    }
+}
+
+@mixin lg-up {
+    @media (min-width: $lg) {
+        @content;
+    }
+}
+
+@mixin xl-up {
+    @media (min-width: $xl) {
+        @content;
+    }
+}
+
+@mixin xxl-up {
+    @media (min-width: $xxl) {
+        @content;
+    }
+}
+
+@mixin cbl-up {
+    @media (min-width: $cbl) {
+        @content;
+    }
+}
+
+@mixin cbm-up {
+    @media (min-width: $cbm) {
+        @content;
+    }
+}

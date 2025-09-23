@@ -1,10 +1,19 @@
 import '@mantine/core/styles.css'
-import '@/styles/globals.css'
+import '@/styles/globals.scss'
 
 import type { Metadata } from 'next'
-import { MantineProvider } from '@mantine/core'
+import { Inter, Roboto_Mono } from 'next/font/google'
+import { ClientThemeProvider } from '@/components/ClientThemeProvider'
 
-import { theme } from '@/lib/theme'
+const inter = Inter({
+    subsets: ['latin'],
+    variable: '--inter',
+})
+
+const robotoMono = Roboto_Mono({
+    subsets: ['latin'],
+    variable: '--roboto',
+})
 
 export const metadata: Metadata = {
     title: 'Modular GenAI Cookbook',
@@ -12,12 +21,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="en">
+        <html lang="en" className={`${inter.variable} ${robotoMono.variable}`}>
             <body>
-                <MantineProvider defaultColorScheme="auto" theme={theme}>
-                    {children}
-                </MantineProvider>
+                <ClientThemeProvider>{children}</ClientThemeProvider>
             </body>
         </html>
     )
 }
+

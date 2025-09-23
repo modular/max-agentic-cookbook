@@ -22,7 +22,7 @@ export default function Navbar({ recipes }: { recipes: RecipeMetadata[] }) {
                                 onClick={() => selectRecipeFromSlug(recipe.slug)}
                                 href={`${recipesPath()}/${recipe.slug}`}
                             >
-                                <Text>{recipe.title}</Text>
+                                <Text c="var(--Black)">{recipe.title}</Text>
                             </Link>
                             {selectedRecipe?.slug === recipe.slug && (
                                 <IconChevronRight opacity={0.5} stroke={iconStroke} />
