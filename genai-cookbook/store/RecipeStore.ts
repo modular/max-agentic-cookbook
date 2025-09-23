@@ -1,4 +1,5 @@
 import { RecipeMetadata } from '@/lib/types'
+import { recipesPath } from '@/lib/constants'
 import path from 'path'
 import fs from 'fs'
 
@@ -7,7 +8,7 @@ class RecipeStore {
     private _path: string
 
     constructor() {
-        const recipePath = path.join(process.cwd(), 'app', 'recipes')
+        const recipePath = path.join(process.cwd(), recipesPath())
         this._path = recipePath
         this._recipes = this.loadRecipes(recipePath)
     }
@@ -69,13 +70,16 @@ class RecipeStore {
     }
 }
 
-// Persist store across hot-reload when running in dev mode
+// Add endpointStore to the NodeJS global type
 declare global {
     // eslint-disable-next-line no-var
-    var __recipeStore__: RecipeStore | undefined
+    var recipeStore: RecipeStore | undefined
 }
 
-const recipeStore: RecipeStore =
-    globalThis.__recipeStore__ ?? (globalThis.__recipeStore__ = new RecipeStore())
+// Prevent multiple instances of EndpointStore in development
+const recipeStore = globalThis.recipeStore || new RecipeStore()
+if (process.env.NODE_ENV !== 'production') {
+    globalThis.recipeStore = recipeStore
+}
 
 export default recipeStore

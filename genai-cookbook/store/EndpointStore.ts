@@ -30,13 +30,16 @@ class EndpointStore {
     }
 }
 
-// Persist store across hot-reload when running in dev mode
+// Add endpointStore to the NodeJS global type
 declare global {
     // eslint-disable-next-line no-var
-    var __endpointStore__: EndpointStore | undefined
+    var endpointStore: EndpointStore | undefined
 }
 
-const endpointStore: EndpointStore =
-    globalThis.__endpointStore__ ?? (globalThis.__endpointStore__ = new EndpointStore())
+// Prevent multiple instances of EndpointStore in development
+const endpointStore = globalThis.endpointStore || new EndpointStore()
+if (process.env.NODE_ENV !== 'production') {
+    globalThis.endpointStore = endpointStore
+}
 
 export default endpointStore
