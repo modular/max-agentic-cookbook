@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 
-import { recipesPath } from '@/lib/constants'
+import { cookbookRoute } from '@/lib/constants'
 
 export function useRecipeSlug(): string | null {
     const [initialRecipe, setInitialRecipe] = useState<string | null>(null)
@@ -9,7 +9,7 @@ export function useRecipeSlug(): string | null {
 
     useEffect(() => {
         try {
-            const base = recipesPath()
+            const base = cookbookRoute()
             let slug: string | null = null
             if (pathname && pathname.startsWith(`${base}/`)) {
                 const rest = pathname.slice(base.length + 1)

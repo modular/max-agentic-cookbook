@@ -3,7 +3,7 @@ import { RecipeMetadata } from '@/lib/types'
 import { AppShell, Group, ScrollArea, Stack, Text } from '@mantine/core'
 import { IconChevronRight } from '@tabler/icons-react'
 import { useCookbook } from '@/hooks'
-import { recipesPath } from '@/lib/constants'
+import { cookbookRoute } from '@/lib/constants'
 import { iconStroke } from '@/lib/theme'
 
 export default function Navbar({ recipes }: { recipes: RecipeMetadata[] }) {
@@ -20,7 +20,7 @@ export default function Navbar({ recipes }: { recipes: RecipeMetadata[] }) {
                         <Group key={recipe.slug} justify="space-between" align="center">
                             <Link
                                 onClick={() => selectRecipeFromSlug(recipe.slug)}
-                                href={`${recipesPath()}/${recipe.slug}`}
+                                href={`${cookbookRoute()}/${recipe.slug}`}
                             >
                                 <Text c="var(--Black)">{recipe.title}</Text>
                             </Link>
