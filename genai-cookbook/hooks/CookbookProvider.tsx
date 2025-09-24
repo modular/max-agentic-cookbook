@@ -4,6 +4,7 @@ import { createContext, useCallback, useEffect, ReactNode, useState } from 'reac
 import { endpointsRoute } from '@/lib/constants'
 
 import type { Endpoint, Model, RecipeMetadata } from '@/lib/types'
+import { useSelectedLayoutSegment } from 'next/navigation'
 
 interface CookbookContextValue {
     endpoints: Endpoint[]
@@ -15,12 +16,10 @@ interface CookbookContextValue {
     setModels: (models: Model[]) => void
     selectModelById: (id: string | null) => void
     selectedRecipe: RecipeMetadata | null
-    selectRecipeFromSlug: (id: string | null) => void
 }
 
 interface CookbookProviderProps {
     recipes: RecipeMetadata[]
-    initialRecipe: string | null
     children: ReactNode
 }
 
@@ -28,11 +27,7 @@ export const CookbookContext = createContext<CookbookContextValue | undefined>(
     undefined
 )
 
-export function CookbookProvider({
-    children,
-    recipes,
-    initialRecipe,
-}: CookbookProviderProps) {
+export function CookbookProvider({ children, recipes }: CookbookProviderProps) {
     const [providerEndpoints, setProviderEndpoints] = useState<Endpoint[]>([])
     const [selectedEndpoint, setSelectedEndpoint] = useState<Endpoint | null>(null)
 
@@ -41,6 +36,8 @@ export function CookbookProvider({
 
     const [providerRecipes, setProviderRecipes] = useState<RecipeMetadata[]>([])
     const [selectedRecipe, setSelectedRecipe] = useState<RecipeMetadata | null>(null)
+
+    const currentRecipe = useSelectedLayoutSegment()
 
     const selectRecipeFromSlug = useCallback(
         (slug: string | null) => {
@@ -86,8 +83,8 @@ export function CookbookProvider({
     useEffect(() => {
         initEndpoints().then(setProviderEndpoints)
         setProviderRecipes(recipes)
-        selectRecipeFromSlug(initialRecipe)
-    }, [initialRecipe, recipes, selectRecipeFromSlug])
+        selectRecipeFromSlug(currentRecipe)
+    }, [currentRecipe, recipes, selectRecipeFromSlug])
 
     useEffect(() => {
         setSelectedEndpoint((selected) => {
@@ -119,7 +116,6 @@ export function CookbookProvider({
                 setModels,
                 selectModelById,
                 selectedRecipe,
-                selectRecipeFromSlug,
             }}
         >
             {children}

@@ -4,7 +4,7 @@ import { AppShell } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { headerHeight, navbarWidth } from '@/lib/theme'
 
-import { CookbookProvider, useRecipeSlug } from '@/hooks'
+import { CookbookProvider } from '@/hooks'
 import { RecipeMetadata } from '@/lib/types'
 
 import Header from './Header'
@@ -19,10 +19,9 @@ interface CookbookShellProps {
 export default function CookbookShell({ recipes, children }: CookbookShellProps) {
     const [mobileOpened, { toggle: toggleMobile }] = useDisclosure()
     const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
-    const initialRecipe = useRecipeSlug()
 
     return (
-        <CookbookProvider initialRecipe={initialRecipe} recipes={recipes}>
+        <CookbookProvider recipes={recipes}>
             <AppShell
                 header={{ height: headerHeight }}
                 navbar={{

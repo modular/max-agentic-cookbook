@@ -35,7 +35,7 @@ class RecipeStore {
             try {
                 const jsonPath = path.join(base, d, 'recipe.json')
                 const fePath = path.join(base, d, 'page.tsx')
-                const bePath = path.join(base, d, 'api', 'route.ts')
+                const bePath = path.join(base, d, 'api.ts')
                 if (!fs.statSync(jsonPath).isFile()) return null
                 const meta = JSON.parse(fs.readFileSync(jsonPath, 'utf8'))
 
@@ -55,6 +55,8 @@ class RecipeStore {
             }
         })
 
+        // console.log('Loaded recipe data:', data)
+
         const recipes: RecipeMetadata[] = data
             .filter((r) => r !== null)
             .map(({ slug, meta, feCode, beCode }) => ({
@@ -66,6 +68,7 @@ class RecipeStore {
                 beCode,
             }))
 
+        console.log(`Built metadata for ${recipes.length} recipes`)
         return recipes
     }
 }

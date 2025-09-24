@@ -1,5 +1,5 @@
 'use client'
 
 export default function Page() {
-    return <div>Choose a Recipe</div>
+    return <div>Choose Recipe</div>
 }
