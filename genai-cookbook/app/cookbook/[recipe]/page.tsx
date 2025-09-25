@@ -1,5 +1,11 @@
-'use client'
+import { redirect } from 'next/navigation'
+import { cookbookRoute } from '@/lib/constants'
+import recipeStore from '@/store/RecipeStore'
 
-export default function Page({ params }: { params: { recipe?: string } }) {
-    return <>{params.recipe && <div>Demo of {params.recipe}</div>}</>
+export default async function Page({ params }: { params: { recipe?: string } }) {
+    const RecipeComponent = await recipeStore.getComponent(params.recipe)
+
+    if (!RecipeComponent) return redirect(cookbookRoute())
+
+    return <RecipeComponent />
 }

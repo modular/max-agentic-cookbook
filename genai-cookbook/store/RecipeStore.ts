@@ -2,10 +2,12 @@ import { RecipeMetadata } from '@/lib/types'
 import { recipesPath } from '@/lib/constants'
 import path from 'path'
 import fs from 'fs'
+import type { ComponentType } from 'react'
 
 class RecipeStore {
     private _recipes: RecipeMetadata[] | null = null
     private _path: string
+    private componentCache = new Map<string, ComponentType>()
 
     constructor() {
         const recipePath = path.join(process.cwd(), recipesPath())
@@ -13,12 +15,33 @@ class RecipeStore {
         this._recipes = this.loadRecipes(recipePath)
     }
 
+    recipePath(): string {
+        return this._path
+    }
+
     getAll(): RecipeMetadata[] | null {
         return this._recipes
     }
 
-    recipePath(): string {
-        return this._path
+    async getComponent(slug: string | undefined): Promise<ComponentType | null> {
+        if (!slug) return null
+
+        const cached = this.componentCache.get(slug)
+        if (cached) return cached
+
+        try {
+            const mod = (await import(`@/recipes/${slug}/ui`)) as {
+                default?: ComponentType
+            }
+            const Component = mod.default ?? null
+            if (Component) {
+                this.componentCache.set(slug, Component)
+            }
+            return Component
+        } catch (error) {
+            console.warn(`Failed to load recipe component for slug: ${slug}`, error)
+            return null
+        }
     }
 
     private loadRecipes(base: string): RecipeMetadata[] {
@@ -34,7 +57,7 @@ class RecipeStore {
         const data = dirs.map((d) => {
             try {
                 const jsonPath = path.join(base, d, 'recipe.json')
-                const fePath = path.join(base, d, 'page.tsx')
+                const fePath = path.join(base, d, 'ui.tsx')
                 const bePath = path.join(base, d, 'api.ts')
                 if (!fs.statSync(jsonPath).isFile()) return null
                 const meta = JSON.parse(fs.readFileSync(jsonPath, 'utf8'))

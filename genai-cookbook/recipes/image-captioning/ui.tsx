@@ -24,7 +24,7 @@ import {
     AspectRatio,
 } from '@mantine/core'
 
-import { useCookbook } from '@/hooks'
+import { useCookbook } from '@/hooks/useCookbook'
 
 // ============================================================================
 // Shared types and data structures
@@ -54,7 +54,7 @@ interface ImageData {
  */
 export default function Recipe() {
     // Pull the active recipe metadata and endpoint so we can align the UI with demo selection.
-    const { selectedRecipe, selectedEndpoint, selectedModel } = useCookbook()
+    const { selectedEndpoint, selectedModel } = useCookbook()
 
     // Pathname determines the API route used for this specific recipe instance.
     const pathname = usePathname()
@@ -176,7 +176,6 @@ export default function Recipe() {
                 </Stack>
             </ScrollArea>
             <FormActions
-                title={selectedRecipe?.title}
                 actionsDisabled={images.length < 1 || processing}
                 generateClicked={onGenerateClicked}
                 resetClicked={() => {
