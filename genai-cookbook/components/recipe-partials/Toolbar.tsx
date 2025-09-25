@@ -1,18 +1,18 @@
 import { Flex, Group, Title } from '@mantine/core'
-import { EndpointSelect } from './EndpointSelect'
-import { ModelSelect } from './ModelSelect'
-import { ShowCodeToggle } from './ShowCodeToggle'
+import { SelectEndpoint } from './SelectEndpoint'
+import { SelectModel } from './SelectModel'
+import { CodeToggle } from './CodeToggle'
 
 export function Toolbar({ title }: { title?: string }) {
     return (
         <Flex w="100%" direction="row" justify="space-between" align="center">
             <Group>
                 <Title order={3}>{title ?? ''}</Title>
-                <ShowCodeToggle />
+                <CodeToggle />
             </Group>
             <Group>
-                <EndpointSelect />
-                <ModelSelect />
+                <SelectEndpoint />
+                <SelectModel />
             </Group>
         </Flex>
     )

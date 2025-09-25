@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { useEffect } from 'react'
 
-export function ShowCodeToggle() {
+export function CodeToggle() {
     const [showingCode, setShowingCode] = useState(false)
     const pathname = usePathname()
     const iconSize = 16

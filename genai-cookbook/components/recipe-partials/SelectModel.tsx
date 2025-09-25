@@ -1,17 +1,17 @@
 'use client'
 
 import { Flex, Select } from '@mantine/core'
-import { useCookbook } from '@/hooks'
+import { useCookbook } from '@/hooks/useCookbook'
 import { useEffect, useState, useCallback } from 'react'
 import { modelsRoute } from '@/lib/constants'
 import type { Model } from '@/lib/types'
 
-export interface ModelSelectProps {
+export interface SelectModelProps {
     label?: string
     showRefresh?: boolean
 }
 
-export function ModelSelect(props: ModelSelectProps) {
+export function SelectModel(props: SelectModelProps) {
     const { selectedEndpoint, models, selectedModel, setModels, selectModelById } =
         useCookbook()
     const [loading, setLoading] = useState(false)

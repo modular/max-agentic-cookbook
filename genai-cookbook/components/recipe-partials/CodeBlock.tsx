@@ -8,7 +8,6 @@ import ts from 'react-syntax-highlighter/dist/esm/languages/prism/typescript'
 import lightCode from 'react-syntax-highlighter/dist/esm/styles/prism/material-light'
 import darkCode from 'react-syntax-highlighter/dist/esm/styles/prism/material-dark'
 
-import { useCookbook } from '@/hooks'
 import {
     Divider,
     ScrollArea,
@@ -17,14 +16,14 @@ import {
     Title,
     useMantineColorScheme,
 } from '@mantine/core'
+import { RecipeMetadata } from '@/lib/types'
 
 type PrismTheme = Record<string, CSSProperties>
 
 SyntaxHighlighter.registerLanguage('jsx', tsx)
 SyntaxHighlighter.registerLanguage('typescript', ts)
 
-export function RecipeCode() {
-    const { selectedRecipe: recipe } = useCookbook()
+export function CodeBlock({ recipe }: { recipe: RecipeMetadata }) {
     const { colorScheme } = useMantineColorScheme()
 
     const codeTheme = useMemo(() => {

@@ -3,7 +3,7 @@ import '@/styles/globals.scss'
 
 import type { Metadata } from 'next'
 import { Inter, Roboto_Mono } from 'next/font/google'
-import { ClientThemeProvider } from '@/components/ClientThemeProvider'
+import { ClientThemeProvider } from '@/hooks/ClientThemeProvider'
 
 const inter = Inter({
     subsets: ['latin'],
@@ -28,4 +28,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </html>
     )
 }
-

@@ -1,3 +1,15 @@
+'use client'
+
+import { redirect } from 'next/navigation'
+import { useCookbook } from '@/hooks/useCookbook'
+import { cookbookRoute } from '@/lib/constants'
+import { CodeBlock } from '@/components/recipe-partials/CodeBlock'
+
 export default function Page({ params }: { params: { recipe?: string } }) {
-    return <>{params.recipe && <div>Code for {params.recipe}</div>}</>
+    const { recipeFromSlug } = useCookbook()
+    const recipe = recipeFromSlug(params.recipe)
+
+    if (!recipe) return redirect(cookbookRoute())
+
+    return <CodeBlock recipe={recipe} />
 }

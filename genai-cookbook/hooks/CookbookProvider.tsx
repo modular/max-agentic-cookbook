@@ -4,19 +4,23 @@ import { createContext, useCallback, useEffect, ReactNode, useState } from 'reac
 import { endpointsRoute } from '@/lib/constants'
 
 import type { Endpoint, Model, RecipeMetadata } from '@/lib/types'
-import { useSelectedLayoutSegment } from 'next/navigation'
 
 interface CookbookContextValue {
+    // Endpoints
     endpoints: Endpoint[]
     selectedEndpoint: Endpoint | null
     setEndpoints: (endpoints: Endpoint[]) => void
     selectEndpointById: (id: string | null) => void
+
+    // Models
     models: Model[]
     selectedModel: Model | null
     setModels: (models: Model[]) => void
     selectModelById: (id: string | null) => void
+
+    // Recipes
     recipes: RecipeMetadata[]
-    selectedRecipe: RecipeMetadata | null
+    recipeFromSlug: (slug: string | undefined) => RecipeMetadata | undefined
 }
 
 interface CookbookProviderProps {
@@ -35,16 +39,15 @@ export function CookbookProvider({ children, recipes }: CookbookProviderProps) {
     const [providerModels, setProviderModels] = useState<Model[]>([])
     const [selectedModel, setSelectedModel] = useState<Model | null>(null)
 
-    const [providerRecipes, setProviderRecipes] = useState<RecipeMetadata[]>([])
-    const [selectedRecipe, setSelectedRecipe] = useState<RecipeMetadata | null>(null)
+    useEffect(() => {
+        initEndpoints().then(setProviderEndpoints)
+    }, [])
 
-    const currentRecipe = useSelectedLayoutSegment()
-
-    const selectRecipeFromSlug = useCallback(
-        (slug: string | null) => {
-            setSelectedRecipe(providerRecipes.find((r) => r.slug === slug) ?? null)
+    const recipeFromSlug = useCallback(
+        (slug: string | undefined) => {
+            return recipes.find((r) => r.slug === slug)
         },
-        [providerRecipes]
+        [recipes]
     )
 
     const selectEndpointById = useCallback(
@@ -80,13 +83,6 @@ export function CookbookProvider({ children, recipes }: CookbookProviderProps) {
         },
         [setProviderModels]
     )
-
-    useEffect(() => {
-        initEndpoints().then(setProviderEndpoints)
-        setProviderRecipes(recipes)
-        selectRecipeFromSlug(currentRecipe)
-    }, [currentRecipe, recipes, selectRecipeFromSlug])
-
     useEffect(() => {
         setSelectedEndpoint((selected) => {
             const keepSelected = selected
@@ -108,16 +104,21 @@ export function CookbookProvider({ children, recipes }: CookbookProviderProps) {
     return (
         <CookbookContext.Provider
             value={{
+                // Endpoints
                 endpoints: providerEndpoints,
                 setEndpoints,
                 selectedEndpoint,
                 selectEndpointById,
+
+                //Models
                 models: providerModels,
                 selectedModel,
                 setModels,
                 selectModelById,
-                recipes: providerRecipes,
-                selectedRecipe,
+
+                //Recipes
+                recipes,
+                recipeFromSlug,
             }}
         >
             {children}

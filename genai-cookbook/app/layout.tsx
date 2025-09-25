@@ -3,8 +3,8 @@ import '@/styles/globals.scss'
 
 import type { Metadata } from 'next'
 import { Inter, Roboto_Mono } from 'next/font/google'
-import { ClientThemeProvider } from '@/components/ClientThemeProvider'
-import { CookbookProvider } from '@/hooks'
+import { ClientThemeProvider } from '@/hooks/ClientThemeProvider'
+import { CookbookProvider } from '@/hooks/CookbookProvider'
 
 import recipeStore from '@/store/RecipeStore'
 

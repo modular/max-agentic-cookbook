@@ -6,6 +6,7 @@ import { appShellContentHeight } from '@/lib/theme'
 import { Toolbar } from '@/components/recipe-partials/Toolbar'
 import { redirect } from 'next/navigation'
 import { cookbookRoute } from '@/lib/constants'
+import { useCookbook } from '@/hooks/useCookbook'
 
 export default function Page({
     children,
@@ -14,7 +15,10 @@ export default function Page({
     children: React.ReactNode
     params: { recipe?: string }
 }) {
-    if (!params.recipe) return redirect(cookbookRoute())
+    const { recipeFromSlug } = useCookbook()
+    const recipe = recipeFromSlug(params.recipe)
+
+    if (!recipe) return redirect(cookbookRoute())
 
     return (
         <>
@@ -24,7 +28,7 @@ export default function Page({
                 style={{ overflow: 'hidden' }}
                 h={appShellContentHeight}
             >
-                {params.recipe && <Toolbar title={params.recipe} />}
+                <Toolbar title={recipe.title} />
                 {children}
             </Flex>
         </>
