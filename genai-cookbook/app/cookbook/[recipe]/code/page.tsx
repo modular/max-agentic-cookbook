@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation'
 import { useCookbook } from '@/hooks/useCookbook'
 import { cookbookRoute } from '@/lib/constants'
-import { CodeBlock } from '@/components/recipe-partials/CodeBlock'
+import { CodeBlock } from '@/components/CodeBlock'
 
 export default function Page({ params }: { params: { recipe?: string } }) {
     const { recipeFromSlug } = useCookbook()
