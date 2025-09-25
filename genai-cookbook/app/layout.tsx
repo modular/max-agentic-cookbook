@@ -4,6 +4,11 @@ import '@/styles/globals.scss'
 import type { Metadata } from 'next'
 import { Inter, Roboto_Mono } from 'next/font/google'
 import { ClientThemeProvider } from '@/components/ClientThemeProvider'
+import { CookbookProvider } from '@/hooks'
+
+import recipeStore from '@/store/RecipeStore'
+
+const recipes = recipeStore.getAll() ?? []
 
 const inter = Inter({
     subsets: ['latin'],
@@ -23,7 +28,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return (
         <html lang="en" className={`${inter.variable} ${robotoMono.variable}`}>
             <body>
-                <ClientThemeProvider>{children}</ClientThemeProvider>
+                <ClientThemeProvider>
+                    <CookbookProvider recipes={recipes}>{children}</CookbookProvider>
+                </ClientThemeProvider>
             </body>
         </html>
     )

@@ -1,13 +1,41 @@
-import recipeStore from '@/store/RecipeStore'
-import CookbookShell from '@/components/cookbook-shell'
+'use client'
 
-const recipes = recipeStore.getAll() ?? []
+import { AppShell } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
+import { headerHeight, navbarWidth } from '@/lib/theme'
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+import Header from '@/components/Header'
+import Navbar from '@/components/Navbar'
+
+interface CookbookShellProps {
+    children: React.ReactNode
+}
+
+export default function CookbookShell({ children }: CookbookShellProps) {
+    const [mobileOpened, { toggle: toggleMobile }] = useDisclosure()
+    const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
+
     return (
-        <CookbookShell recipes={recipes}>
-            {recipes.length < 1 && <>No Recipes Loaded</>}
-            {recipes.length > 0 && children}
-        </CookbookShell>
+        <AppShell
+            header={{ height: headerHeight }}
+            navbar={{
+                width: navbarWidth,
+                breakpoint: 'sm',
+                collapsed: { mobile: !mobileOpened, desktop: !desktopOpened },
+            }}
+            padding="md"
+        >
+            <AppShell.Header>
+                <Header
+                    mobileOpened={mobileOpened}
+                    toggleMobile={toggleMobile}
+                    toggleDesktop={toggleDesktop}
+                />
+            </AppShell.Header>
+            <AppShell.Navbar p="md">
+                <Navbar />
+            </AppShell.Navbar>
+            <AppShell.Main>{children}</AppShell.Main>
+        </AppShell>
     )
 }

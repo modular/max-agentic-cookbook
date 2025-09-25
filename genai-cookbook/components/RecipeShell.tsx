@@ -1,10 +1,10 @@
 import { Flex } from '@mantine/core'
 
 import { appShellContentHeight } from '@/lib/theme'
-import { Toolbar } from '../recipe-partials'
+import { Toolbar } from './recipe-partials/Toolbar'
 import { useCookbook } from '@/hooks'
 
-export function RecipeShell({ children }: { children: React.ReactNode }) {
+export default function RecipeShell({ children }: { children: React.ReactNode }) {
     const { selectedRecipe } = useCookbook()
 
     return (

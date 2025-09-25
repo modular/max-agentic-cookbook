@@ -1,13 +1,14 @@
 import Link from 'next/link'
-import { RecipeMetadata } from '@/lib/types'
 import { AppShell, Group, ScrollArea, Stack, Text } from '@mantine/core'
 import { IconChevronRight } from '@tabler/icons-react'
 import { useCookbook } from '@/hooks'
 import { cookbookRoute } from '@/lib/constants'
 import { iconStroke } from '@/lib/theme'
+import { useSelectedLayoutSegment } from 'next/navigation'
 
-export default function Navbar({ recipes }: { recipes: RecipeMetadata[] }) {
-    const { selectedRecipe, selectRecipeFromSlug } = useCookbook()
+export default function Navbar() {
+    const { recipes } = useCookbook()
+    const currentRecipe = useSelectedLayoutSegment()
 
     return (
         <AppShell.Section grow component={ScrollArea}>
@@ -18,14 +19,15 @@ export default function Navbar({ recipes }: { recipes: RecipeMetadata[] }) {
                 {recipes.map((recipe) => {
                     return (
                         <Group key={recipe.slug} justify="space-between" align="center">
-                            <Link
-                                onClick={() => selectRecipeFromSlug(recipe.slug)}
-                                href={`${cookbookRoute()}/${recipe.slug}`}
-                            >
+                            <Link href={`${cookbookRoute()}/${recipe.slug}`}>
                                 <Text c="var(--Black)">{recipe.title}</Text>
                             </Link>
-                            {selectedRecipe?.slug === recipe.slug && (
-                                <IconChevronRight opacity={0.5} stroke={iconStroke} />
+                            {currentRecipe === recipe.slug && (
+                                <IconChevronRight
+                                    size={16}
+                                    opacity={0.8}
+                                    stroke={iconStroke}
+                                />
                             )}
                         </Group>
                     )

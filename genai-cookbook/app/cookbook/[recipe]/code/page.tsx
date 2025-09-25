@@ -1,3 +1,3 @@
 export default function Page({ params }: { params: { recipe?: string } }) {
-    return <>{params.recipe && <div>{params.recipe} (code)</div>}</>
+    return <>{params.recipe && <div>Code for {params.recipe}</div>}</>
 }

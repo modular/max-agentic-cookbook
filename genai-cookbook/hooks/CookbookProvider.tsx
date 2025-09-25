@@ -15,6 +15,7 @@ interface CookbookContextValue {
     selectedModel: Model | null
     setModels: (models: Model[]) => void
     selectModelById: (id: string | null) => void
+    recipes: RecipeMetadata[]
     selectedRecipe: RecipeMetadata | null
 }
 
@@ -115,6 +116,7 @@ export function CookbookProvider({ children, recipes }: CookbookProviderProps) {
                 selectedModel,
                 setModels,
                 selectModelById,
+                recipes: providerRecipes,
                 selectedRecipe,
             }}
         >
