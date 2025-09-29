@@ -265,7 +265,7 @@ import { centerStyle } from '@/lib/theme'
 function FileDrop({ onDrop, maxSizeMb, disabled }: FileDropProps) {
     const maxSizeBytes = maxSizeMb ? maxSizeMb * 1024 ** 2 : undefined
     return (
-        <Stack gap={2} w="100%" mt={3}>
+        <Stack gap={0} w="100%" mt={1}>
             <Text size="sm">Upload Images</Text>
             {/* Mantine Dropzone handles drag-and-drop + click-to-upload with built-in validation states. */}
             <Dropzone
@@ -283,7 +283,7 @@ function FileDrop({ onDrop, maxSizeMb, disabled }: FileDropProps) {
                 {/* Layout inside the dropzone uses Mantine Group/Box/Text for consistent spacing and color. */}
                 <Group
                     justify="center"
-                    h={66}
+                    h={59}
                     gap="sm"
                     style={{ pointerEvents: 'none' }}
                 >
