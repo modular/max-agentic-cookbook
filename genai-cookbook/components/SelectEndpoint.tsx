@@ -1,7 +1,7 @@
 'use client'
 
 import { Flex, Select } from '@mantine/core'
-import { useCookbook } from '@/hooks'
+import { useCookbook } from '@/hooks/useCookbook'
 import { useMemo } from 'react'
 
 export interface SelectEndpointProps {
@@ -9,7 +9,7 @@ export interface SelectEndpointProps {
     showRefresh?: boolean
 }
 
-export function EndpointSelect(props: SelectEndpointProps) {
+export function SelectEndpoint(props: SelectEndpointProps) {
     const { endpoints, selectedEndpoint, selectEndpointById } = useCookbook()
 
     const options = useMemo(

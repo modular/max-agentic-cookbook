@@ -1,7 +1,7 @@
 'use client'
 
 import { MantineProvider, useMantineColorScheme } from '@mantine/core'
-import { clientTheme } from '@/lib/clientTheme'
+import { clientTheme } from '@/theme/clientTheme'
 import { useEffect } from 'react'
 
 interface ClientThemeProviderProps {

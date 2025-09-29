@@ -9,9 +9,9 @@ type ServerSideEndpoints = EndpointWithApiKey[] | null
 
 // Store endpoints server-side in memory to access them across routes
 class EndpointStore {
-    _endpoints: ServerSideEndpoints = null
+    private _endpoints: ServerSideEndpoints = null
 
-    get(): ServerSideEndpoints {
+    getAll(): ServerSideEndpoints {
         return this._endpoints
     }
 
@@ -30,13 +30,16 @@ class EndpointStore {
     }
 }
 
-// Persist store across hot-reload when running in dev mode
+// Add store to the NodeJS global type
 declare global {
     // eslint-disable-next-line no-var
-    var __endpointStore__: EndpointStore | undefined
+    var endpointStore: EndpointStore | undefined
 }
 
-const endpointStore: EndpointStore =
-    globalThis.__endpointStore__ ?? (globalThis.__endpointStore__ = new EndpointStore())
+// Prevent multiple instances of store in development
+const endpointStore = globalThis.endpointStore || new EndpointStore()
+if (process.env.NODE_ENV !== 'production') {
+    globalThis.endpointStore = endpointStore
+}
 
 export default endpointStore

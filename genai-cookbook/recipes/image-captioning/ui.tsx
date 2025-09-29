@@ -24,7 +24,7 @@ import {
     AspectRatio,
 } from '@mantine/core'
 
-import { useCookbook } from '@/hooks'
+import { useCookbook } from '@/hooks/useCookbook'
 
 // ============================================================================
 // Shared types and data structures
@@ -54,7 +54,7 @@ interface ImageData {
  */
 export default function Recipe() {
     // Pull the active recipe metadata and endpoint so we can align the UI with demo selection.
-    const { selectedRecipe, selectedEndpoint, selectedModel } = useCookbook()
+    const { selectedEndpoint, selectedModel } = useCookbook()
 
     // Pathname determines the API route used for this specific recipe instance.
     const pathname = usePathname()
@@ -176,7 +176,6 @@ export default function Recipe() {
                 </Stack>
             </ScrollArea>
             <FormActions
-                title={selectedRecipe?.title}
                 actionsDisabled={images.length < 1 || processing}
                 generateClicked={onGenerateClicked}
                 resetClicked={() => {
@@ -215,7 +214,7 @@ function FormActions({
             <Button disabled={actionsDisabled} onClick={generateClicked}>
                 Generate Captions
             </Button>
-            <Button variant="outline" disabled={actionsDisabled} onClick={resetClicked}>
+            <Button disabled={actionsDisabled} onClick={resetClicked}>
                 Reset
             </Button>
             <Space mr="auto" />
@@ -258,7 +257,7 @@ import { Text } from '@mantine/core'
 import { Dropzone } from '@mantine/dropzone'
 import { IconUpload, IconPhoto, IconX } from '@tabler/icons-react'
 
-import { centerStyle } from '@/lib/theme'
+import { centerStyle } from '@/theme/theme'
 
 /**
  * Wraps Mantine's Dropzone so we can accept image uploads with minimal setup.
@@ -266,7 +265,7 @@ import { centerStyle } from '@/lib/theme'
 function FileDrop({ onDrop, maxSizeMb, disabled }: FileDropProps) {
     const maxSizeBytes = maxSizeMb ? maxSizeMb * 1024 ** 2 : undefined
     return (
-        <Stack gap={2} w="100%" mt={3}>
+        <Stack gap={0} w="100%" mt={1}>
             <Text size="sm">Upload Images</Text>
             {/* Mantine Dropzone handles drag-and-drop + click-to-upload with built-in validation states. */}
             <Dropzone
@@ -284,7 +283,7 @@ function FileDrop({ onDrop, maxSizeMb, disabled }: FileDropProps) {
                 {/* Layout inside the dropzone uses Mantine Group/Box/Text for consistent spacing and color. */}
                 <Group
                     justify="center"
-                    h={66}
+                    h={59}
                     gap="sm"
                     style={{ pointerEvents: 'none' }}
                 >

@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { ActionIcon, Burger, Flex, Group, Title } from '@mantine/core'
 import { IconLayoutSidebar } from '@tabler/icons-react'
 
-import { iconStroke } from '@/lib/theme'
-import { recipesPath } from '@/lib/constants'
+import { iconStroke } from '@/theme/theme'
+import { cookbookRoute } from '@/lib/constants'
 import { ThemeToggle } from './ThemeToggle'
 
 interface HeaderProps {
@@ -37,7 +37,7 @@ export default function Header({
                 </ActionIcon>
             </Group>
             <Title style={{ fontWeight: 'normal' }} order={5}>
-                <Link href={recipesPath()}>Modular GenAI Cookbook</Link>
+                <Link href={cookbookRoute()}>Modular GenAI Cookbook</Link>
             </Title>
             <ThemeToggle stroke={iconStroke} />
         </Flex>

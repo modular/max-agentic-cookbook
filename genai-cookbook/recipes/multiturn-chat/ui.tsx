@@ -22,7 +22,7 @@ import { DefaultChatTransport } from 'ai'
 import { useChat } from '@ai-sdk/react'
 import { usePathname } from 'next/navigation'
 import { Box, ScrollArea } from '@mantine/core'
-import { useCookbook } from '@/hooks'
+import { useCookbook } from '@/hooks/useCookbook'
 
 // ============================================================================
 // Chat surface component
