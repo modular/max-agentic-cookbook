@@ -214,7 +214,7 @@ function FormActions({
             <Button disabled={actionsDisabled} onClick={generateClicked}>
                 Generate Captions
             </Button>
-            <Button variant="outline" disabled={actionsDisabled} onClick={resetClicked}>
+            <Button disabled={actionsDisabled} onClick={resetClicked}>
                 Reset
             </Button>
             <Space mr="auto" />
