@@ -12,7 +12,7 @@ import { ModelPreparationError, prepareModel } from '@/lib/prepareModel'
 // POST /api — generates an image caption
 // ============================================================================
 /** Processes caption requests for either Modular MAX or OpenAI. */
-export async function POST(req: Request) {
+export default async function POST(req: Request) {
     const { messages, endpointId, modelName } = await req.json()
     if (!messages) {
         return new Response('Client did not provide messages', { status: 400 })
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
     try {
         const { text } = await generateText({
-            // generateText handles the familiar chat-completions format via the Vercel AI SDK.
+            // generateText handles the chat-completions format via the Vercel AI SDK.
             model: model,
             messages: messages,
         })

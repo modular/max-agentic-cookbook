@@ -16,7 +16,7 @@ import { prepareModel, ModelPreparationError } from '@/lib/prepareModel'
 // POST /api route — streams chat completions
 // ============================================================================
 /** Handles chat completions for Modular MAX via compatibility with OpenAI. */
-export async function POST(req: Request) {
+export default async function POST(req: Request) {
     const { messages, endpointId, modelName } = await req.json()
     if (!messages) {
         return new Response('Client did not provide messages', { status: 400 })

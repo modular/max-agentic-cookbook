@@ -4,23 +4,47 @@ import path from 'path'
 import fs from 'fs'
 import type { ComponentType } from 'react'
 
+type Handler = (req: Request) => Response
+
 class RecipeStore {
-    private _recipes: RecipeMetadata[] | null = null
-    private _path: string
+    private recipes: RecipeMetadata[] | null = null
+    private path: string
     private componentCache = new Map<string, ComponentType>()
+    private handlerCache = new Map<string, Handler>()
 
     constructor() {
         const recipePath = path.join(process.cwd(), recipesPath())
-        this._path = recipePath
-        this._recipes = this.loadRecipes(recipePath)
+        this.path = recipePath
+        this.recipes = this.loadRecipes(recipePath)
     }
 
     recipePath(): string {
-        return this._path
+        return this.path
     }
 
     getAll(): RecipeMetadata[] | null {
-        return this._recipes
+        return this.recipes
+    }
+
+    async getHandler(slug: string | undefined): Promise<Handler | null> {
+        if (!slug) return null
+
+        const cached = this.handlerCache.get(slug)
+        if (cached) return cached
+
+        try {
+            const mod = (await import(`@/recipes/${slug}/api`)) as {
+                default?: Handler
+            }
+            const handler = mod.default ?? null
+            if (handler) {
+                this.handlerCache.set(slug, handler)
+            }
+            return handler
+        } catch (error) {
+            console.warn(`Failed to load recipe api for slug: ${slug}`, error)
+            return null
+        }
     }
 
     async getComponent(slug: string | undefined): Promise<ComponentType | null> {
@@ -39,7 +63,7 @@ class RecipeStore {
             }
             return Component
         } catch (error) {
-            console.warn(`Failed to load recipe component for slug: ${slug}`, error)
+            console.warn(`Failed to load recipe ui for slug: ${slug}`, error)
             return null
         }
     }
@@ -77,8 +101,6 @@ class RecipeStore {
                 return null
             }
         })
-
-        // console.log('Loaded recipe data:', data)
 
         const recipes: RecipeMetadata[] = data
             .filter((r) => r !== null)
