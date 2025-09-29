@@ -1,6 +1,6 @@
 // Path to load Recipes from
 export const recipesPath = () => {
-    const fromEnv = process.env.NEXT_PUBLIC_COOKBOOK_ROUTE ?? '/recipes'
+    const fromEnv = process.env.NEXT_PUBLIC_RECIPES_PATH ?? '/recipes'
     return fromEnv.replace(/\/$/, '')
 }
 
