@@ -2,13 +2,13 @@
 
 import { Flex } from '@mantine/core'
 
-import { appShellContentHeight } from '@/lib/theme'
+import { appShellContentHeight } from '@/theme/theme'
 import { Toolbar } from '@/components/Toolbar'
 import { redirect } from 'next/navigation'
 import { cookbookRoute } from '@/lib/constants'
 import { useCookbook } from '@/hooks/useCookbook'
 
-export default function Page({
+export default function RecipeShell({
     children,
     params,
 }: {

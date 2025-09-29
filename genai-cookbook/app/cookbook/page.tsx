@@ -1,3 +1,3 @@
-export default function Page() {
+export default function NoRecipeSelected() {
     return <p>Choose a Recipe</p>
 }

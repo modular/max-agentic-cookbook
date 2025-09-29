@@ -1,5 +1,5 @@
 import '@mantine/core/styles.css'
-import '@/styles/globals.scss'
+import '@/theme/globals.scss'
 
 import type { Metadata } from 'next'
 import { Inter, Roboto_Mono } from 'next/font/google'

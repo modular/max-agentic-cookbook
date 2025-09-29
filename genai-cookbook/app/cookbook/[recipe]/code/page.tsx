@@ -27,7 +27,7 @@ type PrismTheme = Record<string, CSSProperties>
 SyntaxHighlighter.registerLanguage('jsx', tsx)
 SyntaxHighlighter.registerLanguage('typescript', ts)
 
-export default function Page({ params }: { params: { recipe?: string } }) {
+export default function RecipeCode({ params }: { params: { recipe?: string } }) {
     const { colorScheme } = useMantineColorScheme()
     const { recipeFromSlug } = useCookbook()
 
