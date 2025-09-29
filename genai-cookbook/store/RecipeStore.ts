@@ -4,13 +4,13 @@ import path from 'path'
 import fs from 'fs'
 import type { ComponentType } from 'react'
 
-type Handler = (req: Request) => Response
+type RecipeHandler = (req: Request) => Response
 
 class RecipeStore {
     private recipes: RecipeMetadata[] | null = null
     private path: string
     private componentCache = new Map<string, ComponentType>()
-    private handlerCache = new Map<string, Handler>()
+    private handlerCache = new Map<string, RecipeHandler>()
 
     constructor() {
         const recipePath = path.join(process.cwd(), recipesPath())
@@ -26,44 +26,37 @@ class RecipeStore {
         return this.recipes
     }
 
-    async getHandler(slug: string | undefined): Promise<Handler | null> {
-        if (!slug) return null
-
-        const cached = this.handlerCache.get(slug)
-        if (cached) return cached
-
-        try {
-            const mod = (await import(`@/recipes/${slug}/api`)) as {
-                default?: Handler
-            }
-            const handler = mod.default ?? null
-            if (handler) {
-                this.handlerCache.set(slug, handler)
-            }
-            return handler
-        } catch (error) {
-            console.warn(`Failed to load recipe api for slug: ${slug}`, error)
-            return null
-        }
+    async getHandler(slug: string | undefined): Promise<RecipeHandler | null> {
+        return await this.getRecipeContent('api', this.handlerCache, slug)
     }
 
     async getComponent(slug: string | undefined): Promise<ComponentType | null> {
+        return await this.getRecipeContent('ui', this.componentCache, slug)
+    }
+
+    async getRecipeContent<T>(
+        path: string,
+        cache: Map<string, T>,
+        slug: string | undefined
+    ): Promise<T | null> {
         if (!slug) return null
 
-        const cached = this.componentCache.get(slug)
+        const cached = cache.get(slug)
         if (cached) return cached
 
         try {
-            const mod = (await import(`@/recipes/${slug}/ui`)) as {
-                default?: ComponentType
+            const mod = (await import(`@/recipes/${slug}/${path}`)) as {
+                default?: T
             }
-            const Component = mod.default ?? null
-            if (Component) {
-                this.componentCache.set(slug, Component)
+
+            const content = mod.default ?? null
+            if (content) {
+                cache.set(slug, content)
             }
-            return Component
+
+            return content
         } catch (error) {
-            console.warn(`Failed to load recipe ui for slug: ${slug}`, error)
+            console.warn(`Failed loading recipe ${path} for slug: ${slug}`, error)
             return null
         }
     }
@@ -118,13 +111,13 @@ class RecipeStore {
     }
 }
 
-// Add endpointStore to the NodeJS global type
+// Add store to the NodeJS global type
 declare global {
     // eslint-disable-next-line no-var
     var recipeStore: RecipeStore | undefined
 }
 
-// Prevent multiple instances of EndpointStore in development
+// Prevent multiple instances of store in development
 const recipeStore = globalThis.recipeStore || new RecipeStore()
 if (process.env.NODE_ENV !== 'production') {
     globalThis.recipeStore = recipeStore

@@ -30,13 +30,13 @@ class EndpointStore {
     }
 }
 
-// Add endpointStore to the NodeJS global type
+// Add store to the NodeJS global type
 declare global {
     // eslint-disable-next-line no-var
     var endpointStore: EndpointStore | undefined
 }
 
-// Prevent multiple instances of EndpointStore in development
+// Prevent multiple instances of store in development
 const endpointStore = globalThis.endpointStore || new EndpointStore()
 if (process.env.NODE_ENV !== 'production') {
     globalThis.endpointStore = endpointStore
