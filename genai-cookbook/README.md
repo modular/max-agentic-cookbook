@@ -1,6 +1,6 @@
 # Modular GenAI Cookbook
 
-A collection of fullstack recipes demonstrating how to build modern generative AI applications using MAX, Next.js, and the Vercel AI SDK. Unlike other recipes in this repository that are Python-based, the GenAI Cookbook provides TypeScript-based, production-ready patterns for building interactive AI experiences. Each recipe demonstrates end-to-end workflows with both frontend and backend implementations, including detailed documentation.
+The GenAI Cookbook is collection of recipes demonstrating how to build modern fullstack web apps using Modular MAX, Next.js, and the Vercel AI SDK. Unlike other recipes in the MAX Recipes repo—which are Python-based—the GenAI Cookbook is written exclusively in TypeScript, providing production-ready patterns for building interactive AI experiences. Each recipe demonstrates an end-to-end workflow with both frontend and backend implementations, including detailed code comments.
 
 <img src="https://github.com/user-attachments/assets/e2302038-a950-41a8-acec-47c0d9c09ed6" />
 
@@ -9,7 +9,6 @@ A collection of fullstack recipes demonstrating how to build modern generative A
 - **Node.js** 18.x or higher
 - **npm** or **yarn** package manager
 - **MAX** server running locally or remotely—see the [MAX quickstart](https://docs.modular.com/max/get-started/)
-- Optional: OpenAI API key for comparing with OpenAI models
 
 ## Get Started
 
@@ -46,7 +45,7 @@ A collection of fullstack recipes demonstrating how to build modern generative A
     ]'
     ```
 
-    For multiple endpoints or comparison with OpenAI and compatible servers:
+    You may enter multiple endpoints for comparison with OpenAI and other compatible servers:
 
     ```env
     COOKBOOK_ENDPOINTS='[
@@ -79,11 +78,8 @@ A collection of fullstack recipes demonstrating how to build modern generative A
 
 Build a streaming chat interface that maintains conversation context across multiple exchanges. This recipe demonstrates:
 
-- Real-time token streaming using Vercel AI SDK
-- Seamless switching between Modular MAX and OpenAI-compatible endpoints
-- Auto-scrolling message display with Mantine UI components
-- Persistent conversation history management
-- Route-aware API handling for modular deployment
+- Real-time token streaming using the Vercel AI SDK
+- Auto-scrolling message display using Mantine
 
 ### 2. **Image Captioning**
 
@@ -91,9 +87,8 @@ Create an intelligent image captioning system that generates natural language de
 
 - Drag-and-drop image upload with Mantine Dropzone
 - Base64 image encoding for API transport
-- Customizable prompting for caption generation
+- Customizable prompt for caption generation
 - Gallery view with loading states and progress indicators
-- Support for multiple concurrent caption requests
 
 ## Architecture
 
@@ -101,48 +96,77 @@ The GenAI Cookbook follows a modern fullstack architecture optimized for AI appl
 
 ```
 genai-cookbook/
-├── app/                      # Next.js 14 App Router
-│   ├── recipes/             # Individual recipe implementations
-│   │   ├── multiturn-chat/
-│   │   │   ├── page.tsx     # Frontend UI component
-│   │   │   ├── api/
-│   │   │   │   └── route.ts # Backend API handler
-│   │   │   └── recipe.json  # Recipe metadata
-│   │   └── image-captioning/
-│   │       ├── page.tsx
-│   │       ├── api/
-│   │       │   └── route.ts
-│   │       └── recipe.json
-│   └── layout.tsx           # Root layout with providers
+├── app/                     # Next.js 14 App Router
+│   ├── api/                 # API routes
+│   │   ├── endpoints/       # Endpoint API handler
+│   │   └── models/          # Models API handler
+│   ├── cookbook/            # Cookbook pages
+│   │   ├── [recipe]/        # Dynamic recipe routes
+│   │   │   ├── page.tsx     # Recipe page
+│   │   │   ├── code/        # Code view page
+│   │   │   └── api/         # Recipe API handler
+│   │   ├── page.tsx         # Cookbook home
+│   │   └── layout.tsx       # Cookbook layout
+│   ├── page.tsx             # Landing page
+│   └── layout.tsx           # Root layout
+├── recipes/                 # Recipe implementations
+│   ├── multiturn-chat/
+│   │   ├── ui.tsx           # Frontend UI component
+│   │   ├── api.ts           # Backend API logic
+│   │   └── recipe.json      # Recipe metadata
+│   └── image-captioning/
+│       ├── ui.tsx
+│       ├── api.ts
+│       └── recipe.json
 ├── components/              # Reusable UI components
-│   ├── cookbook-shell/      # Navigation and layout
-│   └── recipe-partials/     # Recipe-specific components
+│   ├── Header.tsx           # App header
+│   ├── Navbar.tsx           # Navigation sidebar
+│   ├── Toolbar.tsx          # Recipe toolbar
+│   ├── CodeToggle.tsx       # Code view toggle
+│   ├── ThemeToggle.tsx      # Theme switcher
+│   ├── SelectEndpoint.tsx   # Endpoint selector
+│   ├── SelectModel.tsx      # Model selector
+│   └── BodyText.tsx         # Text component
 ├── hooks/                   # Custom React hooks
-│   └── useCookbook.ts      # Endpoint/model selection
+│   ├── useCookbook.ts       # Endpoint/model selection
+│   ├── CookbookProvider.tsx # Context provider
+│   └── ClientThemeProvider.tsx # Theme provider
 ├── lib/                     # Utility functions
-│   ├── loadRecipes.ts      # Dynamic recipe loading
-│   └── constants.ts        # Shared constants
-└── store/                   # State management
-    └── EndpointStore.ts    # Endpoint configuration
+│   ├── constants.ts         # Shared constants
+│   ├── types.ts             # TypeScript types
+│   └── prepareModel.ts      # AI SDK model preparation
+├── store/                   # State management
+│   ├── EndpointStore.ts     # Endpoint configuration
+│   └── RecipeStore.ts       # Recipe state
+└── theme/                   # Theming and styles
+    ├── partials/            # SCSS partials
+    │   ├── _base.scss
+    │   ├── _colors.scss
+    │   ├── _font.scss
+    │   └── _mantine.scss
+    ├── globals.scss         # Global styles
+    ├── theme.ts             # Theme configuration
+    └── tailwindTheme.js     # Tailwind config
 ```
 
 ## Development
 
 ### Adding a New Recipe
 
-1. Create a new directory under `app/recipes/your-recipe-name/`
+1. Create a new directory under `recipes/your-recipe-name/`
 2. Add the following files:
-    - `page.tsx`: Frontend component
-    - `api/route.ts`: Backend API handler
+    - `ui.tsx`: Frontend UI component (React)
+    - `api.ts`: Backend API logic (NextJS)
     - `recipe.json`: Recipe metadata
-3. The recipe will be automatically discovered and added to the navigation
+
+Recipes will hot-reload changes when running in development, but the server must be restarted to load new recipes.
 
 ### Code Structure Guidelines
 
 Each recipe follows consistent patterns for maintainability:
 
-- **Frontend (`page.tsx`)**: Uses React hooks for state management, Mantine for UI, and detailed inline comments explaining the workflow
-- **Backend (`api/route.ts`)**: Implements OpenAI-compatible protocol using Vercel AI SDK for model abstraction
+- **Frontend (`ui.tsx`)**: Uses React hooks for state management, Mantine for UI, and detailed inline comments explaining the workflow
+- **Backend (`api.ts`)**: Uses the Vercel AI SDK for communicating with MAX model serving
 - **Type Safety**: Full TypeScript coverage with explicit interfaces for data structures
 
 ## Running with MAX
@@ -199,7 +223,7 @@ The best way to learn is by exploring the live cookbook:
 - [Modular](https://docs.modular.com/)
 - [Vercel AI SDK](https://sdk.vercel.ai/docs)
 - [Next.js](https://nextjs.org/docs)
-- [Mantine Components](https://mantine.dev/core/getting-started/)
+- [Mantine](https://mantine.dev/core/getting-started/)
 
 ## Contributing
 
