@@ -100,53 +100,31 @@ genai-cookbook/
 │   ├── api/                 # API routes
 │   │   ├── endpoints/       # Endpoint API handler
 │   │   └── models/          # Models API handler
+│   │
 │   ├── cookbook/            # Cookbook pages
 │   │   ├── [recipe]/        # Dynamic recipe routes
-│   │   │   ├── page.tsx     # Recipe page
-│   │   │   ├── code/        # Code view page
+│   │   │   ├── page.tsx     # Recipe UI (with lazy-load)
+│   │   │   ├── code/        # Recipe code viewer
 │   │   │   └── api/         # Recipe API handler
+│   │   │
 │   │   ├── page.tsx         # Cookbook home
 │   │   └── layout.tsx       # Cookbook layout
+│   │
 │   ├── page.tsx             # Landing page
 │   └── layout.tsx           # Root layout
+│
 ├── recipes/                 # Recipe implementations
 │   ├── multiturn-chat/
 │   │   ├── ui.tsx           # Frontend UI component
 │   │   ├── api.ts           # Backend API logic
 │   │   └── recipe.json      # Recipe metadata
 │   └── image-captioning/
-│       ├── ui.tsx
-│       ├── api.ts
-│       └── recipe.json
+│
 ├── components/              # Reusable UI components
-│   ├── Header.tsx           # App header
-│   ├── Navbar.tsx           # Navigation sidebar
-│   ├── Toolbar.tsx          # Recipe toolbar
-│   ├── CodeToggle.tsx       # Code view toggle
-│   ├── ThemeToggle.tsx      # Theme switcher
-│   ├── SelectEndpoint.tsx   # Endpoint selector
-│   ├── SelectModel.tsx      # Model selector
-│   └── BodyText.tsx         # Text component
-├── hooks/                   # Custom React hooks
-│   ├── useCookbook.ts       # Endpoint/model selection
-│   ├── CookbookProvider.tsx # Context provider
-│   └── ClientThemeProvider.tsx # Theme provider
-├── lib/                     # Utility functions
-│   ├── constants.ts         # Shared constants
-│   ├── types.ts             # TypeScript types
-│   └── prepareModel.ts      # AI SDK model preparation
-├── store/                   # State management
-│   ├── EndpointStore.ts     # Endpoint configuration
-│   └── RecipeStore.ts       # Recipe state
+├── hooks/                   # Endpoint/model/theme selection
+├── lib/                     # Types and misc. utilities
+├── store/                   # In-memory store for configuration
 └── theme/                   # Theming and styles
-    ├── partials/            # SCSS partials
-    │   ├── _base.scss
-    │   ├── _colors.scss
-    │   ├── _font.scss
-    │   └── _mantine.scss
-    ├── globals.scss         # Global styles
-    ├── theme.ts             # Theme configuration
-    └── tailwindTheme.js     # Tailwind config
 ```
 
 ## Development
