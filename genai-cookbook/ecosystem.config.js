@@ -15,8 +15,12 @@ module.exports = {
         },
         {
             name: 'nextjs-app',
-            script: 'node_modules/.bin/wait-on http://localhost:8000/health -t 600000 -i 5000 -v && npm start',
-            interpreter: 'bash',
+            script: '/bin/bash',
+            args: [
+                '-c',
+                'node_modules/.bin/wait-on http://localhost:8000/health -t 600000 -i 5000 -v && npm start',
+            ],
+            interpreter: 'none',
             autorestart: true,
             watch: false,
             max_memory_restart: '1G',
