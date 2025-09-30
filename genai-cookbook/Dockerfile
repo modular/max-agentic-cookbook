@@ -31,5 +31,6 @@ COPY . /app
 # Build the NextJS app
 RUN npm run build
 
-# Start both services with PM2
+# Override base image ENTRYPOINT and start MAX + NextJS services with PM2
+ENTRYPOINT []
 CMD ["pm2-runtime", "start", "ecosystem.config.js"]
