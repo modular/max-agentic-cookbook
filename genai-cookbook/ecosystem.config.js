@@ -18,7 +18,7 @@ module.exports = {
             script: '/bin/bash',
             args: [
                 '-c',
-                'node_modules/.bin/wait-on http://localhost:8000/health -t 600000 -i 5000 -v && npm start',
+                'wait-on http-get://0.0.0.0:8000/health -t 600000 -i 5000 -v && npm start',
             ],
             interpreter: 'none',
             autorestart: true,

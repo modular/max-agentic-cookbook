@@ -16,8 +16,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Install PM2 globally
-RUN npm install -g pm2
+# Install PM2 and wait-on globally
+RUN npm install -g pm2 wait-on@7.2.0
 
 # Copy package files for dependency installation
 COPY package*.json ./

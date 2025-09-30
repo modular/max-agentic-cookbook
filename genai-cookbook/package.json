@@ -26,8 +26,7 @@
         "react": "^18",
         "react-dom": "^18",
         "react-syntax-highlighter": "^15.6.6",
-        "sass": "^1.93.0",
-        "wait-on": "^8.0.1"
+        "sass": "^1.93.0"
     },
     "devDependencies": {
         "@types/node": "^20",
