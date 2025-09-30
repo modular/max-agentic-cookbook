@@ -4,19 +4,31 @@ import { NextResponse } from 'next/server'
 import endpointStore from '@/store/EndpointStore'
 import type { Endpoint } from '@/lib/types'
 
+import fs from 'fs'
+import path from 'path'
+
 export function GET(_request: NextRequest) {
-    const raw = process.env.COOKBOOK_ENDPOINTS
+    let raw = process.env.COOKBOOK_ENDPOINTS
 
     if (!raw) {
-        const error = 'COOKBOOK_ENDPOINTS is not set in the environment'
-        console.error(`[endpoints] ${error}`)
-        return NextResponse.json({ error }, { status: 500 })
+        console.warn('[endpoints] Environment variable COOKBOOK_ENDPOINTS is not set')
+        console.warn('[endpoints] Looking for endpoints.json instead')
+
+        try {
+            raw = fs.readFileSync(path.join(process.cwd(), 'endpoints.json'), 'utf8')
+        } catch (err) {
+            console.error(`[endpoints] Failed to read endpoints.json file`, err)
+            return NextResponse.json(
+                { error: 'No endpoints configured' },
+                { status: 500 }
+            )
+        }
     }
 
     try {
         const parsed = JSON.parse(raw)
         if (!Array.isArray(parsed)) {
-            const error = 'COOKBOOK_ENDPOINTS must be a JSON array'
+            const error = 'Endpoints must be provided in a JSON array'
             console.error(`[endpoints] ${error}`)
             return NextResponse.json({ error }, { status: 400 })
         }
@@ -48,8 +60,8 @@ export function GET(_request: NextRequest) {
 
         return NextResponse.json(endpoints)
     } catch (err) {
-        const message = `Invalid COOKBOOK_ENDPOINTS JSON: ${(err as Error).message}`
-        console.error(`[cookbook] ${message}`)
+        const message = `Invalid JSON: ${(err as Error).message}`
+        console.error(`[endpoints] ${message}`)
         return NextResponse.json({ error: message }, { status: 400 })
     }
 }
