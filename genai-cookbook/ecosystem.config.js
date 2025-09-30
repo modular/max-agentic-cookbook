@@ -9,13 +9,14 @@ module.exports = {
             watch: false,
             max_memory_restart: '4G',
             env: {
+                MODULAR_STRUCTURED_LOGGING: 'False',
                 NODE_ENV: 'production',
             },
         },
         {
             name: 'nextjs-app',
             script: 'npx',
-            args: 'wait-on http://localhost:8000/health -t 600000 && npm start',
+            args: 'wait-on http://localhost:8000/health -t 600000 -i 5000 -v && npm start',
             interpreter: 'bash',
             autorestart: true,
             watch: false,
