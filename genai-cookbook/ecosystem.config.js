@@ -10,6 +10,7 @@ module.exports = {
             max_memory_restart: '4G',
             env: {
                 MODULAR_STRUCTURED_LOGGING: 'False',
+                MAX_SERVE_PORT: 8000,
                 NODE_ENV: 'production',
             },
         },
