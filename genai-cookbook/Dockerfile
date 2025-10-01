@@ -1,6 +1,4 @@
-# FROM modular/max-amd-base
-# or
-FROM modular/max-nvidia-base
+FROM modular/max-nvidia-full
 
 WORKDIR /app
 
