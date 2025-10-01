@@ -1,4 +1,4 @@
-FROM modular/max-nvidia-full
+FROM modular/max-nvidia-base
 
 WORKDIR /app
 
