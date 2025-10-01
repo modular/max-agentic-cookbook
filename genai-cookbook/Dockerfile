@@ -1,4 +1,5 @@
-FROM modular/max-nvidia-base
+ARG GPU_TYPE=nvidia
+FROM modular/max-${GPU_TYPE}-base
 
 WORKDIR /app
 
