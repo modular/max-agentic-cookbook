@@ -154,7 +154,7 @@ To use the cookbook with MAX:
 1. **Start the model server** (in a separate terminal):
 
     ```bash
-    max serve --model meta-llama/Llama-3.1-8B-Instruct
+    max serve --model google/gemma-3-27b-it
     ```
 
     For more details, see the [MAX quickstart](https://docs.modular.com/max/get-started/).
@@ -172,6 +172,67 @@ To use the cookbook with MAX:
     ```
 
 3. **Select MAX** in the cookbook UI endpoint selector
+
+## Running with Docker
+
+The GenAI Cookbook can be run entirely within a Docker container, including the MAX model server and web application.
+
+### Building the Container
+
+The Dockerfile defaults to NVIDIA GPUs:
+
+```bash
+docker build --ulimit nofile=65535:65535 -t max-recipes:latest .
+```
+
+Use the `--build-arg` flag to specify AMD:
+
+```bash
+docker build --build-arg GPU_TYPE=amd --ulimit nofile=65535:65535 -t max-recipes:latest .
+```
+
+**Note:** The `--ulimit nofile=65535:65535` flag increases the file descriptor limit, which is needed for Next.js builds.
+
+### Running the Container
+
+#### With NVIDIA GPUs
+
+```bash
+docker run --gpus all \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
+    --env "HF_HUB_ENABLE_HF_TRANSFER=1" \
+    --env "HF_TOKEN=your-huggingface-token" \
+    --env "MAX_MODEL=google/gemma-3-27b-it" \
+    -p 8000:8000 \
+    -p 3000:3000 \
+    max-recipes:latest
+```
+
+#### With AMD GPUs
+
+```bash
+docker run \
+    --group-add keep-groups \
+    --rm \
+    --device /dev/kfd \
+    --device /dev/dri \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
+    --env "HF_HUB_ENABLE_HF_TRANSFER=1" \
+    --env "HF_TOKEN=your-huggingface-token" \
+    --env "MAX_MODEL=google/gemma-3-27b-it" \
+    -p 8000:8000 \
+    -p 3000:3000 \
+    max-recipes:latest
+```
+
+**Configuration:**
+- **Port 8000**: MAX model serving endpoint
+- **Port 3000**: GenAI Cookbook web application
+- **HF_TOKEN**: Your HuggingFace token for downloading models
+- **MAX_MODEL**: The model to serve (e.g., `google/gemma-3-27b-it`)
+- **Volume mount**: Caches downloaded models in `~/.cache/huggingface`
+
+Once running, navigate to [http://localhost:3000](http://localhost:3000) to access the cookbook.
 
 ## Available Scripts
 
