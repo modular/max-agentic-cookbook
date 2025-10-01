@@ -14,7 +14,7 @@ module.exports = {
             },
         },
         {
-            name: 'nextjs-app',
+            name: 'web-app',
             script: '/bin/bash',
             args: [
                 '-c',
