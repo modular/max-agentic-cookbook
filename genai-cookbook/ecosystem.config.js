@@ -18,7 +18,7 @@ module.exports = {
             script: '/bin/bash',
             args: [
                 '-c',
-                'wait-on http-get://0.0.0.0:8000/health -t 600000 -i 5000 -v && npm start',
+                'wait-on http-get://0.0.0.0:8000/health -t 600000 -i 2000 && npm start',
             ],
             interpreter: 'none',
             autorestart: true,
@@ -27,6 +27,13 @@ module.exports = {
             env: {
                 NODE_ENV: 'production',
                 PORT: 3000,
+                COOKBOOK_ENDPOINTS: JSON.stringify([
+                    {
+                        id: 'max',
+                        baseUrl: 'http://0.0.0.0:8000/v1',
+                        apiKey: 'EMPTY',
+                    },
+                ]),
             },
         },
     ],

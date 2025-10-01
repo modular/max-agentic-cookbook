@@ -1,55 +1,47 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-
+import type { Model } from '@/lib/types'
 import endpointStore from '@/store/EndpointStore'
-import type { Endpoint } from '@/lib/types'
 
-export function GET(_request: NextRequest) {
-    const raw = process.env.COOKBOOK_ENDPOINTS
+export async function GET(request: NextRequest) {
+    const { searchParams } = new URL(request.url)
+    const endpointId = searchParams.get('endpointId')
+    const baseUrl = searchParams.get('baseUrl')
+    const apiKey = endpointStore.apiKey(endpointId)
 
-    if (!raw) {
-        const error = 'COOKBOOK_ENDPOINTS is not set in the environment'
-        console.error(`[endpoints] ${error}`)
-        return NextResponse.json({ error }, { status: 500 })
+    if (!baseUrl || !apiKey || !endpointId) {
+        return NextResponse.json(
+            { error: 'Missing required parameter' },
+            { status: 400 }
+        )
     }
 
     try {
-        const parsed = JSON.parse(raw)
-        if (!Array.isArray(parsed)) {
-            const error = 'COOKBOOK_ENDPOINTS must be a JSON array'
-            console.error(`[endpoints] ${error}`)
-            return NextResponse.json({ error }, { status: 400 })
-        }
-
-        const endpoints: Endpoint[] = parsed.reduce((list: Endpoint[], e) => {
-            const endpoint = {
-                id: String(e.id ?? ''),
-                baseUrl: String(e.baseUrl ?? ''),
-                aiModel: String(e.aiModel ?? ''),
-                hwMake: e.hwMake,
-                hwModel: e.hwModel,
-            }
-
-            if (list.some((existing) => existing.id === endpoint.id)) {
-                const error = `Duplicate endpoint ID found: ${endpoint.id}`
-                console.error(`[endpoints] ${error}`)
-                throw new Error(error)
-            }
-
-            return [...list, endpoint]
-        }, [])
-
-        const endpointsWithApiKeys = endpoints.map((endpoint) => {
-            const original = parsed.find((e: Endpoint) => e.id === endpoint.id)
-            return original ? { ...endpoint, ...original } : endpoint
+        const response = await fetch(`${baseUrl}/models`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json', Authorization: apiKey },
         })
 
-        endpointStore.set(endpointsWithApiKeys)
+        if (!response.ok) {
+            return NextResponse.json(
+                { error: response.statusText },
+                { status: response.status }
+            )
+        }
 
-        return NextResponse.json(endpoints)
+        const data = await response.json()
+
+        const models: Model[] =
+            data.data?.map((model: { id: string; object: string }) => ({
+                id: model.id,
+                name: model.id,
+                endpoint: endpointId || baseUrl,
+            })) || []
+
+        return NextResponse.json(models)
     } catch (err) {
-        const message = `Invalid COOKBOOK_ENDPOINTS JSON: ${(err as Error).message}`
-        console.error(`[cookbook] ${message}`)
-        return NextResponse.json({ error: message }, { status: 400 })
+        console.error(err)
+        const message = `Error fetching models: ${(err as Error).message}`
+        return NextResponse.json({ error: message }, { status: 500 })
     }
 }

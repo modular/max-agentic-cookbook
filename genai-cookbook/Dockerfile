@@ -31,15 +31,6 @@ COPY . /app
 # Build the NextJS app
 RUN npm run build
 
-# Set multiline environment variable
-ENV COOKBOOK_ENDPOINTS='[\
-  {\
-    "id": "max",\
-    "baseUrl": "http://host.docker.internal:8000/v1",\
-    "apiKey": "EMPTY",\
-  }\
-]'
-
 # Override base image ENTRYPOINT and start MAX + NextJS services with PM2
 ENTRYPOINT []
 CMD ["pm2-runtime", "start", "ecosystem.config.js"]
