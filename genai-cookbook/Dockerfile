@@ -15,20 +15,6 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # //////////////////////////////////////////////////////////////////////
-# USE NIGHTLY MAX
-
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-
-ENV PATH="/root/.local/bin:${PATH}"
-
-RUN uv venv /app/.venv && \
-    uv pip install \
-    --python /app/.venv/bin/python \
-    --index-url https://dl.modular.com/public/nightly/python/simple/ \
-    --prerelease allow \
-    modular
-
-# //////////////////////////////////////////////////////////////////////
 # INSTALL NODE & NPM PACKAGES
 
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
