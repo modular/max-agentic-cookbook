@@ -2,8 +2,11 @@ module.exports = {
     apps: [
         {
             name: 'max-llm',
-            script: 'max',
-            args: `serve --model ${process.env.MAX_MODEL || 'google/gemma-3-27b-it'} --trust-remote-code`,
+            script: '/bin/bash',
+            args: [
+                '-c',
+                'source /app/.venv/bin/activate && exec max serve --model "${MAX_MODEL:-google/gemma-3-27b-it}" --trust-remote-code',
+            ],
             interpreter: 'none',
             autorestart: true,
             watch: false,
