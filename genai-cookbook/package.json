@@ -13,8 +13,6 @@
     "dependencies": {
         "@ai-sdk/openai": "^2.0.23",
         "@ai-sdk/react": "^2.0.30",
-        "@emotion/react": "^11.14.0",
-        "@emotion/styled": "^11.14.1",
         "@mantine/core": "^7.17.8",
         "@mantine/dropzone": "^7.17.8",
         "@mantine/hooks": "^7.17.8",
@@ -25,8 +23,7 @@
         "openai": "^5.20.2",
         "react": "^18",
         "react-dom": "^18",
-        "react-syntax-highlighter": "^15.6.6",
-        "sass": "^1.93.0"
+        "react-syntax-highlighter": "^15.6.6"
     },
     "devDependencies": {
         "@types/node": "^20",

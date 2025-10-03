@@ -1,14 +1,31 @@
 import type { Config } from 'tailwindcss'
-import tailwindTheme from './theme/tailwindTheme'
 
 const config: Config = {
+    darkMode: 'class',
     content: [
-        './app/**/*.{js,ts,jsx,tsx,mdx}',
-        './components/**/*.{js,ts,jsx,tsx,mdx}',
-        './lib/**/*.{js,ts,jsx,tsx,mdx}',
-        './styles/**/*.{css,scss}',
+        './app/**/*.{ts,tsx}',
+        './pages/**/*.{ts,tsx}',
+        './components/**/*.{ts,tsx}',
+        './cookbook/**/*.{ts,tsx}',
     ],
-    theme: tailwindTheme,
+    theme: {
+        extend: {
+            fontFamily: {
+                sans: [
+                    'Inter',
+                    'ui-sans-serif',
+                    'system-ui',
+                    '-apple-system',
+                    'Segoe UI',
+                    'Roboto',
+                    'Helvetica',
+                    'Arial',
+                    'Apple Color Emoji',
+                    'Segoe UI Emoji',
+                ],
+            },
+        },
+    },
     plugins: [],
 }
 export default config
