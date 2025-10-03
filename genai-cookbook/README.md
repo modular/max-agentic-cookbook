@@ -175,27 +175,21 @@ To use the cookbook with MAX:
 
 ## Running with Docker
 
-The GenAI Cookbook can be run entirely within a Docker container, including the MAX model server and web application.
+The GenAI Cookbook can be run entirely within a Docker container, including the MAX model server and web application. The container uses the universal MAX image with the nightly build, supporting both NVIDIA and AMD GPUs.
 
 ### Building the Container
 
-The Dockerfile defaults to NVIDIA GPUs:
+Build the universal container image:
 
 ```bash
-docker build --ulimit nofile=65535:65535 -t max-recipes:latest .
-```
-
-Use the `--build-arg` flag to specify AMD:
-
-```bash
-docker build --build-arg GPU_TYPE=amd --ulimit nofile=65535:65535 -t max-recipes:latest .
+docker build --ulimit nofile=65535:65535 -t max-cookbook:latest .
 ```
 
 **Note:** The `--ulimit nofile=65535:65535` flag increases the file descriptor limit, which is needed for Next.js builds.
 
 ### Running the Container
 
-#### With NVIDIA GPUs
+#### NVIDIA GPU
 
 ```bash
 docker run --gpus all \
@@ -205,10 +199,10 @@ docker run --gpus all \
     --env "MAX_MODEL=google/gemma-3-27b-it" \
     -p 8000:8000 \
     -p 3000:3000 \
-    max-recipes:latest
+    max-cookbook:latest
 ```
 
-#### With AMD GPUs
+#### AMD GPU
 
 ```bash
 docker run \
@@ -222,7 +216,7 @@ docker run \
     --env "MAX_MODEL=google/gemma-3-27b-it" \
     -p 8000:8000 \
     -p 3000:3000 \
-    max-recipes:latest
+    max-cookbook:latest
 ```
 
 **Configuration:**
