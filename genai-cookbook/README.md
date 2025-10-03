@@ -196,7 +196,7 @@ docker run --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     --env "HF_HUB_ENABLE_HF_TRANSFER=1" \
     --env "HF_TOKEN=your-huggingface-token" \
-    --env "MAX_MODEL=google/gemma-3-27b-it" \
+    --env "MAX_MODEL=mistral-community/pixtral-12b" \
     -p 8000:8000 \
     -p 3000:3000 \
     max-cookbook:latest
@@ -213,7 +213,7 @@ docker run \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     --env "HF_HUB_ENABLE_HF_TRANSFER=1" \
     --env "HF_TOKEN=your-huggingface-token" \
-    --env "MAX_MODEL=google/gemma-3-27b-it" \
+    --env "MAX_MODEL=mistral-community/pixtral-12b" \
     -p 8000:8000 \
     -p 3000:3000 \
     max-cookbook:latest
