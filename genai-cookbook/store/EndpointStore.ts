@@ -9,23 +9,23 @@ type ServerSideEndpoints = EndpointWithApiKey[] | null
 
 // Store endpoints server-side in memory to access them across routes
 class EndpointStore {
-    private _endpoints: ServerSideEndpoints = null
+    private endpoints: ServerSideEndpoints = null
 
     getAll(): ServerSideEndpoints {
-        return this._endpoints
+        return this.endpoints
     }
 
     set(newEndpoints: ServerSideEndpoints) {
-        this._endpoints = newEndpoints
+        this.endpoints = newEndpoints
     }
 
     apiKey(endpointId: string | null | undefined): string | undefined {
-        const endpoint = this._endpoints?.find((e) => e.id === endpointId)
+        const endpoint = this.endpoints?.find((e) => e.id === endpointId)
         return endpoint?.apiKey
     }
 
     baseUrl(endpointId: string | null | undefined): string | undefined {
-        const endpoint = this._endpoints?.find((e) => e.id === endpointId)
+        const endpoint = this.endpoints?.find((e) => e.id === endpointId)
         return endpoint?.baseUrl
     }
 }
