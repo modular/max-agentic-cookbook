@@ -2,8 +2,11 @@ module.exports = {
     apps: [
         {
             name: 'max-llm',
-            script: 'max',
-            args: `serve --model ${process.env.MAX_MODEL || 'google/gemma-3-27b-it'} --trust-remote-code`,
+            script: '/bin/bash',
+            args: [
+                '-c',
+                'exec python -m max.entrypoints.pipelines serve --model-path "${MAX_MODEL:-google/gemma-3-27b-it}" --trust-remote-code',
+            ],
             interpreter: 'none',
             autorestart: true,
             watch: false,
@@ -13,13 +16,13 @@ module.exports = {
                 MAX_SERVE_PORT: 8000,
                 NODE_ENV: 'production',
             },
-        },
+    },
         {
             name: 'web-app',
             script: '/bin/bash',
             args: [
                 '-c',
-                'wait-on http-get://0.0.0.0:8000/health -t 600000 -i 2000 && npm start',
+                'wait-on http-get://0.0.0.0:8000/v1/health -t 600000 -i 2000 && npm start',
             ],
             interpreter: 'none',
             autorestart: true,
