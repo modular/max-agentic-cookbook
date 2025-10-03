@@ -76,7 +76,7 @@ export default function RecipeCode({ params }: { params: { recipe?: string } }) 
                     fontSize: '0.9rem',
                     backgroundColor:
                         colorScheme === 'dark'
-                            ? 'var(--mantine-color-gray-9)'
+                            ? 'var(--mantine-color-default)'
                             : 'var(--mantine-color-gray-1)',
                 }}
             >
