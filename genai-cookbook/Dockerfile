@@ -1,8 +1,8 @@
 # //////////////////////////////////////////////////////////////////////
 # BASE ON UNIVERSAL MAX CONTAINER
 # FROM modular/max-full:25.7.0.dev2025100305
-# FROM modular/max-nvidia-full:nightly
-FROM modular/max-amd:nightly
+FROM modular/max-nvidia-full:nightly
+# FROM modular/max-amd:nightly
 
 WORKDIR /app
 
