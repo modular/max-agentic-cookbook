@@ -1,8 +1,18 @@
 # //////////////////////////////////////////////////////////////////////
 # BASE ON UNIVERSAL MAX CONTAINER
-# FROM modular/max-full:25.7.0.dev2025100305
-FROM modular/max-nvidia-full:nightly
-# FROM modular/max-amd:nightly
+# Use MAX_VARIANT build arg to select base image:
+#   - omitted/default → max-full:nightly
+#   - MAX_VARIANT=amd → max-amd-full:nightly
+#   - MAX_VARIANT=nvidia → max-nvidia-full:nightly
+
+ARG MAX_GPU=universal
+ARG MAX_TAG=latest
+
+FROM modular/max-full:${MAX_TAG} AS base-universal
+FROM modular/max-amd:${MAX_TAG} AS base-amd
+FROM modular/max-nvidia-full:${MAX_TAG} AS base-nvidia
+
+FROM base-${MAX_GPU} AS final
 
 WORKDIR /app
 
