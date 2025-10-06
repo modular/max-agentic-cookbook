@@ -1,25 +1,30 @@
 # //////////////////////////////////////////////////////////////////////
 # BASE ON UNIVERSAL MAX CONTAINER
-FROM modular/max-full
+# Use MAX_VARIANT build arg to select base image:
+#   - omitted/default → max-full:nightly
+#   - MAX_VARIANT=amd → max-amd-full:nightly
+#   - MAX_VARIANT=nvidia → max-nvidia-full:nightly
+
+ARG MAX_GPU=universal
+ARG MAX_TAG=latest
+
+FROM modular/max-full:${MAX_TAG} AS base-universal
+FROM modular/max-amd:${MAX_TAG} AS base-amd
+FROM modular/max-nvidia-full:${MAX_TAG} AS base-nvidia
+
+FROM base-${MAX_GPU} AS final
 
 WORKDIR /app
 
 # //////////////////////////////////////////////////////////////////////
-# UPDATE SYSTEM
+# INSTALL NODE
 
-RUN apt-get update && apt-get install -y \
-    curl \
-    build-essential \
-    git \
-    wget \
+RUN wget -qO- https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # //////////////////////////////////////////////////////////////////////
-# INSTALL NODE & NPM PACKAGES
-
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-&& apt-get install -y nodejs \
-&& rm -rf /var/lib/apt/lists/*
+# INSTALL NPM PACKAGES
 
 RUN npm install -g pm2 wait-on@7.2.0
 

@@ -187,6 +187,32 @@ docker build --ulimit nofile=65535:65535 -t max-cookbook:latest .
 
 **Note:** The `--ulimit nofile=65535:65535` flag increases the file descriptor limit, which is needed for Next.js builds.
 
+#### Build Arguments
+
+You can customize the Docker build using these arguments to reduce container size:
+
+- **MAX_GPU**: Selects the base image (default: `universal`)
+  - `universal` → `modular/max-full` (larger, supports all GPU types)
+  - `amd` → `modular/max-amd` (smaller, AMD-specific)
+  - `nvidia` → `modular/max-nvidia-full` (smaller, NVIDIA-specific)
+
+- **MAX_TAG**: Selects the image version (default: `latest`)
+  - `latest` → Latest stable release
+  - `nightly` → Nightly development builds
+  - Specific versions (e.g., `25.7.0`)
+
+**Examples:**
+
+Build smaller AMD-specific container:
+```bash
+docker build --build-arg MAX_GPU=amd --ulimit nofile=65535:65535 -t max-cookbook:amd .
+```
+
+Build smaller NVIDIA-specific container with nightly builds:
+```bash
+docker build --build-arg MAX_GPU=nvidia --build-arg MAX_TAG=nightly --ulimit nofile=65535:65535 -t max-cookbook:nvidia-nightly .
+```
+
 ### Running the Container
 
 #### NVIDIA GPU
