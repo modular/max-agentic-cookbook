@@ -24,7 +24,7 @@ interface CookbookContextValue {
 
 interface CookbookProviderProps {
     recipes: RecipeMetadata[]
-    endpointsApiUrl: string
+    endpointsRoute: string
     children: ReactNode
 }
 
@@ -32,7 +32,7 @@ export const CookbookContext = createContext<CookbookContextValue | undefined>(
     undefined
 )
 
-export function CookbookProvider({ children, recipes, endpointsApiUrl }: CookbookProviderProps) {
+export function CookbookProvider({ children, recipes, endpointsRoute }: CookbookProviderProps) {
     const [providerEndpoints, setProviderEndpoints] = useState<Endpoint[]>([])
     const [selectedEndpoint, setSelectedEndpoint] = useState<Endpoint | null>(null)
 
@@ -40,8 +40,8 @@ export function CookbookProvider({ children, recipes, endpointsApiUrl }: Cookboo
     const [selectedModel, setSelectedModel] = useState<Model | null>(null)
 
     useEffect(() => {
-        initEndpoints(endpointsApiUrl).then(setProviderEndpoints)
-    }, [endpointsApiUrl])
+        initEndpoints(endpointsRoute).then(setProviderEndpoints)
+    }, [endpointsRoute])
 
     const recipeFromSlug = useCallback(
         (slug: string | undefined) => {
@@ -126,9 +126,9 @@ export function CookbookProvider({ children, recipes, endpointsApiUrl }: Cookboo
     )
 }
 
-async function initEndpoints(endpointsApiUrl: string): Promise<Endpoint[]> {
+async function initEndpoints(endpointsRoute: string): Promise<Endpoint[]> {
     try {
-        const response = await fetch(endpointsApiUrl)
+        const response = await fetch(endpointsRoute)
         if (!response.ok) {
             throw new Error(`Failed to fetch endpoints: ${response.statusText}`)
         }

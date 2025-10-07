@@ -21,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <html lang="en">
             <body>
                 <MantineProvider defaultColorScheme="auto" theme={theme}>
-                    <CookbookProvider recipes={recipes} endpointsApiUrl={endpointsRoute}>{children}</CookbookProvider>
+                    <CookbookProvider recipes={recipes} endpointsRoute={endpointsRoute}>{children}</CookbookProvider>
                 </MantineProvider>
             </body>
         </html>

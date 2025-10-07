@@ -1,11 +1,48 @@
-node_modules
-.next
+# Git
 .git
+.gitignore
+
+# Dependencies (will be installed during build)
+**/node_modules
+
+# Build artifacts
+**/.next
+**/out
+**/dist
+**/build
+**/*.tsbuildinfo
+
+# Environment files (except .sample.env)
 .env*.local
+**/.env*.local
+
+# Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# IDE
 .vscode
 .idea
-coverage
-.cache
+*.swp
+*.swo
+
+# Testing
+**/coverage
+**/.cache
+
+# Package manager
+.pnpm-store
+package-lock.json
+yarn.lock
+
+# Misc
+README.md
+*.md
+!apps/cookbook/README.md
