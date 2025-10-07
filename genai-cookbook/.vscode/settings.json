@@ -1,12 +1,21 @@
 {
-    "debug.javascript.autoAttachFilter": "onlyWithFlag",
-    "debug.javascript.terminalOptions": {
-        "skipFiles": [
-            "<node_internals>/**",
-            "**/node_modules/**",
-            "**/.next/**"
-        ]
-    },
-    "debug.showInlineBreakpointCandidates": true,
-    "debug.allowBreakpointsEverywhere": false
+  "typescript.tsdk": "apps/cookbook/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "files.exclude": {
+    "**/.next": true,
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/pnpm-lock.yaml": true
+  },
+  "search.exclude": {
+    "**/.next": true,
+    "**/node_modules": true,
+    "**/pnpm-lock.yaml": true
+  },
+  "typescript.preferences.importModuleSpecifier": "non-relative"
 }

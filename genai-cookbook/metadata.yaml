@@ -12,4 +12,4 @@ tags:
   - gui
 
 tasks:
-  - npm run dev
+  - pnpm dev

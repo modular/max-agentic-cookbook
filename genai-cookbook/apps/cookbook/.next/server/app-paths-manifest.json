@@ -1,0 +1,9 @@
+{
+  "/api/endpoints/route": "app/api/endpoints/route.js",
+  "/api/models/route": "app/api/models/route.js",
+  "/icon.ico/route": "app/icon.ico/route.js",
+  "/cookbook/page": "app/cookbook/page.js",
+  "/cookbook/[recipe]/page": "app/cookbook/[recipe]/page.js",
+  "/cookbook/[recipe]/code/page": "app/cookbook/[recipe]/code/page.js",
+  "/cookbook/[recipe]/api/route": "app/cookbook/[recipe]/api/route.js"
+}
