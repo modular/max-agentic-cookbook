@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-import endpointStore from '@/store/EndpointStore'
+import endpointStore from '@modular/recipe-sdk/store'
 import type { Endpoint } from '@modular/recipe-sdk/types'
 
 export function GET(_request: NextRequest) {

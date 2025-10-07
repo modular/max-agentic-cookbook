@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import type { Model } from '@modular/recipe-sdk/types'
-import endpointStore from '@/store/EndpointStore'
+import endpointStore from '@modular/recipe-sdk/store'
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)

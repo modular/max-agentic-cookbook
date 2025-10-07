@@ -1,6 +1,5 @@
 import { RecipeMetadata } from '@modular/recipe-sdk/types'
 import { recipesPath } from '@/lib/constants'
-import { recipeRegistry } from '@modular/recipes'
 import path from 'path'
 import fs from 'fs'
 import type { ComponentType } from 'react'
@@ -46,6 +45,8 @@ class RecipeStore {
         if (cached) return cached
 
         try {
+            // Lazy-load the recipe registry to avoid loading UI components during instrumentation
+            const { recipeRegistry } = await import('@modular/recipes')
             const recipe = recipeRegistry[slug]
             if (!recipe) {
                 console.warn(`Recipe not found in registry: ${slug}`)

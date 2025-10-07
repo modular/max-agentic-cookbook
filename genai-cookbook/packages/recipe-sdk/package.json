@@ -9,6 +9,7 @@
     "./types": "./src/types.ts",
     "./context": "./src/context/index.ts",
     "./prepareModel": "./src/prepareModel.ts",
+    "./store": "./src/store/EndpointStore.ts",
     "./theme": "./src/theme.ts"
   },
   "dependencies": {

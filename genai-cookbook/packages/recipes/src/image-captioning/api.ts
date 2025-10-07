@@ -1,5 +1,5 @@
 import { generateText } from 'ai'
-import { ModelPreparationError, prepareModel } from '@/lib/prepareModel'
+import { ModelPreparationError, prepareModel } from '@modular/recipe-sdk/prepareModel'
 
 /*
  * The captioning API mirrors our multi-turn chat route but returns a single

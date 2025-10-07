@@ -20,13 +20,3 @@ export const centerStyle: React.CSSProperties = {
     justifyContent: 'space-between',
     overflow: 'hidden',
 }
-
-/**
- * Utility to derive a height based on the App Shell content area with an extra offset.
- * Pass a number (pixels) or a CSS length string (e.g., '2rem').
- */
-export function appShellContentHeightWithOffset(offset?: number | string) {
-    if (!offset || offset === 0) return appShellContentHeight
-    const asCss = typeof offset === 'number' ? `${offset}px` : offset
-    return `calc(${appShellContentHeight} - ${asCss})`
-}

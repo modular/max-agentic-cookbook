@@ -1,5 +1,5 @@
 import { convertToModelMessages, streamText } from 'ai'
-import { prepareModel, ModelPreparationError } from '@/lib/prepareModel'
+import { prepareModel, ModelPreparationError } from '@modular/recipe-sdk/prepareModel'
 
 /*
  * This API route is the bridge between our chat surface and the provider that
