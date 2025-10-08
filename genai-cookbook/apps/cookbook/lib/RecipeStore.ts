@@ -11,11 +11,11 @@ class RecipeStore {
     private path: string
     private componentCache = new Map<string, ComponentType<RecipeProps>>()
     private handlerCache = new Map<string, RecipeHandler>()
+    private recipesLoaded = false
 
     constructor() {
         const recipePath = path.join(process.cwd(), recipesPath())
         this.path = recipePath
-        this.recipes = this.loadRecipes(recipePath)
     }
 
     recipePath(): string {
@@ -23,6 +23,10 @@ class RecipeStore {
     }
 
     getAll(): RecipeMetadata[] | null {
+        if (!this.recipesLoaded) {
+            this.recipes = this.loadRecipes(this.path)
+            this.recipesLoaded = true
+        }
         return this.recipes
     }
 
