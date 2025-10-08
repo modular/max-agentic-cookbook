@@ -19,7 +19,7 @@ import {
     useMantineColorScheme,
 } from '@mantine/core'
 
-import { useCookbook } from '@modular/recipe-sdk/context'
+import { useCookbook } from '@/context'
 import { cookbookRoute } from '@/lib/constants'
 
 type PrismTheme = Record<string, CSSProperties>

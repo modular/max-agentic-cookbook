@@ -1,6 +1,6 @@
 'use client'
 
-import { useCookbook } from '@modular/recipe-sdk/context'
+import { useCookbook } from '@/context'
 import { RecipeProps } from '@modular/recipe-sdk/types'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'

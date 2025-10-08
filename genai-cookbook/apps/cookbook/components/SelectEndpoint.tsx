@@ -1,7 +1,7 @@
 'use client'
 
 import { Flex, Select } from '@mantine/core'
-import { useCookbook } from '@modular/recipe-sdk/context'
+import { useCookbook } from '@/context'
 import { useMemo } from 'react'
 
 export interface SelectEndpointProps {

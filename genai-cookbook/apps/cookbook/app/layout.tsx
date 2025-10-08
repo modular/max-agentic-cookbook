@@ -5,7 +5,7 @@ import type { Metadata } from 'next'
 import { MantineProvider } from '@mantine/core'
 
 import { theme } from '@modular/recipe-sdk/theme'
-import { CookbookProvider } from '@modular/recipe-sdk/context'
+import { CookbookProvider } from '@/context'
 import { endpointsRoute } from '@/lib/constants'
 
 import recipeStore from '@/store/RecipeStore'

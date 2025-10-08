@@ -1,7 +1,7 @@
 'use client'
 
 import { Flex, Select } from '@mantine/core'
-import { useCookbook } from '@modular/recipe-sdk/context'
+import { useCookbook } from '@/context'
 import { useEffect, useState, useCallback } from 'react'
 import { modelsRoute } from '@/lib/constants'
 import type { Model } from '@modular/recipe-sdk/types'

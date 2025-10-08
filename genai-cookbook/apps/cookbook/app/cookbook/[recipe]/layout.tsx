@@ -6,7 +6,7 @@ import { appShellContentHeight } from '@modular/recipe-sdk/theme'
 import { Toolbar } from '@/components/Toolbar'
 import { redirect } from 'next/navigation'
 import { cookbookRoute } from '@/lib/constants'
-import { useCookbook } from '@modular/recipe-sdk/context'
+import { useCookbook } from '@/context'
 
 export default function RecipeShell({
     children,
