@@ -22,6 +22,7 @@ import { DefaultChatTransport } from 'ai'
 import { useChat } from '@ai-sdk/react'
 import { Box, ScrollArea } from '@mantine/core'
 import { RecipeProps } from '@modular/recipe-sdk/types'
+import styles from './ui.module.css'
 
 // ============================================================================
 // Chat surface component
@@ -139,22 +140,6 @@ function MessagesPanel({ messages, bottomRef }: MessagesPanelProps) {
                 </div>
             ))}
             <div ref={bottomRef} />
-
-            {/* Quick CSS-in-JS block so new messages fade in as they stream. */}
-            <style jsx>{`
-                @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                    }
-                    to {
-                        opacity: 1;
-                    }
-                }
-
-                .message-fade {
-                    animation: fadeIn 180ms ease-out both;
-                }
-            `}</style>
         </dl>
     )
 }
@@ -169,7 +154,7 @@ interface MessageContentProps {
  */
 function MessageRole({ message }: MessageContentProps) {
     return (
-        <dt className="message-fade font-bold">
+        <dt className={`${styles.messageFade} font-bold`}>
             {/* GenAI roles come through lowercase, so we prettify them for the UI. */}
             {message.role.charAt(0).toUpperCase() + message.role.slice(1)}
         </dt>
@@ -191,7 +176,7 @@ function MessageContent({ message }: MessageContentProps) {
                     .filter((p) => p.type === 'text')
                     .map((p, i) =>
                         'text' in p ? (
-                            <span key={i} className="message-fade">
+                            <span key={i} className={styles.messageFade}>
                                 {p.text}
                             </span>
                         ) : null
