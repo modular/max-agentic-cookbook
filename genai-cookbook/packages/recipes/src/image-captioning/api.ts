@@ -1,5 +1,5 @@
 import { generateText } from 'ai'
-import { ModelPreparationError, prepareModel } from '@modular/recipe-sdk/prepareModel'
+import { RecipeContext, ModelPreparationError } from '@modular/recipe-sdk/types'
 
 /*
  * The captioning API mirrors our multi-turn chat route but returns a single
@@ -12,7 +12,7 @@ import { ModelPreparationError, prepareModel } from '@modular/recipe-sdk/prepare
 // POST /api — generates an image caption
 // ============================================================================
 /** Processes caption requests for either Modular MAX or OpenAI. */
-export default async function POST(req: Request) {
+export default async function POST(req: Request, context: RecipeContext) {
     const { messages, endpointId, modelName } = await req.json()
     if (!messages) {
         return new Response('Client did not provide messages', { status: 400 })
@@ -20,7 +20,7 @@ export default async function POST(req: Request) {
 
     let model
     try {
-        model = await prepareModel(endpointId, modelName)
+        model = await context.prepareModel(endpointId, modelName)
     } catch (error) {
         const modelError = error as ModelPreparationError
         return new Response(modelError.message, { status: modelError.status })

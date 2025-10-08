@@ -1,4 +1,6 @@
 import recipeStore from '@/store/RecipeStore'
+import { prepareModel } from '@/lib/prepareModel'
+import type { RecipeContext } from '@modular/recipe-sdk/types'
 
 function createErrorResponse(message: string, error?: unknown, status = 400): Response {
     const errorMessage = error instanceof Error ? `: ${error.message}` : ''
@@ -26,8 +28,13 @@ export async function POST(req: Request) {
         return createErrorResponse(`Unable to load POST handler for recipe ${recipeId}`, error)
     }
 
+    // Create context with dependencies for recipe handlers
+    const context: RecipeContext = {
+        prepareModel,
+    }
+
     try {
-        const response = handleRequest?.(req)
+        const response = handleRequest?.(req, context)
         return response
     } catch (error) {
         return createErrorResponse(`Encountered problem with POST handler for recipe ${recipeId}`, error)

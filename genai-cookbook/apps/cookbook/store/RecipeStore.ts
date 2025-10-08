@@ -1,10 +1,10 @@
-import { RecipeMetadata, RecipeProps } from '@modular/recipe-sdk/types'
+import { RecipeMetadata, RecipeProps, RecipeContext } from '@modular/recipe-sdk/types'
 import { recipesPath } from '@/lib/constants'
 import path from 'path'
 import fs from 'fs'
 import type { ComponentType } from 'react'
 
-type RecipeHandler = (req: Request) => Response | Promise<Response>
+type RecipeHandler = (req: Request, context: RecipeContext) => Response | Promise<Response>
 
 class RecipeStore {
     private recipes: RecipeMetadata[] | null = null

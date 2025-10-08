@@ -1,5 +1,5 @@
 import { convertToModelMessages, streamText } from 'ai'
-import { prepareModel, ModelPreparationError } from '@modular/recipe-sdk/prepareModel'
+import { RecipeContext, ModelPreparationError } from '@modular/recipe-sdk/types'
 
 /*
  * This API route is the bridge between our chat surface and the provider that
@@ -16,7 +16,7 @@ import { prepareModel, ModelPreparationError } from '@modular/recipe-sdk/prepare
 // POST /api route — streams chat completions
 // ============================================================================
 /** Handles chat completions for Modular MAX via compatibility with OpenAI. */
-export default async function POST(req: Request) {
+export default async function POST(req: Request, context: RecipeContext) {
     const { messages, endpointId, modelName } = await req.json()
     if (!messages) {
         return new Response('Client did not provide messages', { status: 400 })
@@ -24,7 +24,7 @@ export default async function POST(req: Request) {
 
     let model
     try {
-        model = await prepareModel(endpointId, modelName)
+        model = await context.prepareModel(endpointId, modelName)
     } catch (error) {
         const modelError = error as ModelPreparationError
         return new Response(modelError.message, { status: modelError.status })

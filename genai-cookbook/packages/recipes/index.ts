@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import type { RecipeProps } from '@modular/recipe-sdk/types'
+import type { RecipeProps, RecipeContext } from '@modular/recipe-sdk/types'
 
 // Import recipe components
 import ImageCaptioningUI from './src/image-captioning/ui'
@@ -9,7 +9,7 @@ import MultiturnChatAPI from './src/multiturn-chat/api'
 
 export interface RecipeComponents {
     ui: ComponentType<RecipeProps>
-    api: (req: Request) => Response | Promise<Response>
+    api: (req: Request, context: RecipeContext) => Response | Promise<Response>
 }
 
 export const recipeRegistry: Record<string, RecipeComponents> = {

@@ -7,13 +7,11 @@
   "exports": {
     ".": "./src/index.ts",
     "./types": "./src/types.ts",
-    "./prepareModel": "./src/prepareModel.ts",
-    "./store": "./src/store/EndpointStore.ts",
     "./theme": "./src/theme.ts"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^2.0.23",
     "@mantine/core": "^7.17.8",
+    "ai": "^5.0.28",
     "react": "^18"
   },
   "devDependencies": {
