@@ -12,11 +12,3 @@ export const headerHeight = 40
 export const navbarWidth = 260
 
 export const appShellContentHeight = `calc(100dvh - var(--app-shell-header-offset, ${headerHeight}px) - var(--app-shell-footer-offset, 0px) - (var(--app-shell-padding, var(--mantine-spacing-md)) * 2))`
-
-export const centerStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    overflow: 'hidden',
-}

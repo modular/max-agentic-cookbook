@@ -248,7 +248,13 @@ import { Text } from '@mantine/core'
 import { Dropzone } from '@mantine/dropzone'
 import { IconUpload, IconPhoto, IconX } from '@tabler/icons-react'
 
-import { centerStyle } from '../lib/theme'
+const centerStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    overflow: 'hidden',
+}
 
 /**
  * Wraps Mantine's Dropzone so we can accept image uploads with minimal setup.
