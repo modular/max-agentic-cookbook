@@ -13,10 +13,10 @@ export class ModelPreparationError extends Error {
 }
 
 /**
- * Prepares a model client by looking up endpoint configuration from the store.
- * This is used by recipe API handlers to prepare models.
+ * Gets an authenticated model client by looking up endpoint configuration from the store.
+ * This is used by recipe API handlers to obtain authenticated models.
  */
-export async function prepareModel(
+export async function getAuthenticatedModel(
     endpointId: string | undefined,
     modelName: string | undefined
 ): Promise<LanguageModel> {

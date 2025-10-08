@@ -8,7 +8,7 @@ import { theme } from '@modular/recipe-sdk/theme'
 import { CookbookProvider } from '@/context'
 import { endpointsRoute } from '@/lib/constants'
 
-import recipeStore from '@/store/RecipeStore'
+import recipeStore from '@/lib/RecipeStore'
 
 const recipes = recipeStore.getAll() ?? []
 

@@ -12,6 +12,7 @@ class EndpointStore {
     private endpoints: ServerSideEndpoints = null
 
     getAll(): ServerSideEndpoints {
+        ac
         return this.endpoints
     }
 

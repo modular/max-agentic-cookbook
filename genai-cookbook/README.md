@@ -122,8 +122,7 @@ genai-cookbook/
 │
 ├── components/              # Reusable UI components
 ├── hooks/                   # Endpoint/model/theme selection
-├── lib/                     # Types and misc. utilities
-├── store/                   # In-memory store for configuration
+├── lib/                     # Shared utilities
 └── theme/                   # Theming and styles
 ```
 
@@ -134,7 +133,7 @@ genai-cookbook/
 1. Create a new directory under `recipes/your-recipe-name/`
 2. Add the following files:
     - `ui.tsx`: Frontend UI component (React)
-    - `api.ts`: Backend API logic (NextJS)
+    - `api.ts`: Backend API handler (receives Request and RecipeContext)
     - `recipe.json`: Recipe metadata
 
 Recipes will hot-reload changes when running in development, but the server must be restarted to load new recipes.

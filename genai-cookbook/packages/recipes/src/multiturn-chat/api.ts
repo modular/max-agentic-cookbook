@@ -24,7 +24,7 @@ export default async function POST(req: Request, context: RecipeContext) {
 
     let model
     try {
-        model = await context.prepareModel(endpointId, modelName)
+        model = await context.getAuthenticatedModel(endpointId, modelName)
     } catch (error) {
         const modelError = error as ModelPreparationError
         return new Response(modelError.message, { status: modelError.status })

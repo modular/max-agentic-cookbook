@@ -1,5 +1,5 @@
-import recipeStore from '@/store/RecipeStore'
-import { prepareModel } from '@/lib/prepareModel'
+import recipeStore from '@/lib/RecipeStore'
+import { getAuthenticatedModel } from '@/lib/getAuthenticatedModel'
 import type { RecipeContext } from '@modular/recipe-sdk/types'
 
 function createErrorResponse(message: string, error?: unknown, status = 400): Response {
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 
     // Create context with dependencies for recipe handlers
     const context: RecipeContext = {
-        prepareModel,
+        getAuthenticatedModel,
     }
 
     try {
