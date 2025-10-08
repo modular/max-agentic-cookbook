@@ -15,11 +15,10 @@ const nextConfig = {
             // Turbopack resolves workspace packages correctly by default
             resolveAlias: {
                 '@modular/recipes': '../../packages/recipes',
-                '@modular/recipe-sdk': '../../packages/recipe-sdk',
             },
         },
     },
-    transpilePackages: ['@modular/recipes', '@modular/recipe-sdk'],
+    transpilePackages: ['@modular/recipes'],
 }
 
 export default nextConfig

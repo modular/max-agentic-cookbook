@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { ActionIcon, Burger, Flex, Group, Title } from '@mantine/core'
 import { IconLayoutSidebar } from '@tabler/icons-react'
 
-import { iconStroke } from '@modular/recipe-sdk/theme'
+import { iconStroke } from '@modular/recipes/lib/theme'
 import { cookbookRoute } from '@/lib/constants'
 import { ThemeToggle } from './ThemeToggle'
 

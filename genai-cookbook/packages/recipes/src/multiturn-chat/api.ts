@@ -1,5 +1,5 @@
 import { convertToModelMessages, streamText } from 'ai'
-import { RecipeContext, ModelPreparationError } from '@modular/recipe-sdk/types'
+import { RecipeContext, ModelPreparationError } from '../lib/types'
 
 /*
  * This API route is the bridge between our chat surface and the provider that

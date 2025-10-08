@@ -4,7 +4,7 @@ import { Flex, Select } from '@mantine/core'
 import { useCookbook } from '@/context'
 import { useEffect, useState, useCallback } from 'react'
 import { modelsRoute } from '@/lib/constants'
-import type { Model } from '@modular/recipe-sdk/types'
+import type { Model } from '@modular/recipes/lib/types'
 
 export interface SelectModelProps {
     label?: string

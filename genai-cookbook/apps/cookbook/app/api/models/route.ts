@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import type { Model } from '@modular/recipe-sdk/types'
+import type { Model } from '@modular/recipes/lib/types'
 import endpointStore from '@/lib/EndpointStore'
 
 export async function GET(request: NextRequest) {

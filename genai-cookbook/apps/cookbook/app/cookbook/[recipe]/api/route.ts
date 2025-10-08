@@ -1,6 +1,6 @@
 import recipeStore from '@/lib/RecipeStore'
 import { getAuthenticatedModel } from '@/lib/getAuthenticatedModel'
-import type { RecipeContext } from '@modular/recipe-sdk/types'
+import type { RecipeContext } from '@modular/recipes/lib/types'
 
 function createErrorResponse(message: string, error?: unknown, status = 400): Response {
     const errorMessage = error instanceof Error ? `: ${error.message}` : ''

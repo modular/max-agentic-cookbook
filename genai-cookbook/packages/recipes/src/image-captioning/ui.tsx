@@ -248,7 +248,7 @@ import { Text } from '@mantine/core'
 import { Dropzone } from '@mantine/dropzone'
 import { IconUpload, IconPhoto, IconX } from '@tabler/icons-react'
 
-import { centerStyle } from '@modular/recipe-sdk/theme'
+import { centerStyle } from '../lib/theme'
 
 /**
  * Wraps Mantine's Dropzone so we can accept image uploads with minimal setup.
@@ -316,7 +316,7 @@ function FileDrop({ onDrop, maxSizeMb, disabled }: FileDropProps) {
 // Generated caption gallery
 // ============================================================================
 import { Box, Image, LoadingOverlay } from '@mantine/core'
-import { RecipeProps } from '@modular/recipe-sdk/types'
+import { RecipeProps } from '../lib/types'
 
 /**
  * Renders each uploaded image alongside its streaming caption status inside a

@@ -2,7 +2,7 @@
 
 import { Flex } from '@mantine/core'
 
-import { appShellContentHeight } from '@modular/recipe-sdk/theme'
+import { appShellContentHeight } from '@modular/recipes/lib/theme'
 import { Toolbar } from '@/components/Toolbar'
 import { redirect } from 'next/navigation'
 import { cookbookRoute } from '@/lib/constants'

@@ -32,9 +32,6 @@ importers:
       '@mantine/hooks':
         specifier: ^7.17.8
         version: 7.17.8(react@18.3.1)
-      '@modular/recipe-sdk':
-        specifier: workspace:*
-        version: link:../../packages/recipe-sdk
       '@modular/recipes':
         specifier: workspace:*
         version: link:../../packages/recipes
@@ -91,25 +88,6 @@ importers:
         specifier: ^5
         version: 5.9.3
 
-  packages/recipe-sdk:
-    dependencies:
-      '@mantine/core':
-        specifier: ^7.17.8
-        version: 7.17.8(@mantine/hooks@7.17.8(react@18.3.1))(@types/react@18.3.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      ai:
-        specifier: ^5.0.28
-        version: 5.0.60(zod@3.25.76)
-      react:
-        specifier: ^18
-        version: 18.3.1
-    devDependencies:
-      '@types/react':
-        specifier: ^18
-        version: 18.3.26
-      typescript:
-        specifier: ^5
-        version: 5.9.3
-
   packages/recipes:
     dependencies:
       '@ai-sdk/openai':
@@ -127,9 +105,6 @@ importers:
       '@mantine/hooks':
         specifier: ^7.17.8
         version: 7.17.8(react@18.3.1)
-      '@modular/recipe-sdk':
-        specifier: workspace:*
-        version: link:../recipe-sdk
       '@tabler/icons-react':
         specifier: ^3.34.1
         version: 3.35.0(react@18.3.1)

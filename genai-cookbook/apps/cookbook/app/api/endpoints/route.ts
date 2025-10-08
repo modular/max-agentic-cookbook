@@ -2,7 +2,7 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
 import endpointStore from '@/lib/EndpointStore'
-import type { Endpoint } from '@modular/recipe-sdk/types'
+import type { Endpoint } from '@modular/recipes/lib/types'
 
 export function GET(_request: NextRequest) {
     const raw = process.env.COOKBOOK_ENDPOINTS

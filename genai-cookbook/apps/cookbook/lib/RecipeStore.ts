@@ -1,4 +1,4 @@
-import { RecipeMetadata, RecipeProps, RecipeContext } from '@modular/recipe-sdk/types'
+import { RecipeMetadata, RecipeProps, RecipeContext } from '@modular/recipes/lib/types'
 import { recipesPath } from '@/lib/constants'
 import path from 'path'
 import fs from 'fs'

@@ -3,7 +3,7 @@ import { AppShell, Group, ScrollArea, Stack, Text } from '@mantine/core'
 import { IconChevronRight } from '@tabler/icons-react'
 import { useCookbook } from '@/context'
 import { cookbookRoute } from '@/lib/constants'
-import { iconStroke } from '@modular/recipe-sdk/theme'
+import { iconStroke } from '@modular/recipes/lib/theme'
 import { useSelectedLayoutSegment } from 'next/navigation'
 
 export default function Navbar() {

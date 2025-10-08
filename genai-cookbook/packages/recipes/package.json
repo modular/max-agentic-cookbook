@@ -7,10 +7,11 @@
   "exports": {
     ".": "./index.ts",
     "./package.json": "./package.json",
+    "./lib/types": "./src/lib/types.ts",
+    "./lib/theme": "./src/lib/theme.ts",
     "./*": "./src/*"
   },
   "dependencies": {
-    "@modular/recipe-sdk": "workspace:*",
     "@ai-sdk/openai": "^2.0.23",
     "@ai-sdk/react": "^2.0.30",
     "@mantine/core": "^7.17.8",

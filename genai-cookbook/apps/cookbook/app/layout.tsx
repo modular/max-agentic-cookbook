@@ -4,7 +4,7 @@ import '@/styles/globals.css'
 import type { Metadata } from 'next'
 import { MantineProvider } from '@mantine/core'
 
-import { theme } from '@modular/recipe-sdk/theme'
+import { theme } from '@modular/recipes/lib/theme'
 import { CookbookProvider } from '@/context'
 import { endpointsRoute } from '@/lib/constants'
 

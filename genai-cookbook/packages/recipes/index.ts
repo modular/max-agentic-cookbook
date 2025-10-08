@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import type { RecipeProps, RecipeContext } from '@modular/recipe-sdk/types'
+import type { RecipeProps, RecipeContext } from './src/lib/types'
 
 // Import recipe components
 import ImageCaptioningUI from './src/image-captioning/ui'

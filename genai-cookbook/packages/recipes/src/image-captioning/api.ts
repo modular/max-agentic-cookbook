@@ -1,5 +1,5 @@
 import { generateText } from 'ai'
-import { RecipeContext, ModelPreparationError } from '@modular/recipe-sdk/types'
+import { RecipeContext, ModelPreparationError } from '../lib/types'
 
 /*
  * The captioning API mirrors our multi-turn chat route but returns a single

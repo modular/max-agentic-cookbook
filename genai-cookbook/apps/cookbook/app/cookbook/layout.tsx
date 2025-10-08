@@ -2,7 +2,7 @@
 
 import { AppShell } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { headerHeight, navbarWidth } from '@modular/recipe-sdk/theme'
+import { headerHeight, navbarWidth } from '@modular/recipes/lib/theme'
 
 import Header from '@/components/Header'
 import Navbar from '@/components/Navbar'
