@@ -1,6 +1,6 @@
-import recipeStore from '@/lib/RecipeStore'
 import { getAuthenticatedModel } from '@/lib/getAuthenticatedModel'
 import type { RecipeContext } from '@modular/recipes/lib/types'
+import { recipeRegistry } from '@modular/recipes'
 
 function createErrorResponse(message: string, error?: unknown, status = 400): Response {
     const errorMessage = error instanceof Error ? `: ${error.message}` : ''
@@ -21,22 +21,22 @@ export async function POST(req: Request) {
         return createErrorResponse('Cannot determine recipe slug', error)
     }
 
-    let handleRequest
-    try {
-        handleRequest = await recipeStore.getHandler(recipeId)
-    } catch (error) {
-        return createErrorResponse(`Unable to load POST handler for recipe ${recipeId}`, error)
+    const recipe = recipeRegistry[recipeId]
+    if (!recipe) {
+        return createErrorResponse(`Recipe not found: ${recipeId}`, undefined, 404)
     }
 
-    // Create context with dependencies for recipe handlers
     const context: RecipeContext = {
         getAuthenticatedModel,
     }
 
     try {
-        const response = handleRequest?.(req, context)
+        const response = recipe.api(req, context)
         return response
     } catch (error) {
-        return createErrorResponse(`Encountered problem with POST handler for recipe ${recipeId}`, error)
+        return createErrorResponse(
+            `Encountered problem with POST handler for recipe ${recipeId}`,
+            error
+        )
     }
 }

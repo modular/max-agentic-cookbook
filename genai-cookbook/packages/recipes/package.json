@@ -8,7 +8,7 @@
     ".": "./index.ts",
     "./package.json": "./package.json",
     "./lib/types": "./src/lib/types.ts",
-    "./lib/theme": "./src/lib/theme.ts",
+    "./lib/layout": "./src/lib/layout.tsx",
     "./*": "./src/*"
   },
   "dependencies": {

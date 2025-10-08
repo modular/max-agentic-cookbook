@@ -14,8 +14,6 @@ export type RecipeMetadata = {
     slug: string
     title: string
     description?: string
-    beCode?: string
-    feCode?: string
 }
 
 export type Endpoint = {

@@ -1,36 +1,31 @@
 'use client'
 
-import { Flex } from '@mantine/core'
-
+import { RecipeLayout } from '@modular/recipes/lib/layout'
 import { appShellContentHeight } from '@/lib/theme'
 import { Toolbar } from '@/components/Toolbar'
 import { redirect } from 'next/navigation'
 import { cookbookRoute } from '@/lib/constants'
-import { useCookbook } from '@/context'
+import { recipeRegistry } from '@modular/recipes'
 
-export default function RecipeShell({
+export default function Layout({
     children,
     params,
 }: {
     children: React.ReactNode
     params: { recipe?: string }
 }) {
-    const { recipeFromSlug } = useCookbook()
-    const recipe = recipeFromSlug(params.recipe)
+    if (!params.recipe) return redirect(cookbookRoute())
+
+    const recipe = recipeRegistry[params.recipe]
 
     if (!recipe) return redirect(cookbookRoute())
 
     return (
-        <>
-            <Flex
-                direction="column"
-                gap="sm"
-                style={{ overflow: 'hidden' }}
-                h={appShellContentHeight}
-            >
-                <Toolbar title={recipe.title} />
-                {children}
-            </Flex>
-        </>
+        <RecipeLayout
+            height={appShellContentHeight}
+            toolbar={<Toolbar title={recipe.title} />}
+        >
+            {children}
+        </RecipeLayout>
     )
 }

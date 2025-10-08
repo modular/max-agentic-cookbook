@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useEffect, ReactNode, useState } from 'react'
 
-import type { Endpoint, Model, RecipeMetadata } from '@modular/recipes/lib/types'
+import type { Endpoint, Model } from '@modular/recipes/lib/types'
 
 interface CookbookContextValue {
     // Endpoints
@@ -16,14 +16,9 @@ interface CookbookContextValue {
     selectedModel: Model | null
     setModels: (models: Model[]) => void
     selectModelById: (id: string | null) => void
-
-    // Recipes
-    recipes: RecipeMetadata[]
-    recipeFromSlug: (slug: string | undefined) => RecipeMetadata | undefined
 }
 
 interface CookbookProviderProps {
-    recipes: RecipeMetadata[]
     endpointsRoute: string
     children: ReactNode
 }
@@ -32,7 +27,7 @@ export const CookbookContext = createContext<CookbookContextValue | undefined>(
     undefined
 )
 
-export function CookbookProvider({ children, recipes, endpointsRoute }: CookbookProviderProps) {
+export function CookbookProvider({ children, endpointsRoute }: CookbookProviderProps) {
     const [providerEndpoints, setProviderEndpoints] = useState<Endpoint[]>([])
     const [selectedEndpoint, setSelectedEndpoint] = useState<Endpoint | null>(null)
 
@@ -42,13 +37,6 @@ export function CookbookProvider({ children, recipes, endpointsRoute }: Cookbook
     useEffect(() => {
         initEndpoints(endpointsRoute).then(setProviderEndpoints)
     }, [endpointsRoute])
-
-    const recipeFromSlug = useCallback(
-        (slug: string | undefined) => {
-            return recipes.find((r) => r.slug === slug)
-        },
-        [recipes]
-    )
 
     const selectEndpointById = useCallback(
         (id: string | null) => {
@@ -115,10 +103,6 @@ export function CookbookProvider({ children, recipes, endpointsRoute }: Cookbook
                 selectedModel,
                 setModels,
                 selectModelById,
-
-                //Recipes
-                recipes,
-                recipeFromSlug,
             }}
         >
             {children}

@@ -1,39 +1,23 @@
 'use client'
 
+import { redirect, usePathname } from 'next/navigation'
+import { cookbookRoute } from '@/lib/constants'
 import { useCookbook } from '@/context'
-import { RecipeProps } from '@modular/recipes/lib/types'
-import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import type { ComponentType } from 'react'
+import { recipeRegistry } from '@modular/recipes'
 
-export default function RecipeContent({ params }: { params: { recipe?: string } }) {
+export default function Page({ params }: { params: { recipe?: string } }) {
     const pathname = usePathname()
     const { selectedEndpoint, selectedModel } = useCookbook()
-    const [RecipeComponent, setRecipeComponent] =
-        useState<ComponentType<RecipeProps> | null>(null)
 
-    useEffect(() => {
-        const loadRecipe = async () => {
-            if (!params.recipe) return
+    if (!params.recipe) return redirect(cookbookRoute())
 
-            try {
-                // Dynamically import the recipe registry (client-safe)
-                const { recipeRegistry } = await import('@modular/recipes')
-                const recipe = recipeRegistry[params.recipe]
+    const recipe = recipeRegistry[params.recipe]
 
-                if (recipe?.ui) {
-                    setRecipeComponent(() => recipe.ui)
-                } else {
-                    console.warn(`Recipe not found in registry: ${params.recipe}`)
-                }
-            } catch (error) {
-                console.error(`Failed loading recipe: ${params.recipe}`, error)
-            }
-        }
-        loadRecipe()
-    }, [params.recipe])
+    if (!recipe) {
+        throw new Error(`Unable to load recipe ${params.recipe}`)
+    }
 
-    if (!RecipeComponent) return <div />
+    const RecipeComponent = recipe.ui
 
     return (
         <RecipeComponent
