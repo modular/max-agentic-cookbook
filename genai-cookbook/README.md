@@ -7,7 +7,7 @@ The GenAI Cookbook is collection of recipes demonstrating how to build modern fu
 ## Requirements
 
 - **Node.js** 18.x or higher
-- **npm** or **yarn** package manager
+- **pnpm** package manager
 - **MAX** server running locally or remotely—see the [MAX quickstart](https://docs.modular.com/max/get-started/)
 
 ## Get Started
@@ -22,7 +22,7 @@ The GenAI Cookbook is collection of recipes demonstrating how to build modern fu
 2. **Install dependencies**
 
     ```bash
-    npm install
+    pnpm install
     ```
 
 3. **Configure environment variables**
@@ -65,7 +65,7 @@ The GenAI Cookbook is collection of recipes demonstrating how to build modern fu
 4. **Start the development server**
 
     ```bash
-    npm run dev
+    pnpm dev
     ```
 
 5. **Open the cookbook**
@@ -92,45 +92,56 @@ Create an intelligent image captioning system that generates natural language de
 
 ## Architecture
 
-The GenAI Cookbook follows a modern fullstack architecture optimized for AI applications:
+The GenAI Cookbook follows a modern fullstack architecture optimized for AI applications, organized as a pnpm workspace monorepo:
 
 ```
 genai-cookbook/
-├── app/                     # Next.js 14 App Router
-│   ├── api/                 # API routes
-│   │   ├── endpoints/       # Endpoint API handler
-│   │   └── models/          # Models API handler
-│   │
-│   ├── cookbook/            # Cookbook pages
-│   │   ├── [recipe]/        # Dynamic recipe routes
-│   │   │   ├── page.tsx     # Recipe UI (with lazy-load)
-│   │   │   ├── code/        # Recipe code viewer
-│   │   │   └── api/         # Recipe API handler
-│   │   │
-│   │   ├── page.tsx         # Cookbook home
-│   │   └── layout.tsx       # Cookbook layout
-│   │
-│   ├── page.tsx             # Landing page
-│   └── layout.tsx           # Root layout
+├── apps/
+│   └── cookbook/            # Next.js 14 App with App Router
+│       ├── app/             # Next.js app directory
+│       │   ├── api/         # API routes
+│       │   │   ├── endpoints/   # Endpoint API handler
+│       │   │   └── models/      # Models API handler
+│       │   │
+│       │   ├── cookbook/    # Cookbook pages
+│       │   │   ├── [recipe]/    # Dynamic recipe routes
+│       │   │   │   ├── page.tsx     # Recipe UI (lazy-loaded)
+│       │   │   │   ├── code/        # Recipe code viewer
+│       │   │   │   └── api/         # Recipe API handler
+│       │   │   │
+│       │   │   ├── page.tsx     # Cookbook home
+│       │   │   └── layout.tsx   # Cookbook layout
+│       │   │
+│       │   ├── page.tsx     # Landing page
+│       │   └── layout.tsx   # Root layout
+│       │
+│       ├── components/      # Reusable UI components
+│       ├── context/         # React context providers
+│       ├── lib/             # Shared utilities
+│       ├── styles/          # Global styles
+│       └── Dockerfile       # Container configuration
 │
-├── recipes/                 # Recipe implementations
-│   ├── multiturn-chat/
-│   │   ├── ui.tsx           # Frontend UI component
-│   │   ├── api.ts           # Backend API logic
-│   │   └── recipe.json      # Recipe metadata
-│   └── image-captioning/
-│
-├── components/              # Reusable UI components
-├── hooks/                   # Endpoint/model/theme selection
-├── lib/                     # Shared utilities
-└── theme/                   # Theming and styles
+└── packages/
+    └── recipes/             # Shared recipe implementations
+        └── src/
+            ├── multiturn-chat/
+            │   ├── ui.tsx       # Frontend UI component
+            │   ├── api.ts       # Backend API logic
+            │   └── recipe.json  # Recipe metadata
+            │
+            ├── image-captioning/
+            │   ├── ui.tsx
+            │   ├── api.ts
+            │   └── recipe.json
+            │
+            └── lib/         # Recipe utilities and types
 ```
 
 ## Development
 
 ### Adding a New Recipe
 
-1. Create a new directory under `recipes/your-recipe-name/`
+1. Create a new directory under `packages/recipes/src/your-recipe-name/`
 2. Add the following files:
     - `ui.tsx`: Frontend UI component (React)
     - `api.ts`: Backend API handler (receives Request and RecipeContext)
@@ -255,12 +266,12 @@ Once running, navigate to [http://localhost:3000](http://localhost:3000) to acce
 
 ## Available Scripts
 
-- `npm run dev` - Start development server with hot reloading
-- `npm run build` - Build production-optimized bundle
-- `npm run start` - Run production server
-- `npm run lint` - Run ESLint checks
-- `npm run format` - Format code with Prettier
-- `npm run format:check` - Check code formatting
+- `pnpm dev` - Start development server with hot reloading (uses Turbopack)
+- `pnpm build` - Build production-optimized bundle
+- `pnpm start` - Run production server
+- `pnpm lint` - Run ESLint checks
+- `pnpm format` - Format code with Prettier
+- `pnpm format:check` - Check code formatting
 
 ## Learn More
 
