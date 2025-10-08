@@ -12,7 +12,6 @@
  */
 
 import { useCallback, useState } from "react";
-import { usePathname } from "next/navigation";
 import { nanoid } from "nanoid";
 import { SystemModelMessage, UserModelMessage } from "ai";
 import {
@@ -23,8 +22,6 @@ import {
   ScrollArea,
   AspectRatio,
 } from "@mantine/core";
-
-import { useCookbook } from "@modular/recipe-sdk/context";
 
 // ============================================================================
 // Shared types and data structures
@@ -52,13 +49,7 @@ interface ImageData {
  * prompt, and delegating caption generation to the API route that speaks the
  * Modular MAX/OpenAI protocol.
  */
-export default function Recipe() {
-  // Pull the active recipe metadata and endpoint so we can align the UI with demo selection.
-  const { selectedEndpoint, selectedModel } = useCookbook();
-
-  // Pathname determines the API route used for this specific recipe instance.
-  const pathname = usePathname();
-
+export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
   // Track every uploaded image plus its caption/processing state so the UI can render progress.
   const [images, setImages] = useState<ImageData[]>([]);
 
@@ -104,7 +95,7 @@ export default function Recipe() {
     setProcessing(true);
 
     try {
-      if (!selectedEndpoint || !selectedModel) {
+      if (!endpoint || !model) {
         throw new Error("Model is not selected");
       }
 
@@ -130,8 +121,8 @@ export default function Recipe() {
           const caption = await generateCaption({
             image,
             prompt,
-            endpointId: selectedEndpoint.id,
-            modelName: selectedModel.name,
+            endpointId: endpoint.id,
+            modelName: model.name,
             api: `${pathname}/api`,
           });
 
@@ -152,7 +143,7 @@ export default function Recipe() {
     } finally {
       setProcessing(false);
     }
-  }, [selectedEndpoint, selectedModel, images, pathname, prompt]);
+  }, [endpoint, model, images, pathname, prompt]);
 
   return (
     <Stack flex={1} h="100%" style={{ overflow: "hidden", minHeight: 0 }}>
@@ -321,6 +312,7 @@ function FileDrop({ onDrop, maxSizeMb, disabled }: FileDropProps) {
 // Generated caption gallery
 // ============================================================================
 import { Box, Image, LoadingOverlay } from "@mantine/core";
+import { RecipeProps } from "@modular/recipe-sdk/types";
 
 /**
  * Renders each uploaded image alongside its streaming caption status inside a

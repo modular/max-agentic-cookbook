@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react'
+import type { RecipeProps } from '@modular/recipe-sdk/types'
 
 // Import recipe components
 import ImageCaptioningUI from './src/image-captioning/ui'
@@ -7,7 +8,7 @@ import MultiturnChatUI from './src/multiturn-chat/ui'
 import MultiturnChatAPI from './src/multiturn-chat/api'
 
 export interface RecipeComponents {
-    ui: ComponentType
+    ui: ComponentType<RecipeProps>
     api: (req: Request) => Response | Promise<Response>
 }
 

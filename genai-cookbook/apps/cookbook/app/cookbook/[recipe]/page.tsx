@@ -1,13 +1,45 @@
-import recipeStore from '@/store/RecipeStore'
+'use client'
 
-export default async function RecipeContent({
-    params,
-}: {
-    params: { recipe?: string }
-}) {
-    const RecipeComponent = await recipeStore.getComponent(params.recipe)
+import { useCookbook } from '@modular/recipe-sdk/context'
+import { RecipeProps } from '@modular/recipe-sdk/types'
+import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import type { ComponentType } from 'react'
 
-    if (!RecipeComponent) throw new Error(`Recipe Not Found ${params.recipe}`)
+export default function RecipeContent({ params }: { params: { recipe?: string } }) {
+    const pathname = usePathname()
+    const { selectedEndpoint, selectedModel } = useCookbook()
+    const [RecipeComponent, setRecipeComponent] =
+        useState<ComponentType<RecipeProps> | null>(null)
 
-    return <RecipeComponent />
+    useEffect(() => {
+        const loadRecipe = async () => {
+            if (!params.recipe) return
+
+            try {
+                // Dynamically import the recipe registry (client-safe)
+                const { recipeRegistry } = await import('@modular/recipes')
+                const recipe = recipeRegistry[params.recipe]
+
+                if (recipe?.ui) {
+                    setRecipeComponent(() => recipe.ui)
+                } else {
+                    console.warn(`Recipe not found in registry: ${params.recipe}`)
+                }
+            } catch (error) {
+                console.error(`Failed loading recipe: ${params.recipe}`, error)
+            }
+        }
+        loadRecipe()
+    }, [params.recipe])
+
+    if (!RecipeComponent) return <div />
+
+    return (
+        <RecipeComponent
+            endpoint={selectedEndpoint}
+            model={selectedModel}
+            pathname={pathname}
+        />
+    )
 }

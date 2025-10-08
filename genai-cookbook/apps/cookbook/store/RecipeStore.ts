@@ -1,4 +1,4 @@
-import { RecipeMetadata } from '@modular/recipe-sdk/types'
+import { RecipeMetadata, RecipeProps } from '@modular/recipe-sdk/types'
 import { recipesPath } from '@/lib/constants'
 import path from 'path'
 import fs from 'fs'
@@ -9,7 +9,7 @@ type RecipeHandler = (req: Request) => Response | Promise<Response>
 class RecipeStore {
     private recipes: RecipeMetadata[] | null = null
     private path: string
-    private componentCache = new Map<string, ComponentType>()
+    private componentCache = new Map<string, ComponentType<RecipeProps>>()
     private handlerCache = new Map<string, RecipeHandler>()
 
     constructor() {
@@ -30,7 +30,7 @@ class RecipeStore {
         return await this.getRecipeContent('api', this.handlerCache, slug)
     }
 
-    async getComponent(slug: string | undefined): Promise<ComponentType | null> {
+    async getComponent(slug: string | undefined): Promise<ComponentType<RecipeProps> | null> {
         return await this.getRecipeContent('ui', this.componentCache, slug)
     }
 
