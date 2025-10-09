@@ -7,7 +7,7 @@ import ImageCaptioningAPI from './src/image-captioning/api'
 import MultiturnChatUI from './src/multiturn-chat/ui'
 import MultiturnChatAPI from './src/multiturn-chat/api'
 
-export * from './src/layout'
+export * from './src/components'
 export * from './src/types'
 
 export interface RecipeComponents {

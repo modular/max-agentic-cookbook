@@ -8,10 +8,10 @@ export interface RecipeLayoutProps {
     children: React.ReactNode
 }
 
-export function RecipeLayout({ height, header: toolbar, children }: RecipeLayoutProps) {
+export function RecipeLayout({ height, header, children }: RecipeLayoutProps) {
     return (
         <Flex direction="column" gap="sm" style={{ overflow: 'hidden' }} h={height}>
-            {toolbar}
+            {header}
             {children}
         </Flex>
     )

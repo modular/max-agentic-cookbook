@@ -1,6 +1,5 @@
-import type { RecipeContext } from '@modular/recipes'
-import { recipeRegistry } from '@modular/recipes'
 import cache from '@/utils/cache'
+import { recipeRegistry } from '@modular/recipes'
 
 function createErrorResponse(message: string, error?: unknown, status = 400): Response {
     const errorMessage = error instanceof Error ? `: ${error.message}` : ''
@@ -26,12 +25,20 @@ export async function POST(req: Request) {
         return createErrorResponse(`Recipe not found: ${recipeId}`, undefined, 404)
     }
 
-    const context: RecipeContext = {
-        buildModel: cache.buildModel.bind(cache),
+    const { endpointId, modelName } = await req.clone().json()
+    const apiKey = cache.apiKey(endpointId)
+    const baseUrl = cache.baseUrl(endpointId)
+
+    if (!apiKey || !baseUrl) {
+        return createErrorResponse(
+            `Endpoint not available: Failed to lookup baseUrl / apiKey.`,
+            undefined,
+            502
+        )
     }
 
     try {
-        const response = recipe.api(req, context)
+        const response = recipe.api(req, { apiKey, baseUrl, modelName })
         return response
     } catch (error) {
         return createErrorResponse(

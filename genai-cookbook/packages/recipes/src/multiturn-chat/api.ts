@@ -1,5 +1,6 @@
 import { convertToModelMessages, streamText } from 'ai'
-import { RecipeContext, ModelPreparationError } from '../types'
+import { RecipeContext } from '../types'
+import { createOpenAI } from '@ai-sdk/openai'
 
 /*
  * This API route is the bridge between our chat surface and the provider that
@@ -15,30 +16,30 @@ import { RecipeContext, ModelPreparationError } from '../types'
 // ============================================================================
 // POST /api route — streams chat completions
 // ============================================================================
-/** Handles chat completions for Modular MAX via compatibility with OpenAI. */
 export default async function POST(req: Request, context: RecipeContext) {
-    const { messages, endpointId, modelName } = await req.json()
+    const { apiKey, baseUrl, modelName } = context
+    const { messages } = await req.json()
     if (!messages) {
         return new Response('Client did not provide messages', { status: 400 })
     }
 
-    let model
     try {
-        model = await context.buildModel(endpointId, modelName)
-    } catch (error) {
-        const modelError = error as ModelPreparationError
-        return new Response(modelError.message, { status: modelError.status })
-    }
+        // createOpenAI returns an OpenAI-compatible client
+        const client = createOpenAI({ baseURL: baseUrl, apiKey })
 
-    try {
+        // chat(modelName) works with LLM servers like MAX that
+        // implement the chat-completions format
+        const model = client.chat(modelName)
+
         const result = streamText({
             model: model,
+            // Convert messages from the UIMessage format
             messages: convertToModelMessages(messages),
-            // Respect the same stop sequence used by the model.
+            // Respect the same stop sequence used by the model
             stopSequences: ['<end_of_turn>'],
         })
 
-        // Convert the streaming result into the structure the React UI consumes.
+        // Convert the streaming result into the structure the recipe UI consumes
         return result.toUIMessageStreamResponse({
             originalMessages: messages,
         })
