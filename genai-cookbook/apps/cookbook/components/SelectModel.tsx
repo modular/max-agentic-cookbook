@@ -3,8 +3,8 @@
 import { Flex, Select } from '@mantine/core'
 import { useCookbook } from '@/context'
 import { useEffect, useState, useCallback } from 'react'
-import { modelsRoute } from '@/lib/constants'
-import type { Model } from '@modular/recipes/lib/types'
+import { modelsRoute } from '@/utils/constants'
+import type { Model } from '@modular/recipes'
 
 export interface SelectModelProps {
     label?: string

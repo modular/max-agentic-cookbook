@@ -322,7 +322,7 @@ function FileDrop({ onDrop, maxSizeMb, disabled }: FileDropProps) {
 // Generated caption gallery
 // ============================================================================
 import { Box, Image, LoadingOverlay } from '@mantine/core'
-import { RecipeProps } from '../lib/types'
+import { RecipeProps } from '../types'
 
 /**
  * Renders each uploaded image alongside its streaming caption status inside a

@@ -21,7 +21,7 @@ import { useEffect, useRef, useState } from 'react'
 import { DefaultChatTransport } from 'ai'
 import { useChat } from '@ai-sdk/react'
 import { Box, ScrollArea } from '@mantine/core'
-import { RecipeProps } from '../lib/types'
+import { RecipeProps } from '../types'
 import styles from './ui.module.css'
 
 // ============================================================================

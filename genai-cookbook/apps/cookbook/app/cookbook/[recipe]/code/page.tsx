@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { cookbookRoute, recipesPath } from '@/lib/constants'
+import { cookbookRoute, recipesPath } from '@/utils/constants'
 import { CodeViewer } from '@/components/CodeViewer'
 import path from 'path'
 import fs from 'fs'

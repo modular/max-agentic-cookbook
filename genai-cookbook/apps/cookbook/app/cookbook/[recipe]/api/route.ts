@@ -1,6 +1,6 @@
-import type { RecipeContext } from '@modular/recipes/lib/types'
+import type { RecipeContext } from '@modular/recipes'
 import { recipeRegistry } from '@modular/recipes'
-import endpointStore from '@/lib/EndpointStore'
+import cache from '@/utils/cache'
 
 function createErrorResponse(message: string, error?: unknown, status = 400): Response {
     const errorMessage = error instanceof Error ? `: ${error.message}` : ''
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     }
 
     const context: RecipeContext = {
-        getAuthenticatedModel: endpointStore.buildModel.bind(endpointStore),
+        buildModel: cache.buildModel.bind(cache),
     }
 
     try {

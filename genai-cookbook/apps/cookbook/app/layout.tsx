@@ -4,9 +4,9 @@ import '@/styles/globals.css'
 import type { Metadata } from 'next'
 import { MantineProvider } from '@mantine/core'
 
-import { theme } from '@/lib/theme'
+import { theme } from '@/utils/theme'
 import { CookbookProvider } from '@/context'
-import { endpointsRoute } from '@/lib/constants'
+import { endpointsRoute } from '@/utils/constants'
 
 export const metadata: Metadata = {
     title: 'Modular GenAI Cookbook',
@@ -17,7 +17,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <html lang="en">
             <body>
                 <MantineProvider defaultColorScheme="auto" theme={theme}>
-                    <CookbookProvider endpointsRoute={endpointsRoute}>{children}</CookbookProvider>
+                    <CookbookProvider endpointsRoute={endpointsRoute}>
+                        {children}
+                    </CookbookProvider>
                 </MantineProvider>
             </body>
         </html>

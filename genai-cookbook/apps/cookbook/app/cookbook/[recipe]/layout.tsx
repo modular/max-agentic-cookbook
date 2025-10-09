@@ -1,11 +1,11 @@
 'use client'
 
-import { RecipeLayout } from '@modular/recipes/lib/layout'
-import { appShellContentHeight } from '@/lib/theme'
-import { Toolbar } from '@/components/Toolbar'
 import { redirect } from 'next/navigation'
-import { cookbookRoute } from '@/lib/constants'
+import { Toolbar } from '@/components/Toolbar'
+import { cookbookRoute } from '@/utils/constants'
+import { appShellContentHeight } from '@/utils/theme'
 import { recipeRegistry } from '@modular/recipes'
+import { RecipeLayout } from '@modular/recipes'
 
 export default function Layout({
     children,
@@ -23,7 +23,7 @@ export default function Layout({
     return (
         <RecipeLayout
             height={appShellContentHeight}
-            toolbar={<Toolbar title={recipe.title} />}
+            header={<Toolbar title={recipe.title} />}
         >
             {children}
         </RecipeLayout>

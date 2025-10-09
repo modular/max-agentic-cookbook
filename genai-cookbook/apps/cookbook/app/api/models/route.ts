@@ -1,13 +1,13 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
-import type { Model } from '@modular/recipes/lib/types'
-import endpointStore from '@/lib/EndpointStore'
+import type { Model } from '@modular/recipes'
+import cache from '@/utils/cache'
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const endpointId = searchParams.get('endpointId')
     const baseUrl = searchParams.get('baseUrl')
-    const apiKey = endpointStore.apiKey(endpointId)
+    const apiKey = cache.apiKey(endpointId)
 
     if (!baseUrl || !apiKey || !endpointId) {
         return NextResponse.json(

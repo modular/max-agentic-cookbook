@@ -1,34 +1,32 @@
 {
-  "name": "@modular/recipes",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "main": "./index.ts",
-  "exports": {
-    ".": "./index.ts",
-    "./package.json": "./package.json",
-    "./lib/types": "./src/lib/types.ts",
-    "./lib/layout": "./src/lib/layout.tsx",
-    "./*": "./src/*"
-  },
-  "dependencies": {
-    "@ai-sdk/openai": "^2.0.23",
-    "@ai-sdk/react": "^2.0.30",
-    "@mantine/core": "^7.17.8",
-    "@mantine/dropzone": "^7.17.8",
-    "@mantine/hooks": "^7.17.8",
-    "@tabler/icons-react": "^3.34.1",
-    "ai": "^5.0.28",
-    "nanoid": "^5.1.5",
-    "next": "^14",
-    "openai": "^5.20.2",
-    "react": "^18",
-    "react-dom": "^18"
-  },
-  "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "typescript": "^5"
-  }
+    "name": "@modular/recipes",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "main": "./index.ts",
+    "exports": {
+        ".": "./index.ts",
+        "./package.json": "./package.json",
+        "./*": "./src/*"
+    },
+    "dependencies": {
+        "@ai-sdk/openai": "^2.0.23",
+        "@ai-sdk/react": "^2.0.30",
+        "@mantine/core": "^7.17.8",
+        "@mantine/dropzone": "^7.17.8",
+        "@mantine/hooks": "^7.17.8",
+        "@tabler/icons-react": "^3.34.1",
+        "ai": "^5.0.28",
+        "nanoid": "^5.1.5",
+        "next": "^14",
+        "openai": "^5.20.2",
+        "react": "^18",
+        "react-dom": "^18"
+    },
+    "devDependencies": {
+        "@types/node": "^20",
+        "@types/react": "^18",
+        "@types/react-dom": "^18",
+        "typescript": "^5"
+    }
 }

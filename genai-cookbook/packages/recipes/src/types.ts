@@ -35,11 +35,11 @@ export interface RecipeProps {
     pathname: string
 }
 
-export type GetAuthenticatedModelFn = (
+export type ModelBuilder = (
     endpointId: string | undefined,
     modelName: string | undefined
 ) => Promise<LanguageModel>
 
 export interface RecipeContext {
-    getAuthenticatedModel: GetAuthenticatedModelFn
+    buildModel: ModelBuilder
 }

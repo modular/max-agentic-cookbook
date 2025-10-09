@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { AppShell, Group, ScrollArea, Stack, Text } from '@mantine/core'
 import { IconChevronRight } from '@tabler/icons-react'
-import { cookbookRoute } from '@/lib/constants'
-import { iconStroke } from '@/lib/theme'
+import { cookbookRoute } from '@/utils/constants'
+import { iconStroke } from '@/utils/theme'
 import { useSelectedLayoutSegment } from 'next/navigation'
 import { recipeRegistry } from '@modular/recipes'
 

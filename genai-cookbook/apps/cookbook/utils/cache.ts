@@ -1,4 +1,4 @@
-import { Endpoint } from '@modular/recipes/lib/types'
+import { Endpoint } from '@modular/recipes'
 import { createOpenAI } from '@ai-sdk/openai'
 import type { LanguageModel } from 'ai'
 
@@ -20,7 +20,7 @@ export class ModelPreparationError extends Error {
 }
 
 // Store endpoints server-side in memory to access them across routes
-class EndpointStore {
+class CookbookCache {
     private endpoints: ServerSideEndpoints = null
 
     getAll(): ServerSideEndpoints {
@@ -85,13 +85,13 @@ class EndpointStore {
 // Add store to the NodeJS global type
 declare global {
     // eslint-disable-next-line no-var
-    var endpointStore: EndpointStore | undefined
+    var cookbookCache: CookbookCache | undefined
 }
 
 // Prevent multiple instances of store in development
-const endpointStore = globalThis.endpointStore || new EndpointStore()
+const cache = globalThis.cookbookCache || new CookbookCache()
 if (process.env.NODE_ENV !== 'production') {
-    globalThis.endpointStore = endpointStore
+    globalThis.cookbookCache = cache
 }
 
-export default endpointStore
+export default cache

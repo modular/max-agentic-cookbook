@@ -1,5 +1,5 @@
 import { convertToModelMessages, streamText } from 'ai'
-import { RecipeContext, ModelPreparationError } from '../lib/types'
+import { RecipeContext, ModelPreparationError } from '../types'
 
 /*
  * This API route is the bridge between our chat surface and the provider that
@@ -24,7 +24,7 @@ export default async function POST(req: Request, context: RecipeContext) {
 
     let model
     try {
-        model = await context.getAuthenticatedModel(endpointId, modelName)
+        model = await context.buildModel(endpointId, modelName)
     } catch (error) {
         const modelError = error as ModelPreparationError
         return new Response(modelError.message, { status: modelError.status })

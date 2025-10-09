@@ -1,5 +1,5 @@
 import { generateText } from 'ai'
-import { RecipeContext, ModelPreparationError } from '../lib/types'
+import { RecipeContext, ModelPreparationError } from '../types'
 
 /*
  * The captioning API mirrors our multi-turn chat route but returns a single
@@ -20,7 +20,7 @@ export default async function POST(req: Request, context: RecipeContext) {
 
     let model
     try {
-        model = await context.getAuthenticatedModel(endpointId, modelName)
+        model = await context.buildModel(endpointId, modelName)
     } catch (error) {
         const modelError = error as ModelPreparationError
         return new Response(modelError.message, { status: modelError.status })

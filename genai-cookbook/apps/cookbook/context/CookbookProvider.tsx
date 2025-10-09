@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useEffect, ReactNode, useState } from 'react'
 
-import type { Endpoint, Model } from '@modular/recipes/lib/types'
+import type { Endpoint, Model } from '@modular/recipes'
 
 interface CookbookContextValue {
     // Endpoints
