@@ -6,7 +6,7 @@ import cache from '@/utils/cache'
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const endpointId = searchParams.get('endpointId')
-    const baseUrl = searchParams.get('baseUrl')
+    const baseUrl = cache.baseUrl(endpointId)
     const apiKey = cache.apiKey(endpointId)
 
     if (!baseUrl || !apiKey || !endpointId) {

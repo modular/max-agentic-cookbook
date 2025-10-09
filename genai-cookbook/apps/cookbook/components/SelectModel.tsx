@@ -33,7 +33,6 @@ export function SelectModel(props: SelectModelProps) {
 
         try {
             const params = new URLSearchParams({
-                baseUrl: selectedEndpoint.baseUrl,
                 ...(selectedEndpoint.id && { endpointId: selectedEndpoint.id }),
             })
 
