@@ -1,7 +1,6 @@
 import type { ComponentType } from 'react'
 import type { RecipeProps, RecipeContext } from './src/types'
 
-// Import recipe components
 import ImageCaptioningUI from './src/image-captioning/ui'
 import ImageCaptioningAPI from './src/image-captioning/api'
 import MultiturnChatUI from './src/multiturn-chat/ui'
@@ -9,6 +8,7 @@ import MultiturnChatAPI from './src/multiturn-chat/api'
 
 export * from './src/components'
 export * from './src/types'
+export * from './src/utils'
 
 export interface RecipeComponents {
     ui: ComponentType<RecipeProps>
