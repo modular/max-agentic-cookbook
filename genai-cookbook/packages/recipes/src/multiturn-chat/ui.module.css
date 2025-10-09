@@ -1,0 +1,12 @@
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.messageFade {
+    animation: fadeIn 180ms ease-out both;
+}

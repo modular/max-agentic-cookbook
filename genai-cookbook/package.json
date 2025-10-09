@@ -1,41 +1,18 @@
 {
-    "name": "agent-cookbook",
-    "version": "0.1.0",
-    "private": true,
-    "scripts": {
-        "dev": "next dev",
-        "build": "next build",
-        "start": "next start",
-        "lint": "next lint",
-        "format": "prettier --write .",
-        "format:check": "prettier --check ."
-    },
-    "dependencies": {
-        "@ai-sdk/openai": "^2.0.23",
-        "@ai-sdk/react": "^2.0.30",
-        "@mantine/core": "^7.17.8",
-        "@mantine/dropzone": "^7.17.8",
-        "@mantine/hooks": "^7.17.8",
-        "@tabler/icons-react": "^3.34.1",
-        "ai": "^5.0.28",
-        "nanoid": "^5.1.5",
-        "next": "^14",
-        "openai": "^5.20.2",
-        "react": "^18",
-        "react-dom": "^18",
-        "react-syntax-highlighter": "^15.6.6"
-    },
-    "devDependencies": {
-        "@types/node": "^20",
-        "@types/react": "^18",
-        "@types/react-dom": "^18",
-        "@types/react-syntax-highlighter": "^15.5.13",
-        "eslint": "^8",
-        "eslint-config-next": "14.2.31",
-        "postcss": "^8",
-        "prettier": "^3.6.2",
-        "prettier-plugin-tailwindcss": "^0.6.14",
-        "tailwindcss": "^3.4.1",
-        "typescript": "^5"
-    }
+  "name": "@modular/genai-cookbook",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @modular/cookbook dev",
+    "build": "pnpm --filter @modular/cookbook build",
+    "start": "pnpm --filter @modular/cookbook start",
+    "lint": "pnpm --filter @modular/cookbook lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14"
+  },
+  "packageManager": "pnpm@10.18.1+sha512.77a884a165cbba2d8d1c19e3b4880eee6d2fcabd0d879121e282196b80042351d5eb3ca0935fa599da1dc51265cc68816ad2bddd2a2de5ea9fdf92adbec7cd34"
 }
