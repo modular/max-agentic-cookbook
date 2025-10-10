@@ -20,9 +20,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { DefaultChatTransport } from 'ai'
 import { useChat } from '@ai-sdk/react'
-import { Box, ScrollArea } from '@mantine/core'
+import { Box, Paper, ScrollArea, Space, Stack, Text } from '@mantine/core'
 import { RecipeProps } from '../types'
-import styles from './ui.module.css'
 
 // ============================================================================
 // Chat surface component
@@ -82,7 +81,7 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
                         if (!el) return
                         const distanceToBottom =
                             el.scrollHeight - el.scrollTop - el.clientHeight
-                        const nearBottomThreshold = 4 // px
+                        const nearBottomThreshold = 8 // px
                         const nearBottom = distanceToBottom <= nearBottomThreshold
 
                         // Pause auto-follow when the user scrolls up to read older content.
@@ -116,6 +115,7 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
  */
 import type { UIMessage } from 'ai'
 import type { RefObject } from 'react'
+import { Streamdown } from 'streamdown'
 
 /**
  * Shared props for our message history block.
@@ -127,62 +127,40 @@ interface MessagesPanelProps {
 }
 
 /**
- * Lists every chat exchange and injects a fade-in animation for readability.
+ * Displays chat messages using Streamdown, a part of the Vercel AI SDK.
  */
 function MessagesPanel({ messages, bottomRef }: MessagesPanelProps) {
     return (
-        <dl>
-            {messages.map((m) => (
-                // Pair the speaker label with the text body for each message in order.
-                <div key={m.id} className="pb-4">
-                    <MessageRole message={m} />
-                    <MessageContent message={m} />
-                </div>
+        <Stack align="flex-start" justify="flex-start" gap="sm">
+            {messages.map((message) => (
+                // The outer loop maps each message from the user or assistant
+                <Box key={message.id} w="100%">
+                    <Text fw="bold" tt="capitalize">
+                        {message.role}
+                    </Text>
+                    <Paper>
+                        {message.parts
+                            // The inner loop maps each message part, with support
+                            // for streaming responses from the LLM
+                            .filter((part) => part.type === 'text')
+                            .map((part, index) => (
+                                <Streamdown
+                                    controls={false}
+                                    shikiTheme={[
+                                        'material-theme-lighter',
+                                        'material-theme-darker',
+                                    ]}
+                                    key={index}
+                                >
+                                    {part.text}
+                                </Streamdown>
+                            ))}
+                    </Paper>
+                    <Space h="xs" />
+                </Box>
             ))}
-            <div ref={bottomRef} />
-        </dl>
-    )
-}
-
-/** Keeps type information consistent across role and content renderers. */
-interface MessageContentProps {
-    message: UIMessage
-}
-
-/**
- * Displays who said the message (user vs. assistant) with quick capitalization.
- */
-function MessageRole({ message }: MessageContentProps) {
-    return (
-        <dt className={`${styles.messageFade} font-bold`}>
-            {/* GenAI roles come through lowercase, so we prettify them for the UI. */}
-            {message.role.charAt(0).toUpperCase() + message.role.slice(1)}
-        </dt>
-    )
-}
-
-/**
- * Streams message text with simple formatting that respects whitespace.
- */
-function MessageContent({ message }: MessageContentProps) {
-    return (
-        <dd>
-            <pre
-                style={{ fontFamily: 'inherit' }}
-                className="whitespace-pre-wrap break-words"
-            >
-                {/* Only render text parts so other message types (like tool calls) can be added later. */}
-                {message.parts
-                    .filter((p) => p.type === 'text')
-                    .map((p, i) =>
-                        'text' in p ? (
-                            <span key={i} className={styles.messageFade}>
-                                {p.text}
-                            </span>
-                        ) : null
-                    )}
-            </pre>
-        </dd>
+            <Box ref={bottomRef} />
+        </Stack>
     )
 }
 
