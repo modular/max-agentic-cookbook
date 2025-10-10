@@ -9,7 +9,7 @@ import { CookbookProvider } from '@/context'
 import { endpointsRoute } from '@/utils/constants'
 
 export const metadata: Metadata = {
-    title: 'Modular GenAI Cookbook',
+    title: 'Modular Agentic Cookbook',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

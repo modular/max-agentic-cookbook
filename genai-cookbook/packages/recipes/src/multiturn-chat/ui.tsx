@@ -20,9 +20,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { DefaultChatTransport } from 'ai'
 import { useChat } from '@ai-sdk/react'
-import { Box, ScrollArea } from '@mantine/core'
+import { Box, Paper, ScrollArea, Space, Stack, Text } from '@mantine/core'
 import { RecipeProps } from '../types'
-import styles from './ui.module.css'
 
 // ============================================================================
 // Chat surface component
@@ -61,29 +60,53 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
     const [followStream, setFollowStream] = useState(true)
     const viewportRef = useRef<HTMLDivElement>(null)
     const bottomRef = useRef<HTMLDivElement>(null)
+    const isAutoScrolling = useRef(false)
 
     // Whenever a new message arrives, keep the latest tokens in view unless
     // we've intentionally scrolled upward to review earlier context.
     useEffect(() => {
         if (!followStream) return
+
+        // Mark that we're about to programmatically scroll
+        isAutoScrolling.current = true
         bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+
+        // Clear the flag after scroll animation starts (~100ms is enough)
+        const timer = setTimeout(() => {
+            isAutoScrolling.current = false
+        }, 100)
+
+        return () => clearTimeout(timer)
     }, [messages, followStream])
 
     return (
         <>
             <Box style={{ flex: 1, minHeight: 0 }}>
                 <ScrollArea
-                    // Mantine exposes scroll info through a forwarded ref so we can detect manual scrolling.
+                    // Mantine exposes scroll info through a forwarded ref
+                    // so we can detect manual scrolling.
                     h="100%"
                     type="auto"
                     viewportRef={viewportRef}
                     onScrollPositionChange={() => {
                         const el = viewportRef.current
                         if (!el) return
+
                         const distanceToBottom =
                             el.scrollHeight - el.scrollTop - el.clientHeight
-                        const nearBottomThreshold = 4 // px
+                        const nearBottomThreshold = 20 // px
                         const nearBottom = distanceToBottom <= nearBottomThreshold
+
+                        // If user has clearly scrolled away (>50px from bottom),
+                        // they want to stop following - even during auto-scroll
+                        if (isAutoScrolling.current && distanceToBottom > 50) {
+                            isAutoScrolling.current = false
+                            setFollowStream(false)
+                            return
+                        }
+
+                        // Don't interfere with programmatic auto-scroll when close to bottom
+                        if (isAutoScrolling.current) return
 
                         // Pause auto-follow when the user scrolls up to read older content.
                         setFollowStream(nearBottom)
@@ -105,7 +128,7 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
 }
 
 // ============================================================================
-// Message panel types and components
+// Message panel
 // ============================================================================
 
 /*
@@ -116,6 +139,7 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
  */
 import type { UIMessage } from 'ai'
 import type { RefObject } from 'react'
+import { Streamdown } from 'streamdown'
 
 /**
  * Shared props for our message history block.
@@ -127,62 +151,40 @@ interface MessagesPanelProps {
 }
 
 /**
- * Lists every chat exchange and injects a fade-in animation for readability.
+ * Displays chat messages using Streamdown, a part of the Vercel AI SDK.
  */
 function MessagesPanel({ messages, bottomRef }: MessagesPanelProps) {
     return (
-        <dl>
-            {messages.map((m) => (
-                // Pair the speaker label with the text body for each message in order.
-                <div key={m.id} className="pb-4">
-                    <MessageRole message={m} />
-                    <MessageContent message={m} />
-                </div>
+        <Stack align="flex-start" justify="flex-start" gap="sm">
+            {messages.map((message) => (
+                // The outer loop maps each message from the user or assistant
+                <Box key={message.id} w="100%">
+                    <Text fw="bold" tt="capitalize">
+                        {message.role}
+                    </Text>
+                    <Paper>
+                        {message.parts
+                            // The inner loop maps each message part, with support
+                            // for streaming responses from the LLM
+                            .filter((part) => part.type === 'text')
+                            .map((part, index) => (
+                                <Streamdown
+                                    controls={false}
+                                    shikiTheme={[
+                                        'material-theme-lighter',
+                                        'material-theme-darker',
+                                    ]}
+                                    key={index}
+                                >
+                                    {part.text}
+                                </Streamdown>
+                            ))}
+                    </Paper>
+                    <Space h="xs" />
+                </Box>
             ))}
-            <div ref={bottomRef} />
-        </dl>
-    )
-}
-
-/** Keeps type information consistent across role and content renderers. */
-interface MessageContentProps {
-    message: UIMessage
-}
-
-/**
- * Displays who said the message (user vs. assistant) with quick capitalization.
- */
-function MessageRole({ message }: MessageContentProps) {
-    return (
-        <dt className={`${styles.messageFade} font-bold`}>
-            {/* GenAI roles come through lowercase, so we prettify them for the UI. */}
-            {message.role.charAt(0).toUpperCase() + message.role.slice(1)}
-        </dt>
-    )
-}
-
-/**
- * Streams message text with simple formatting that respects whitespace.
- */
-function MessageContent({ message }: MessageContentProps) {
-    return (
-        <dd>
-            <pre
-                style={{ fontFamily: 'inherit' }}
-                className="whitespace-pre-wrap break-words"
-            >
-                {/* Only render text parts so other message types (like tool calls) can be added later. */}
-                {message.parts
-                    .filter((p) => p.type === 'text')
-                    .map((p, i) =>
-                        'text' in p ? (
-                            <span key={i} className={styles.messageFade}>
-                                {p.text}
-                            </span>
-                        ) : null
-                    )}
-            </pre>
-        </dd>
+            <Box ref={bottomRef} />
+        </Stack>
     )
 }
 

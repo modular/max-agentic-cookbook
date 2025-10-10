@@ -1,6 +1,6 @@
-# Modular GenAI Cookbook
+# Modular Agentic Cookbook
 
-The GenAI Cookbook is collection of recipes demonstrating how to build modern fullstack web apps using Modular MAX, Next.js, and the Vercel AI SDK. Unlike other recipes in the MAX Recipes repo—which are Python-based—the GenAI Cookbook is written exclusively in TypeScript, providing production-ready patterns for building interactive AI experiences. Each recipe demonstrates an end-to-end workflow with both frontend and backend implementations, including detailed code comments.
+The Agentic Cookbook is collection of recipes demonstrating how to build modern fullstack web apps using Modular MAX, Next.js, and the Vercel AI SDK. Unlike other recipes in the MAX Recipes repo—which are Python-based—the Agentic Cookbook is written exclusively in TypeScript, providing production-ready patterns for building interactive AI experiences. Each recipe demonstrates an end-to-end workflow with both frontend and backend implementations, including detailed code comments.
 
 <img src="https://github.com/user-attachments/assets/e2302038-a950-41a8-acec-47c0d9c09ed6" />
 
@@ -92,7 +92,7 @@ Create an intelligent image captioning system that generates natural language de
 
 ## Architecture
 
-The GenAI Cookbook follows a modern fullstack architecture optimized for AI applications, organized as a pnpm workspace monorepo:
+The Agentic Cookbook follows a modern fullstack architecture optimized for AI applications, organized as a pnpm workspace monorepo:
 
 ```
 genai-cookbook/
@@ -185,7 +185,7 @@ To use the cookbook with MAX:
 
 ## Running with Docker
 
-The GenAI Cookbook can be run entirely within a Docker container, including the MAX model server and web application. The container uses the universal MAX image with the nightly build, supporting both NVIDIA and AMD GPUs.
+The Agentic Cookbook can be run entirely within a Docker container, including the MAX model server and web application. The container uses the universal MAX image with the nightly build, supporting both NVIDIA and AMD GPUs.
 
 ### Building the Container
 
@@ -202,23 +202,25 @@ docker build --ulimit nofile=65535:65535 -t max-cookbook:latest .
 You can customize the Docker build using these arguments to reduce container size:
 
 - **MAX_GPU**: Selects the base image (default: `universal`)
-  - `universal` → `modular/max-full` (larger, supports all GPU types)
-  - `amd` → `modular/max-amd` (smaller, AMD-specific)
-  - `nvidia` → `modular/max-nvidia-full` (smaller, NVIDIA-specific)
+    - `universal` → `modular/max-full` (larger, supports all GPU types)
+    - `amd` → `modular/max-amd` (smaller, AMD-specific)
+    - `nvidia` → `modular/max-nvidia-full` (smaller, NVIDIA-specific)
 
 - **MAX_TAG**: Selects the image version (default: `latest`)
-  - `latest` → Latest stable release
-  - `nightly` → Nightly development builds
-  - Specific versions (e.g., `25.7.0`)
+    - `latest` → Latest stable release
+    - `nightly` → Nightly development builds
+    - Specific versions (e.g., `25.7.0`)
 
 **Examples:**
 
 Build smaller AMD-specific container:
+
 ```bash
 docker build --build-arg MAX_GPU=amd --ulimit nofile=65535:65535 -t max-cookbook:amd .
 ```
 
 Build smaller NVIDIA-specific container with nightly builds:
+
 ```bash
 docker build --build-arg MAX_GPU=nvidia --build-arg MAX_TAG=nightly --ulimit nofile=65535:65535 -t max-cookbook:nvidia-nightly .
 ```
@@ -256,8 +258,9 @@ docker run \
 ```
 
 **Configuration:**
+
 - **Port 8000**: MAX model serving endpoint
-- **Port 3000**: GenAI Cookbook web application
+- **Port 3000**: Agentic Cookbook web application
 - **HF_TOKEN**: Your HuggingFace token for downloading models
 - **MAX_MODEL**: The model to serve (e.g., `google/gemma-3-27b-it`)
 - **Volume mount**: Caches downloaded models in `~/.cache/huggingface`

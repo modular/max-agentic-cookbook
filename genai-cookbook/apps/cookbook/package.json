@@ -11,12 +11,12 @@
         "format:check": "prettier --check ."
     },
     "dependencies": {
-        "@modular/recipes": "workspace:*",
         "@ai-sdk/openai": "^2.0.23",
         "@ai-sdk/react": "^2.0.30",
         "@mantine/core": "^7.17.8",
         "@mantine/dropzone": "^7.17.8",
         "@mantine/hooks": "^7.17.8",
+        "@modular/recipes": "workspace:*",
         "@tabler/icons-react": "^3.34.1",
         "ai": "^5.0.28",
         "nanoid": "^5.1.5",
@@ -24,7 +24,8 @@
         "openai": "^5.20.2",
         "react": "^18",
         "react-dom": "^18",
-        "react-syntax-highlighter": "^15.6.6"
+        "react-syntax-highlighter": "^15.6.6",
+        "streamdown": "^1.3.0"
     },
     "devDependencies": {
         "@types/node": "^20",
