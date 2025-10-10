@@ -37,7 +37,7 @@ export default function Header({
                 </ActionIcon>
             </Group>
             <Title style={{ fontWeight: 'normal' }} order={5}>
-                <Link href={cookbookRoute()}>Modular GenAI Cookbook</Link>
+                <Link href={cookbookRoute()}>Modular Agentic Cookbook</Link>
             </Title>
             <ThemeToggle stroke={iconStroke} />
         </Flex>
