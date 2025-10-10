@@ -60,29 +60,53 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
     const [followStream, setFollowStream] = useState(true)
     const viewportRef = useRef<HTMLDivElement>(null)
     const bottomRef = useRef<HTMLDivElement>(null)
+    const isAutoScrolling = useRef(false)
 
     // Whenever a new message arrives, keep the latest tokens in view unless
     // we've intentionally scrolled upward to review earlier context.
     useEffect(() => {
         if (!followStream) return
+
+        // Mark that we're about to programmatically scroll
+        isAutoScrolling.current = true
         bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+
+        // Clear the flag after scroll animation starts (~100ms is enough)
+        const timer = setTimeout(() => {
+            isAutoScrolling.current = false
+        }, 100)
+
+        return () => clearTimeout(timer)
     }, [messages, followStream])
 
     return (
         <>
             <Box style={{ flex: 1, minHeight: 0 }}>
                 <ScrollArea
-                    // Mantine exposes scroll info through a forwarded ref so we can detect manual scrolling.
+                    // Mantine exposes scroll info through a forwarded ref
+                    // so we can detect manual scrolling.
                     h="100%"
                     type="auto"
                     viewportRef={viewportRef}
                     onScrollPositionChange={() => {
                         const el = viewportRef.current
                         if (!el) return
+
                         const distanceToBottom =
                             el.scrollHeight - el.scrollTop - el.clientHeight
-                        const nearBottomThreshold = 8 // px
+                        const nearBottomThreshold = 20 // px
                         const nearBottom = distanceToBottom <= nearBottomThreshold
+
+                        // If user has clearly scrolled away (>50px from bottom),
+                        // they want to stop following - even during auto-scroll
+                        if (isAutoScrolling.current && distanceToBottom > 50) {
+                            isAutoScrolling.current = false
+                            setFollowStream(false)
+                            return
+                        }
+
+                        // Don't interfere with programmatic auto-scroll when close to bottom
+                        if (isAutoScrolling.current) return
 
                         // Pause auto-follow when the user scrolls up to read older content.
                         setFollowStream(nearBottom)
@@ -104,7 +128,7 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
 }
 
 // ============================================================================
-// Message panel types and components
+// Message panel
 // ============================================================================
 
 /*
