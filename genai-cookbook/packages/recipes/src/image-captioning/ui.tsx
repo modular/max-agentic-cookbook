@@ -273,6 +273,8 @@ function FileDrop({ onDrop, maxSizeMb, disabled }: FileDropProps) {
                 multiple={true}
                 style={centerStyle}
                 disabled={disabled}
+                mt="4"
+                h="100"
                 p="md"
                 w="100%"
                 bd="1px solid var(--mantine-color-default-border)"
