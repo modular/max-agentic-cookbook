@@ -3,7 +3,7 @@
 import path from 'path'
 import fs from 'fs'
 import { createRequire } from 'module'
-import { recipeRegistry } from '../index'
+import { recipeMetadata } from './registry/metadata'
 
 const require = createRequire(import.meta.url)
 const packageRoot = path.dirname(require.resolve('@modular/recipes/package.json'))
@@ -13,7 +13,7 @@ export async function getRecipeSource(
     id: string,
     file: 'ui' | 'api'
 ): Promise<string | undefined> {
-    if (!recipeRegistry[id]) return undefined
+    if (!recipeMetadata[id]) return undefined
     if (file !== 'ui' && file !== 'api') return undefined
 
     const extension = file === 'ui' ? '.tsx' : '.ts'
