@@ -1,4 +1,4 @@
-import { Endpoint } from '@modular/recipes'
+import type { Endpoint } from '@modular/recipes'
 
 // Only store the API key server side
 interface EndpointWithApiKey extends Endpoint {

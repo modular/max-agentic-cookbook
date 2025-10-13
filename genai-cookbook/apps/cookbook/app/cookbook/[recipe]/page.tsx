@@ -3,7 +3,7 @@
 import { redirect, usePathname } from 'next/navigation'
 import { cookbookRoute } from '@/utils/constants'
 import { useCookbook } from '@/context'
-import { recipeRegistry } from '@modular/recipes'
+import { recipeMetadata, recipeUiRegistry } from '@modular/recipes'
 
 export default function Page({ params }: { params: { recipe?: string } }) {
     const pathname = usePathname()
@@ -11,13 +11,12 @@ export default function Page({ params }: { params: { recipe?: string } }) {
 
     if (!params.recipe) return redirect(cookbookRoute())
 
-    const recipe = recipeRegistry[params.recipe]
+    const recipe = recipeMetadata[params.recipe]
+    const RecipeComponent = recipeUiRegistry[params.recipe]
 
-    if (!recipe) {
+    if (!recipe || !RecipeComponent) {
         throw new Error(`Unable to load recipe ${params.recipe}`)
     }
-
-    const RecipeComponent = recipe.ui
 
     return (
         <RecipeComponent

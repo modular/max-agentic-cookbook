@@ -4,8 +4,7 @@ import { redirect } from 'next/navigation'
 import { Toolbar } from '@/components/Toolbar'
 import { cookbookRoute } from '@/utils/constants'
 import { appShellContentHeight } from '@/utils/theme'
-import { recipeRegistry } from '@modular/recipes'
-import { RecipeLayout } from '@modular/recipes'
+import { recipeMetadata, RecipeLayout } from '@modular/recipes'
 
 export default function Layout({
     children,
@@ -16,7 +15,7 @@ export default function Layout({
 }) {
     if (!params.recipe) return redirect(cookbookRoute())
 
-    const recipe = recipeRegistry[params.recipe]
+    const recipe = recipeMetadata[params.recipe]
 
     if (!recipe) return redirect(cookbookRoute())
 
