@@ -1,5 +1,5 @@
 import cache from '@/utils/cache'
-import { recipeApiRegistry } from '@modular/recipes/server'
+import { getRecipeApiHandler } from '@modular/recipes/server'
 
 function createErrorResponse(message: string, error?: unknown, status = 400): Response {
     const errorMessage = error instanceof Error ? `: ${error.message}` : ''
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
         return createErrorResponse('Cannot determine recipe slug', error)
     }
 
-    const apiHandler = recipeApiRegistry[recipeId]
+    const apiHandler = await getRecipeApiHandler(recipeId)
     if (!apiHandler) {
         return createErrorResponse(`Recipe not found: ${recipeId}`, undefined, 404)
     }
