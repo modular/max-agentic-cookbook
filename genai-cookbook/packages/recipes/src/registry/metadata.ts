@@ -13,4 +13,9 @@ export const recipeMetadata: Record<string, RecipeMetadata> = {
         description:
             "This recipe demonstrates a Mantine-powered chat surface that streams multi-turn conversations through the Vercel AI SDK, letting you toggle between Modular MAX and other OpenAI-compatible endpoints without rewriting UI logic. The page component keeps composer input, scroll-follow behavior, and the live message list in sync while forwarding each prompt to a Next.js API route. That route adapts the chat transcript into the SDK's message format, invokes the selected model via `openai.chat`, and streams tokens back to the browser so replies render fluidly as they arrive.",
     },
+    'streaming-threads': {
+        slug: 'streaming-threads',
+        title: 'Streaming Threads',
+        description: 'Lorem ipsum dolot sit amet.',
+    },
 }
