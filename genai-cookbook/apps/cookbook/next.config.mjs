@@ -11,14 +11,15 @@ const nextConfig = {
         outputFileTracingRoot: path.join(__dirname, '../../'),
         // Enable Fast Refresh for external packages
         externalDir: true,
-        turbo: {
-            // Turbopack resolves workspace packages correctly by default
-            resolveAlias: {
-                '@modular/recipes': '../../packages/recipes',
-            },
-        },
     },
     transpilePackages: ['@modular/recipes'],
+    webpack(config, { dev }) {
+        if (dev) {
+            // Avoid PackFile serialization warnings by keeping the cache in-memory during dev
+            config.cache = { type: 'memory' }
+        }
+        return config
+    },
 }
 
 export default nextConfig
