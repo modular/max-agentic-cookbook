@@ -1,15 +1,17 @@
 'use client'
 
 /*
- * Image Captioning with NDJSON Streaming
+ * Image Captioning with NDJSON Streaming and Performance Metrics
  *
  * This recipe demonstrates how to caption images using Modular MAX or any OpenAI-compatible
  * server, with progressive streaming updates for better UX. Instead of waiting for all captions
- * to complete, users see each result as soon as it's ready.
+ * to complete, users see each result as soon as it's ready, along with performance metrics.
  *
  * Architecture:
  * - Custom useNDJSON hook: Handles NDJSON streaming from the API (no external dependencies)
  * - Progressive UI updates: Captions appear one-by-one as they complete
+ * - Performance tracking: TTFT (time to first token) and generation duration displayed per image
+ * - Time formatting: pretty-ms library shows human-readable times (e.g., "2m 5s", "245ms")
  * - Mantine components: File upload, image gallery, and form controls
  * - Vercel AI SDK: OpenAI-compatible API client (works with MAX, OpenAI, etc.)
  */
@@ -33,7 +35,11 @@ import {
 
 /**
  * Tracks everything we need to caption an uploaded image, including async state
- * so the UI can show spinners while Modular MAX/OpenAI generate text.
+ * and performance metrics for measuring OpenAI-compatible API response times.
+ *
+ * Performance metrics:
+ * - captionTTFT: Time to first token in milliseconds (latency before streaming starts)
+ * - captionDuration: Generation time in milliseconds (time from first token to completion)
  */
 interface ImageData {
     id: string
@@ -164,8 +170,8 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
         imageId: string
         text?: string
         error?: string
-        ttft?: number
-        duration?: number
+        ttft?: number // Time to first token (ms)
+        duration?: number // Generation time after first token (ms)
     }
     const { trigger, isMutating, error } = useNDJSON<CaptionResult>(`${pathname}/api`)
 
@@ -233,7 +239,8 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
                     batch,
                 },
                 (result) => {
-                    // Update UI with each caption as it arrives, including timing metrics
+                    // Update UI with each caption as it arrives from the stream
+                    // Includes timing metrics: TTFT (latency) and duration (generation time)
                     setImages((data) =>
                         data.map((prev) =>
                             prev.id === result.imageId
@@ -427,7 +434,10 @@ function FileDrop({ onDrop, maxSizeMb, disabled }: FileDropProps) {
 import { Box, Image, LoadingOverlay } from '@mantine/core'
 import { RecipeProps } from '../types'
 
-/** Displays uploaded images in a responsive grid with caption text below each */
+/**
+ * Displays uploaded images in a responsive grid with caption text and performance metrics.
+ * Each image shows TTFT and duration using pretty-ms for human-readable formatting.
+ */
 function Gallery({ images }: { images: ImageData[] }) {
     const ImageBox = ({ image }: { image: ImageData }) => {
         return (
@@ -446,12 +456,12 @@ function Gallery({ images }: { images: ImageData[] }) {
                 <Text c="dimmed" size="sm">
                     TTFT:{' '}
                     {image.captionTTFT
-                        ? prettyMilliseconds(image.captionTTFT, { unitCount: 3 })
+                        ? prettyMilliseconds(image.captionTTFT, { unitCount: 4 })
                         : '--'}
                     , Duration:{' '}
                     {image.captionDuration
                         ? '+' +
-                          prettyMilliseconds(image.captionDuration, { unitCount: 3 })
+                          prettyMilliseconds(image.captionDuration, { unitCount: 4 })
                         : '--'}
                 </Text>
             </Box>

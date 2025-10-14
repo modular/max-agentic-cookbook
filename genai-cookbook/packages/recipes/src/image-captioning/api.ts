@@ -3,17 +3,22 @@ import { RecipeContext } from '../types'
 import { createOpenAI } from '@ai-sdk/openai'
 
 /*
- * Image Captioning API with NDJSON Streaming
+ * Image Captioning API with NDJSON Streaming and Performance Metrics
  *
  * This API demonstrates progressive response streaming using NDJSON (newline-delimited JSON).
  * Instead of waiting for all captions to complete, we stream each result as it's generated,
- * providing immediate feedback to users.
+ * providing immediate feedback to users along with detailed performance metrics.
  *
  * Key concepts:
  * - NDJSON format: One JSON object per line, easy to parse progressively
  * - Parallel processing: All images caption simultaneously for speed
  * - Stream-as-you-go: Results appear in the UI the moment they're ready
+ * - Performance tracking: TTFT (time to first token) and duration (generation time) per image
  * - OpenAI-compatible: Works with Modular MAX or any OpenAI-compatible server
+ *
+ * Timing metrics explained:
+ * - TTFT: Time from request start to first token (measures latency)
+ * - Duration: Time from first token to completion (measures generation speed)
  */
 
 export default async function POST(req: Request, context: RecipeContext) {
@@ -47,15 +52,15 @@ export default async function POST(req: Request, context: RecipeContext) {
                                     let ttft: number | null = null
                                     let textChunks: string[] = []
 
-                                    // Stream caption generation to capture timing metrics
+                                    // Use streamText (not generateText) to capture timing metrics
                                     const result = streamText({
                                         model: model,
                                         messages: item.messages,
                                     })
 
-                                    // Consume the stream to collect text and timing
+                                    // Consume the stream chunk-by-chunk to collect text and timing
                                     for await (const chunk of result.textStream) {
-                                        // Capture time to first token
+                                        // Capture TTFT: time from request start to first token
                                         if (ttft === null) {
                                             firstTokenTime = Date.now()
                                             ttft = firstTokenTime - startTime
@@ -63,11 +68,11 @@ export default async function POST(req: Request, context: RecipeContext) {
                                         textChunks.push(chunk)
                                     }
 
-                                    // Duration is time from first token to completion
+                                    // Duration: time from first token to completion (not total time)
                                     const duration = firstTokenTime ? Date.now() - firstTokenTime : null
                                     const text = textChunks.join('')
 
-                                    // NDJSON format: JSON object + newline with timing metrics
+                                    // Stream result as NDJSON: one JSON object per line with metrics
                                     const line = JSON.stringify({
                                         imageId: item.imageId,
                                         text,
