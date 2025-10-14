@@ -204,7 +204,7 @@ function FormActions({
             <Button disabled={actionsDisabled} onClick={generateClicked}>
                 Generate Captions
             </Button>
-            <Button disabled={actionsDisabled} onClick={resetClicked}>
+            <Button variant="outline" disabled={actionsDisabled} onClick={resetClicked}>
                 Reset
             </Button>
             <Space mr="auto" />
@@ -432,7 +432,9 @@ async function batchCaptionFetcher(
         if (result.text) {
             results.set(result.imageId, result.text)
         } else if (result.error) {
-            throw new Error(`Failed to caption image ${result.imageId}: ${result.error}`)
+            throw new Error(
+                `Failed to caption image ${result.imageId}: ${result.error}`
+            )
         }
     })
 
