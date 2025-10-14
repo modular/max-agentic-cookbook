@@ -79,16 +79,20 @@ The Agentic Cookbook is collection of recipes demonstrating how to build modern 
 Build a streaming chat interface that maintains conversation context across multiple exchanges. This recipe demonstrates:
 
 - Real-time token streaming using the Vercel AI SDK
-- Auto-scrolling message display using Mantine
+- Markdown rendering with syntax-highlighted code blocks using Streamdown
+- Auto-scrolling message display with smart scroll detection
+- Seamless compatibility with Modular MAX and OpenAI-compatible endpoints
 
 ### 2. **Image Captioning**
 
-Create an intelligent image captioning system that generates natural language descriptions for uploaded images. Features include:
+Create an intelligent image captioning system that generates natural language descriptions for uploaded images with progressive streaming and performance tracking. Features include:
 
+- **NDJSON streaming**: Custom useNDJSON hook for progressive results—captions appear as they're generated
+- **Parallel processing**: Multiple images processed simultaneously for maximum speed
+- **Performance metrics**: TTFT (time to first token) and duration tracking with human-readable formatting via pretty-ms
 - Drag-and-drop image upload with Mantine Dropzone
-- Base64 image encoding for API transport
 - Customizable prompt for caption generation
-- Gallery view with loading states and progress indicators
+- Gallery view with loading states and real-time updates
 
 ## Architecture
 

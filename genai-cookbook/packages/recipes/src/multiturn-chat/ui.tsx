@@ -1,20 +1,23 @@
 'use client'
 
 /*
- * This walkthrough shows how Modular MAX can share the same surface as OpenAI by
- * leaning on the Vercel AI SDK. We configure a single transport that can talk to
- * many models, stream responses token by token, and keep the UI responsive
- * the entire time.
+ * Multi-turn Chat with Token Streaming
  *
- * Mantine powers the visible shell because it ships polished primitives—such as
- * ScrollArea—that would be tedious to build from scratch. Modular's internal
- * Design Language System also layers on Mantine, so this mirrors our own
- * production ergonomics.
+ * This recipe demonstrates how to build a chat interface that works with Modular MAX
+ * or any OpenAI-compatible endpoint using the Vercel AI SDK. Messages stream token-by-token
+ * for fluid, real-time responses.
  *
- * Below you will find three sections: the top-level chat surface, the helpers
- * that present streamed messages, and the composer form. Comments along the way
- * trace how data and events move between the Vercel AI SDK, Modular MAX, and the
- * surrounding React components.
+ * Key features:
+ * - Token streaming: Response text appears progressively as it's generated
+ * - Auto-scroll: Automatically follows new messages with smart manual scroll detection
+ * - Streamdown: Renders markdown with syntax-highlighted code blocks
+ * - Conversation history: Multi-turn context maintained across messages
+ * - Mantine UI: Polished components (ScrollArea, forms) for production-ready UX
+ *
+ * Architecture:
+ * - useChat hook (Vercel AI SDK): Manages streaming, message state, and transport
+ * - DefaultChatTransport: Routes requests to the selected OpenAI-compatible endpoint
+ * - Streamdown component: Renders streamed markdown with Shiki syntax highlighting
  */
 
 import { useEffect, useRef, useState } from 'react'
@@ -28,9 +31,8 @@ import { RecipeProps } from '../types'
 // ============================================================================
 
 /*
- * The chat surface brings everything together. It wires the Vercel AI SDK to a
- * Modular MAX-compatible transport, tracks scroll position for auto-follow, and
- * hands message data to the presentation components further down the file.
+ * Main chat component: wires the Vercel AI SDK to an OpenAI-compatible transport,
+ * tracks scroll position for auto-follow behavior, and manages message state.
  */
 export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
     // Controlled value for the chat composer input.
@@ -132,10 +134,8 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
 // ============================================================================
 
 /*
- * These helpers focus on rendering the chat history. They apply subtle
- * animations, label each message by role, and prepare a scroll anchor so the
- * surface can follow the newest streamed tokens coming from Modular MAX
- * through the AI SDK transport.
+ * Renders chat history with Streamdown for markdown formatting and syntax highlighting.
+ * Provides a scroll anchor for auto-follow behavior as new tokens stream in.
  */
 import type { UIMessage } from 'ai'
 import type { RefObject } from 'react'
@@ -151,7 +151,8 @@ interface MessagesPanelProps {
 }
 
 /**
- * Displays chat messages using Streamdown, a part of the Vercel AI SDK.
+ * Displays chat messages using Streamdown for markdown rendering with syntax highlighting.
+ * Streamdown is part of the Vercel AI SDK ecosystem for rendering streamed text.
  */
 function MessagesPanel({ messages, bottomRef }: MessagesPanelProps) {
     return (
@@ -193,9 +194,8 @@ function MessagesPanel({ messages, bottomRef }: MessagesPanelProps) {
 // ============================================================================
 
 /*
- * The composer accepts user prompts and invokes the `useChat` helper. It keeps
- * the input controlled, clears the text once a prompt is submitted, and
- * delegates provider-agnostic networking to the transport configured above.
+ * Composer form: accepts user prompts and triggers message submission.
+ * Controlled input is cleared on send, with networking delegated to useChat transport.
  */
 import { Button, Group, Input } from '@mantine/core'
 

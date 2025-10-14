@@ -11,25 +11,26 @@
         "./*": "./src/*"
     },
     "dependencies": {
-        "@ai-sdk/openai": "^2.0.23",
-        "@ai-sdk/react": "^2.0.30",
-        "@mantine/core": "^7.17.8",
-        "@mantine/dropzone": "^7.17.8",
-        "@mantine/hooks": "^7.17.8",
-        "@tabler/icons-react": "^3.34.1",
-        "ai": "^5.0.28",
-        "nanoid": "^5.1.5",
-        "openai": "^5.20.2",
-        "streamdown": "^1.3.0"
+        "@ai-sdk/openai": "catalog:",
+        "@ai-sdk/react": "catalog:",
+        "@mantine/core": "catalog:",
+        "@mantine/dropzone": "catalog:",
+        "@mantine/hooks": "catalog:",
+        "@tabler/icons-react": "catalog:",
+        "ai": "catalog:",
+        "nanoid": "catalog:",
+        "openai": "catalog:",
+        "pretty-ms": "catalog:",
+        "streamdown": "catalog:"
     },
     "peerDependencies": {
         "react": "^18",
         "react-dom": "^18"
     },
     "devDependencies": {
-        "@types/node": "^20",
-        "@types/react": "^18",
-        "@types/react-dom": "^18",
-        "typescript": "^5"
+        "@types/node": "catalog:",
+        "@types/react": "catalog:",
+        "@types/react-dom": "catalog:",
+        "typescript": "catalog:"
     }
 }
