@@ -10,14 +10,13 @@
  * interaction, and the request helpers that translate files into provider-ready
  * messages.
  *
- * This implementation uses SWR for data fetching with automatic request
- * deduplication and built-in loading/error states.
+ * This implementation uses a custom NDJSON streaming hook for progressive
+ * caption updates as they arrive from the server.
  */
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { nanoid } from 'nanoid'
 import { SystemModelMessage, UserModelMessage } from 'ai'
-import useSWRMutation from 'swr/mutation'
 import {
     Stack,
     SimpleGrid,
@@ -45,13 +44,103 @@ interface ImageData {
 }
 
 // ============================================================================
+// Custom NDJSON streaming hook
+// ============================================================================
+
+/**
+ * Custom hook for streaming NDJSON responses from a fetch request.
+ * Provides SWR-like API with trigger, isMutating, and error states.
+ *
+ * @param url - The endpoint URL to POST to
+ * @returns Hook interface with trigger function, loading state, and error
+ */
+function useNDJSON<T>(url: string) {
+    const [isMutating, setIsMutating] = useState(false)
+    const [error, setError] = useState<Error | null>(null)
+    const abortControllerRef = useRef<AbortController | null>(null)
+
+    const trigger = useCallback(
+        async (body: any, onMessage: (data: T) => void) => {
+            setIsMutating(true)
+            setError(null)
+            abortControllerRef.current = new AbortController()
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                    signal: abortControllerRef.current.signal,
+                })
+
+                if (!response.ok) {
+                    throw new Error(await response.text())
+                }
+
+                // Parse NDJSON stream
+                const reader = response.body!.getReader()
+                const decoder = new TextDecoder()
+                let buffer = ''
+
+                while (true) {
+                    const { done, value } = await reader.read()
+                    if (done) break
+
+                    // Accumulate chunks and split by newline
+                    buffer += decoder.decode(value, { stream: true })
+                    const lines = buffer.split('\n')
+
+                    // Keep the last incomplete line in the buffer
+                    buffer = lines.pop() || ''
+
+                    // Process each complete line
+                    for (const line of lines) {
+                        if (!line.trim()) continue
+
+                        try {
+                            const data = JSON.parse(line)
+                            onMessage(data)
+                        } catch (parseError) {
+                            console.error('Failed to parse NDJSON line:', line, parseError)
+                        }
+                    }
+                }
+            } catch (err) {
+                if (err instanceof Error && err.name === 'AbortError') {
+                    // Request was cancelled, don't set error
+                    return
+                }
+                setError(err as Error)
+                throw err
+            } finally {
+                setIsMutating(false)
+            }
+        },
+        [url]
+    )
+
+    const cancel = useCallback(() => {
+        abortControllerRef.current?.abort()
+    }, [])
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            abortControllerRef.current?.abort()
+        }
+    }, [])
+
+    return { trigger, isMutating, error, cancel }
+}
+
+// ============================================================================
 // Image captioning recipe surface
 // ============================================================================
 
 /**
  * Manages the end-to-end captioning flow: collecting files, configuring the
  * prompt, and delegating caption generation to the API route that speaks the
- * Modular MAX/OpenAI protocol. Uses SWR for efficient data fetching.
+ * Modular MAX/OpenAI protocol. Uses custom NDJSON streaming for progressive updates.
  */
 export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
     // Track every uploaded image plus its caption/processing state so the UI can render progress.
@@ -62,23 +151,21 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
         'You are given an image. Respond with a concise caption that describes the main subject or scene. Keep it to one short sentence. Do not add explanations, reasoning, or formatting—only the caption.'
     const [prompt, setPrompt] = useState(imageCaptioningPrompt)
 
-    // Store any transport/runtime failures so ErrorAlert can surface them.
-    const [error, setError] = useState<string | null>(null)
-
     // Set a reasonable max file size limit here
     const maxSizeMb = 5
 
-    // SWR mutation hook for batch caption generation
-    const { trigger, isMutating } = useSWRMutation(
-        `${pathname}/api`,
-        batchCaptionFetcher
-    )
+    // NDJSON streaming hook for progressive caption updates
+    interface CaptionResult {
+        imageId: string
+        text?: string
+        error?: string
+    }
+    const { trigger, isMutating, error } = useNDJSON<CaptionResult>(`${pathname}/api`)
 
     // Callback for the FileDrop component
     const onFileDroppped = useCallback(
         async (newFiles: File[]) => {
-            // Reset stale error state and convert the selected File objects to our ImageData shape.
-            setError(null)
+            // Convert the selected File objects to our ImageData shape.
             if (!newFiles || newFiles.length === 0) return
             const newImages = await Promise.all(
                 newFiles.map(async (file) => ({
@@ -96,53 +183,78 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
         [setImages]
     )
 
-    // Callback for the Generate button - uses SWR mutation
+    // Callback for the Generate button - uses NDJSON streaming
     const onGenerateClicked = useCallback(async () => {
-        setError(null)
+        if (!endpoint || !model) {
+            return
+        }
+
+        // Only send images that still need captions and are not currently being processed.
+        const queue = images.filter(
+            (img) => img.caption === null && !img.processing
+        )
+
+        if (queue.length === 0) return
+
+        // Optimistically mark queued images as processing so the gallery overlays spinners immediately.
+        setImages((data) =>
+            data.map((prev) =>
+                queue.find((queued) => queued.id === prev.id)
+                    ? { ...prev, processing: true }
+                    : prev
+            )
+        )
 
         try {
-            if (!endpoint || !model) {
-                throw new Error('Model is not selected')
+            // Build batch request with each image and its messages
+            const systemMessage: SystemModelMessage = {
+                role: 'system',
+                content: prompt,
             }
 
-            // Only send images that still need captions and are not currently being processed.
-            const queue = images.filter(
-                (img) => img.caption === null && !img.processing
-            )
-
-            if (queue.length === 0) return
-
-            // Optimistically mark queued images as processing so the gallery overlays spinners immediately.
-            setImages((data) =>
-                data.map((prev) =>
-                    queue.find((queued) => queued.id === prev.id)
-                        ? { ...prev, processing: true }
-                        : prev
-                )
-            )
-
-            // Trigger the batch caption request via SWR
-            const captions = await trigger({
-                images: queue,
-                prompt,
-                endpointId: endpoint.id,
-                modelName: model.name,
+            const batch = queue.map((image) => {
+                const userMessage: UserModelMessage = {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'image',
+                            image: image.imageData,
+                        },
+                    ],
+                }
+                return {
+                    imageId: image.id,
+                    messages: [systemMessage, userMessage],
+                }
             })
 
-            // Update all captions at once
-            setImages((data) =>
-                data.map((prev) => {
-                    const caption = captions.get(prev.id)
-                    return caption !== undefined
-                        ? { ...prev, processing: false, caption }
-                        : prev
-                })
+            // Trigger NDJSON stream with progressive updates
+            await trigger(
+                {
+                    endpointId: endpoint.id,
+                    modelName: model.name,
+                    batch,
+                },
+                (result) => {
+                    // Update each image as its caption arrives
+                    setImages((data) =>
+                        data.map((prev) =>
+                            prev.id === result.imageId
+                                ? {
+                                      ...prev,
+                                      processing: false,
+                                      caption: result.text || null,
+                                  }
+                                : prev
+                        )
+                    )
+                }
             )
-        } catch (error) {
-            setError('Unable to generate captions. ' + (error as Error)?.message)
+        } catch (err) {
+            // Error is handled by the hook, just reset processing state
             setImages((data) => data.map((img) => ({ ...img, processing: false })))
         }
-    }, [endpoint, model, images, pathname, prompt, trigger])
+    }, [endpoint, model, images, prompt, trigger])
 
     return (
         <Stack flex={1} h="100%" style={{ overflow: 'hidden', minHeight: 0 }}>
@@ -170,7 +282,6 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
                 generateClicked={onGenerateClicked}
                 resetClicked={() => {
                     setImages([])
-                    setError(null)
                 }}
             />
         </Stack>
@@ -219,13 +330,13 @@ import { Alert, Divider } from '@mantine/core'
 import { IconExclamationCircle } from '@tabler/icons-react'
 
 /** Surfaces transport errors so users can adjust configuration or retry. */
-function ErrorAlert({ error }: { error: string | null }) {
+function ErrorAlert({ error }: { error: Error | null }) {
     const errorIcon = <IconExclamationCircle />
 
     if (error) {
         return (
             <Alert variant="light" color="red" title="Error" icon={errorIcon}>
-                {error}
+                {error.message}
             </Alert>
         )
     } else {
@@ -361,85 +472,8 @@ function Gallery({ images }: { images: ImageData[] }) {
 }
 
 // ============================================================================
-// Request helpers with SWR
+// File helper utilities
 // ============================================================================
-
-/** Parameters for batch caption generation via SWR mutation */
-interface BatchCaptionRequest {
-    images: ImageData[]
-    prompt: string
-    endpointId: string
-    modelName: string
-}
-
-/** Result from batch caption API */
-interface BatchCaptionResult {
-    imageId: string
-    text?: string
-    error?: string
-}
-
-/**
- * SWR fetcher for batch caption generation. Sends multiple images to the API
- * in a single request and returns a Map of imageId -> caption text.
- * The payload matches the OpenAI-compatible schema, so Modular MAX or OpenAI
- * can be swapped by changing the endpoint selection.
- */
-async function batchCaptionFetcher(
-    url: string,
-    { arg }: { arg: BatchCaptionRequest }
-): Promise<Map<string, string>> {
-    const systemMessage: SystemModelMessage = {
-        role: 'system',
-        content: arg.prompt,
-    }
-
-    // Build batch request with each image and its messages
-    const batch = arg.images.map((image) => {
-        const userMessage: UserModelMessage = {
-            role: 'user',
-            content: [
-                {
-                    type: 'image',
-                    image: image.imageData,
-                },
-            ],
-        }
-        return {
-            imageId: image.id,
-            messages: [systemMessage, userMessage],
-        }
-    })
-
-    const response = await fetch(url, {
-        method: 'POST',
-        body: JSON.stringify({
-            endpointId: arg.endpointId,
-            modelName: arg.modelName,
-            batch,
-        }),
-    })
-
-    if (!response.ok) {
-        throw new Error(await response.text())
-    }
-
-    const data = await response.json()
-    const results = new Map<string, string>()
-
-    // Convert array results to Map for easy lookup
-    data.results.forEach((result: BatchCaptionResult) => {
-        if (result.text) {
-            results.set(result.imageId, result.text)
-        } else if (result.error) {
-            throw new Error(
-                `Failed to caption image ${result.imageId}: ${result.error}`
-            )
-        }
-    })
-
-    return results
-}
 
 /** Converts a File to a base64 data URL for transport to the API route. */
 async function getDataFromFile(file: File): Promise<string> {
