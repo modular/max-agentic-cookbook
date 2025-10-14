@@ -21,7 +21,8 @@
         "ai": "catalog:",
         "nanoid": "catalog:",
         "openai": "catalog:",
-        "streamdown": "catalog:"
+        "streamdown": "catalog:",
+        "swr": "catalog:"
     },
     "peerDependencies": {
         "react": "^18",

@@ -27,7 +27,8 @@
         "react-dom": "^18",
         "react-syntax-highlighter": "^15.6.6",
         "sass": "^1.93.2",
-        "streamdown": "catalog:"
+        "streamdown": "catalog:",
+        "swr": "catalog:"
     },
     "devDependencies": {
         "@types/node": "catalog:",

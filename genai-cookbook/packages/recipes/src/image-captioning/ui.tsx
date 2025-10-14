@@ -9,11 +9,15 @@
  * The page is organized into the core recipe component, UI helpers for user
  * interaction, and the request helpers that translate files into provider-ready
  * messages.
+ *
+ * This implementation uses SWR for data fetching with automatic request
+ * deduplication and built-in loading/error states.
  */
 
 import { useCallback, useState } from 'react'
 import { nanoid } from 'nanoid'
 import { SystemModelMessage, UserModelMessage } from 'ai'
+import useSWRMutation from 'swr/mutation'
 import {
     Stack,
     SimpleGrid,
@@ -47,7 +51,7 @@ interface ImageData {
 /**
  * Manages the end-to-end captioning flow: collecting files, configuring the
  * prompt, and delegating caption generation to the API route that speaks the
- * Modular MAX/OpenAI protocol.
+ * Modular MAX/OpenAI protocol. Uses SWR for efficient data fetching.
  */
 export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
     // Track every uploaded image plus its caption/processing state so the UI can render progress.
@@ -61,11 +65,14 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
     // Store any transport/runtime failures so ErrorAlert can surface them.
     const [error, setError] = useState<string | null>(null)
 
-    // Flip to true while at least one caption request is in flight—disables buttons.
-    const [processing, setProcessing] = useState(false)
-
     // Set a reasonable max file size limit here
     const maxSizeMb = 5
+
+    // SWR mutation hook for batch caption generation
+    const { trigger, isMutating } = useSWRMutation(
+        `${pathname}/api`,
+        batchCaptionFetcher
+    )
 
     // Callback for the FileDrop component
     const onFileDroppped = useCallback(
@@ -89,10 +96,9 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
         [setImages]
     )
 
-    // Callback for the Generate button
+    // Callback for the Generate button - uses SWR mutation
     const onGenerateClicked = useCallback(async () => {
         setError(null)
-        setProcessing(true)
 
         try {
             if (!endpoint || !model) {
@@ -115,35 +121,28 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
                 )
             )
 
-            await Promise.all(
-                queue.map(async (image) => {
-                    // Each image is captioned via the route wired to the Vercel AI SDK transport.
-                    const caption = await generateCaption({
-                        image,
-                        prompt,
-                        endpointId: endpoint.id,
-                        modelName: model.name,
-                        api: `${pathname}/api`,
-                    })
+            // Trigger the batch caption request via SWR
+            const captions = await trigger({
+                images: queue,
+                prompt,
+                endpointId: endpoint.id,
+                modelName: model.name,
+            })
 
-                    setImages((data) =>
-                        data.map((prev) =>
-                            prev.id === image.id
-                                ? { ...prev, processing: false, caption: caption }
-                                : prev
-                        )
-                    )
+            // Update all captions at once
+            setImages((data) =>
+                data.map((prev) => {
+                    const caption = captions.get(prev.id)
+                    return caption !== undefined
+                        ? { ...prev, processing: false, caption }
+                        : prev
                 })
             )
-
-            setError(null)
         } catch (error) {
             setError('Unable to generate captions. ' + (error as Error)?.message)
             setImages((data) => data.map((img) => ({ ...img, processing: false })))
-        } finally {
-            setProcessing(false)
         }
-    }, [endpoint, model, images, pathname, prompt])
+    }, [endpoint, model, images, pathname, prompt, trigger])
 
     return (
         <Stack flex={1} h="100%" style={{ overflow: 'hidden', minHeight: 0 }}>
@@ -167,7 +166,7 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
                 </Stack>
             </ScrollArea>
             <FormActions
-                actionsDisabled={images.length < 1 || processing}
+                actionsDisabled={images.length < 1 || isMutating}
                 generateClicked={onGenerateClicked}
                 resetClicked={() => {
                     setImages([])
@@ -362,52 +361,62 @@ function Gallery({ images }: { images: ImageData[] }) {
 }
 
 // ============================================================================
-// Request helpers
+// Request helpers with SWR
 // ============================================================================
 
-/** Parameters required to generate a caption for one image. */
-interface CaptionRequest {
-    image: ImageData
+/** Parameters for batch caption generation via SWR mutation */
+interface BatchCaptionRequest {
+    images: ImageData[]
     prompt: string
     endpointId: string
     modelName: string
-    api: string
+}
+
+/** Result from batch caption API */
+interface BatchCaptionResult {
+    imageId: string
+    text?: string
+    error?: string
 }
 
 /**
- * Sends the user-provided prompt and image to the recipe API. The payload matches
- * the OpenAI-compatible schema, so Modular MAX or OpenAI can be swapped by
- * changing the endpoint selection.
+ * SWR fetcher for batch caption generation. Sends multiple images to the API
+ * in a single request and returns a Map of imageId -> caption text.
+ * The payload matches the OpenAI-compatible schema, so Modular MAX or OpenAI
+ * can be swapped by changing the endpoint selection.
  */
-async function generateCaption({
-    image,
-    prompt,
-    endpointId,
-    modelName,
-    api,
-}: CaptionRequest): Promise<string> {
-    // Vercel AI SDK uses OpenAI-style message arrays
-    const systemMessage: SystemModelMessage = { role: 'system', content: prompt }
-    const userMessage: UserModelMessage = {
-        role: 'user',
-        content: [
-            {
-                type: 'image',
-                image: image.imageData,
-            },
-        ],
+async function batchCaptionFetcher(
+    url: string,
+    { arg }: { arg: BatchCaptionRequest }
+): Promise<Map<string, string>> {
+    const systemMessage: SystemModelMessage = {
+        role: 'system',
+        content: arg.prompt,
     }
 
-    // Bundle the prompt + image messages.
-    const messages = [systemMessage, userMessage]
+    // Build batch request with each image and its messages
+    const batch = arg.images.map((image) => {
+        const userMessage: UserModelMessage = {
+            role: 'user',
+            content: [
+                {
+                    type: 'image',
+                    image: image.imageData,
+                },
+            ],
+        }
+        return {
+            imageId: image.id,
+            messages: [systemMessage, userMessage],
+        }
+    })
 
-    const response = await fetch(api, {
-        // Proxy to the Next.js route that pipes into the Vercel AI SDK transport.
+    const response = await fetch(url, {
         method: 'POST',
         body: JSON.stringify({
-            endpointId,
-            modelName,
-            messages,
+            endpointId: arg.endpointId,
+            modelName: arg.modelName,
+            batch,
         }),
     })
 
@@ -415,9 +424,19 @@ async function generateCaption({
         throw new Error(await response.text())
     }
 
-    // The API route relays Vercel AI SDK streaming back into JSON with the generated text.
     const data = await response.json()
-    return data.text
+    const results = new Map<string, string>()
+
+    // Convert array results to Map for easy lookup
+    data.results.forEach((result: BatchCaptionResult) => {
+        if (result.text) {
+            results.set(result.imageId, result.text)
+        } else if (result.error) {
+            throw new Error(`Failed to caption image ${result.imageId}: ${result.error}`)
+        }
+    })
+
+    return results
 }
 
 /** Converts a File to a base64 data URL for transport to the API route. */
