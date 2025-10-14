@@ -8,7 +8,6 @@ catalog:
     '@mantine/core': ^7.17.8
     '@mantine/dropzone': ^7.17.8
     '@mantine/hooks': ^7.17.8
-    '@microsoft/fetch-event-source': ^2.0.1
     '@tabler/icons-react': ^3.34.1
     '@types/node': ^20
     '@types/react': ^18
@@ -17,5 +16,4 @@ catalog:
     nanoid: ^5.1.5
     openai: ^5.20.2
     streamdown: ^1.3.0
-    swr: ^2.3.6
     typescript: ^5

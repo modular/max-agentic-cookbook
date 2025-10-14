@@ -3,56 +3,57 @@ import { RecipeContext } from '../types'
 import { createOpenAI } from '@ai-sdk/openai'
 
 /*
- * The captioning API streams caption results as NDJSON (newline-delimited JSON).
- * For batch processing, it accepts an array of image caption requests, processes
- * them in parallel, and streams each result as it completes. This provides
- * progressive feedback to the UI as captions are generated.
- * Because Modular MAX speaks the OpenAI-compatible protocol, the Vercel AI SDK
- * works with Modular MAX out of the box.
+ * Image Captioning API with NDJSON Streaming
+ *
+ * This API demonstrates progressive response streaming using NDJSON (newline-delimited JSON).
+ * Instead of waiting for all captions to complete, we stream each result as it's generated,
+ * providing immediate feedback to users.
+ *
+ * Key concepts:
+ * - NDJSON format: One JSON object per line, easy to parse progressively
+ * - Parallel processing: All images caption simultaneously for speed
+ * - Stream-as-you-go: Results appear in the UI the moment they're ready
+ * - OpenAI-compatible: Works with Modular MAX or any OpenAI-compatible server
  */
 
-// ============================================================================
-// POST /api — generates image captions and streams NDJSON results
-// ============================================================================
 export default async function POST(req: Request, context: RecipeContext) {
     const { apiKey, baseUrl, modelName } = context
     const body = await req.json()
 
-    // Support both single caption requests and batch NDJSON streaming
     const isBatch = Array.isArray(body.batch)
 
     if (!isBatch && !body.messages) {
         return new Response('Client did not provide messages or batch', { status: 400 })
     }
 
-    // Use the Vercel AI SDK to connect to the MAX endpoint
     try {
-        // createOpenAI returns an OpenAI-compatible client
+        // The Vercel AI SDK's createOpenAI works with any OpenAI-compatible endpoint
         const client = createOpenAI({ baseURL: baseUrl, apiKey })
-
-        // chat(modelName) works with LLM servers like MAX that
-        // implement the chat-completions format
         const model = client.chat(modelName)
 
         if (isBatch) {
-            // Handle batch caption requests with NDJSON streaming
+            // NDJSON streaming: send results progressively as they complete
             const encoder = new TextEncoder()
             const stream = new ReadableStream({
                 async start(controller) {
                     try {
-                        // Process all images in parallel, stream results as they complete
+                        // Process all images in parallel using Promise.all
+                        // As each caption completes, we immediately stream it to the client
                         await Promise.all(
                             body.batch.map(async (item: { imageId: string; messages: any }) => {
                                 try {
+                                    // Generate caption using Vercel AI SDK
                                     const { text } = await generateText({
                                         model: model,
                                         messages: item.messages,
                                     })
 
-                                    // Send NDJSON line: one JSON object per line
+                                    // NDJSON format: JSON object + newline
+                                    // Client can parse each line as soon as it arrives
                                     const line = JSON.stringify({ imageId: item.imageId, text }) + '\n'
                                     controller.enqueue(encoder.encode(line))
                                 } catch (error) {
+                                    // Send errors per-image so UI can show partial results
                                     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
                                     const line = JSON.stringify({
                                         imageId: item.imageId,
@@ -76,7 +77,7 @@ export default async function POST(req: Request, context: RecipeContext) {
                 },
             })
         } else {
-            // Handle single caption request (backward compatibility)
+            // Single caption request: return JSON immediately (no streaming needed)
             const { text } = await generateText({
                 model: model,
                 messages: body.messages,

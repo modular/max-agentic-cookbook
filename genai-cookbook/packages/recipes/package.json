@@ -16,13 +16,11 @@
         "@mantine/core": "catalog:",
         "@mantine/dropzone": "catalog:",
         "@mantine/hooks": "catalog:",
-        "@microsoft/fetch-event-source": "catalog:",
         "@tabler/icons-react": "catalog:",
         "ai": "catalog:",
         "nanoid": "catalog:",
         "openai": "catalog:",
-        "streamdown": "catalog:",
-        "swr": "catalog:"
+        "streamdown": "catalog:"
     },
     "peerDependencies": {
         "react": "^18",

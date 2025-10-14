@@ -16,7 +16,6 @@
         "@mantine/core": "catalog:",
         "@mantine/dropzone": "catalog:",
         "@mantine/hooks": "catalog:",
-        "@microsoft/fetch-event-source": "catalog:",
         "@modular/recipes": "workspace:*",
         "@tabler/icons-react": "catalog:",
         "ai": "catalog:",
@@ -27,8 +26,7 @@
         "react-dom": "^18",
         "react-syntax-highlighter": "^15.6.6",
         "sass": "^1.93.2",
-        "streamdown": "catalog:",
-        "swr": "catalog:"
+        "streamdown": "catalog:"
     },
     "devDependencies": {
         "@types/node": "catalog:",

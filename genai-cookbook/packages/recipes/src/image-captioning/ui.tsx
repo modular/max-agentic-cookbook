@@ -1,17 +1,17 @@
 'use client'
 
 /*
- * This recipe shows how to use Modular MAX for the image captioning
- * using the Vercel AI SDK plumbing for OpenAI-compatble endpoints.
- * We lean on Mantine for UI primitives—matching Modular's Mantine-based
- * design system—so we can focus on the GenAI workflow.
+ * Image Captioning with NDJSON Streaming
  *
- * The page is organized into the core recipe component, UI helpers for user
- * interaction, and the request helpers that translate files into provider-ready
- * messages.
+ * This recipe demonstrates how to caption images using Modular MAX or any OpenAI-compatible
+ * server, with progressive streaming updates for better UX. Instead of waiting for all captions
+ * to complete, users see each result as soon as it's ready.
  *
- * This implementation uses a custom NDJSON streaming hook for progressive
- * caption updates as they arrive from the server.
+ * Architecture:
+ * - Custom useNDJSON hook: Handles NDJSON streaming from the API (no external dependencies)
+ * - Progressive UI updates: Captions appear one-by-one as they complete
+ * - Mantine components: File upload, image gallery, and form controls
+ * - Vercel AI SDK: OpenAI-compatible API client (works with MAX, OpenAI, etc.)
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -48,11 +48,17 @@ interface ImageData {
 // ============================================================================
 
 /**
- * Custom hook for streaming NDJSON responses from a fetch request.
- * Provides SWR-like API with trigger, isMutating, and error states.
+ * useNDJSON: A reusable hook for streaming NDJSON responses
  *
- * @param url - The endpoint URL to POST to
- * @returns Hook interface with trigger function, loading state, and error
+ * NDJSON (newline-delimited JSON) is a simple streaming format where each line is a
+ * separate JSON object. This hook handles the complexity of parsing incomplete chunks
+ * and buffering partial lines, giving you a clean callback-based API.
+ *
+ * Usage:
+ *   const { trigger, isMutating, error } = useNDJSON<MyType>(apiUrl)
+ *   await trigger(requestBody, (data) => {
+ *     // Called for each line of NDJSON as it arrives
+ *   })
  */
 function useNDJSON<T>(url: string) {
     const [isMutating, setIsMutating] = useState(false)
@@ -77,7 +83,7 @@ function useNDJSON<T>(url: string) {
                     throw new Error(await response.text())
                 }
 
-                // Parse NDJSON stream
+                // Stream NDJSON: read chunks and parse complete lines
                 const reader = response.body!.getReader()
                 const decoder = new TextDecoder()
                 let buffer = ''
@@ -90,10 +96,10 @@ function useNDJSON<T>(url: string) {
                     buffer += decoder.decode(value, { stream: true })
                     const lines = buffer.split('\n')
 
-                    // Keep the last incomplete line in the buffer
+                    // Keep the last (potentially incomplete) line in the buffer
                     buffer = lines.pop() || ''
 
-                    // Process each complete line
+                    // Parse and deliver each complete line
                     for (const line of lines) {
                         if (!line.trim()) continue
 
@@ -107,8 +113,7 @@ function useNDJSON<T>(url: string) {
                 }
             } catch (err) {
                 if (err instanceof Error && err.name === 'AbortError') {
-                    // Request was cancelled, don't set error
-                    return
+                    return // User cancelled, ignore
                 }
                 setError(err as Error)
                 throw err
@@ -123,11 +128,8 @@ function useNDJSON<T>(url: string) {
         abortControllerRef.current?.abort()
     }, [])
 
-    // Cleanup on unmount
     useEffect(() => {
-        return () => {
-            abortControllerRef.current?.abort()
-        }
+        return () => abortControllerRef.current?.abort()
     }, [])
 
     return { trigger, isMutating, error, cancel }
@@ -138,23 +140,19 @@ function useNDJSON<T>(url: string) {
 // ============================================================================
 
 /**
- * Manages the end-to-end captioning flow: collecting files, configuring the
- * prompt, and delegating caption generation to the API route that speaks the
- * Modular MAX/OpenAI protocol. Uses custom NDJSON streaming for progressive updates.
+ * Main recipe component: handles file uploads, triggers caption generation,
+ * and displays results as they stream in from the API.
  */
 export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
-    // Track every uploaded image plus its caption/processing state so the UI can render progress.
     const [images, setImages] = useState<ImageData[]>([])
 
-    // Allow the user to tweak the instruction set that accompanies each caption request.
     const imageCaptioningPrompt =
         'You are given an image. Respond with a concise caption that describes the main subject or scene. Keep it to one short sentence. Do not add explanations, reasoning, or formatting—only the caption.'
     const [prompt, setPrompt] = useState(imageCaptioningPrompt)
 
-    // Set a reasonable max file size limit here
     const maxSizeMb = 5
 
-    // NDJSON streaming hook for progressive caption updates
+    // NDJSON streaming hook provides progressive updates
     interface CaptionResult {
         imageId: string
         text?: string
@@ -162,11 +160,11 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
     }
     const { trigger, isMutating, error } = useNDJSON<CaptionResult>(`${pathname}/api`)
 
-    // Callback for the FileDrop component
     const onFileDroppped = useCallback(
         async (newFiles: File[]) => {
-            // Convert the selected File objects to our ImageData shape.
             if (!newFiles || newFiles.length === 0) return
+
+            // Convert Files to base64 data URLs for API transport
             const newImages = await Promise.all(
                 newFiles.map(async (file) => ({
                     id: nanoid(),
@@ -177,26 +175,19 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
                     processing: false,
                 }))
             )
-            // Merge freshly prepared data URLs into the gallery queue.
+
             setImages((prevImages) => [...prevImages, ...newImages])
         },
         [setImages]
     )
 
-    // Callback for the Generate button - uses NDJSON streaming
     const onGenerateClicked = useCallback(async () => {
-        if (!endpoint || !model) {
-            return
-        }
+        if (!endpoint || !model) return
 
-        // Only send images that still need captions and are not currently being processed.
-        const queue = images.filter(
-            (img) => img.caption === null && !img.processing
-        )
-
+        const queue = images.filter((img) => img.caption === null && !img.processing)
         if (queue.length === 0) return
 
-        // Optimistically mark queued images as processing so the gallery overlays spinners immediately.
+        // Show spinners immediately
         setImages((data) =>
             data.map((prev) =>
                 queue.find((queued) => queued.id === prev.id)
@@ -206,29 +197,24 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
         )
 
         try {
-            // Build batch request with each image and its messages
+            // Build OpenAI-compatible message format for each image
             const systemMessage: SystemModelMessage = {
                 role: 'system',
                 content: prompt,
             }
 
-            const batch = queue.map((image) => {
-                const userMessage: UserModelMessage = {
-                    role: 'user',
-                    content: [
-                        {
-                            type: 'image',
-                            image: image.imageData,
-                        },
-                    ],
-                }
-                return {
-                    imageId: image.id,
-                    messages: [systemMessage, userMessage],
-                }
-            })
+            const batch = queue.map((image) => ({
+                imageId: image.id,
+                messages: [
+                    systemMessage,
+                    {
+                        role: 'user',
+                        content: [{ type: 'image', image: image.imageData }],
+                    } as UserModelMessage,
+                ],
+            }))
 
-            // Trigger NDJSON stream with progressive updates
+            // Stream captions as they're generated
             await trigger(
                 {
                     endpointId: endpoint.id,
@@ -236,22 +222,17 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
                     batch,
                 },
                 (result) => {
-                    // Update each image as its caption arrives
+                    // Update UI with each caption as it arrives
                     setImages((data) =>
                         data.map((prev) =>
                             prev.id === result.imageId
-                                ? {
-                                      ...prev,
-                                      processing: false,
-                                      caption: result.text || null,
-                                  }
+                                ? { ...prev, processing: false, caption: result.text || null }
                                 : prev
                         )
                     )
                 }
             )
         } catch (err) {
-            // Error is handled by the hook, just reset processing state
             setImages((data) => data.map((img) => ({ ...img, processing: false })))
         }
     }, [endpoint, model, images, prompt, trigger])
@@ -300,10 +281,7 @@ interface FormActionsProps {
     resetClicked: () => void
 }
 
-/**
- * Presents buttons for generating captions or clearing the workspace. Both are
- * disabled while requests to Modular MAX/OpenAI are in flight.
- */
+/** Action buttons for generating captions and resetting the workspace */
 function FormActions({
     actionsDisabled,
     generateClicked,
@@ -324,12 +302,12 @@ function FormActions({
 }
 
 // ============================================================================
-// Error reporting banner
+// Error reporting
 // ============================================================================
 import { Alert, Divider } from '@mantine/core'
 import { IconExclamationCircle } from '@tabler/icons-react'
 
-/** Surfaces transport errors so users can adjust configuration or retry. */
+/** Shows error banner when caption generation fails */
 function ErrorAlert({ error }: { error: Error | null }) {
     const errorIcon = <IconExclamationCircle />
 
@@ -366,15 +344,12 @@ const centerStyle: React.CSSProperties = {
     overflow: 'hidden',
 }
 
-/**
- * Wraps Mantine's Dropzone so we can accept image uploads with minimal setup.
- */
+/** Drag-and-drop file upload zone powered by Mantine's Dropzone */
 function FileDrop({ onDrop, maxSizeMb, disabled }: FileDropProps) {
     const maxSizeBytes = maxSizeMb ? maxSizeMb * 1024 ** 2 : undefined
     return (
         <Stack gap={0} w="100%" mt={1}>
             <Text size="sm">Upload Images</Text>
-            {/* Mantine Dropzone handles drag-and-drop + click-to-upload with built-in validation states. */}
             <Dropzone
                 onDrop={onDrop}
                 onReject={(files) => console.log('rejected files', files)}
@@ -389,7 +364,6 @@ function FileDrop({ onDrop, maxSizeMb, disabled }: FileDropProps) {
                 w="100%"
                 bd="1px solid var(--mantine-color-default-border)"
             >
-                {/* Layout inside the dropzone uses Mantine Group/Box/Text for consistent spacing and color. */}
                 <Group
                     justify="center"
                     h={59}
@@ -431,23 +405,16 @@ function FileDrop({ onDrop, maxSizeMb, disabled }: FileDropProps) {
 }
 
 // ============================================================================
-// Generated caption gallery
+// Image gallery
 // ============================================================================
 import { Box, Image, LoadingOverlay } from '@mantine/core'
 import { RecipeProps } from '../types'
 
-/**
- * Renders each uploaded image alongside its streaming caption status inside a
- * scrollable grid. The local `ImageBox` helper keeps the loading overlay and
- * aspect ratio consistent per card, while `ScrollArea` + `SimpleGrid` stretch to
- * the available height so overflow is handled without breaking the outer flex
- * layout.
- */
+/** Displays uploaded images in a responsive grid with caption text below each */
 function Gallery({ images }: { images: ImageData[] }) {
     const ImageBox = ({ image }: { image: ImageData }) => {
         return (
             <Box>
-                {/* Mantine Box + LoadingOverlay show spinner on top of the image while captioning. */}
                 <AspectRatio pos="relative" ratio={4 / 3}>
                     <LoadingOverlay visible={image.processing} zIndex={1000} />
                     <Image
