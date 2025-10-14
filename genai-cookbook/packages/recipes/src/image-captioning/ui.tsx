@@ -17,6 +17,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { nanoid } from 'nanoid'
 import { SystemModelMessage, UserModelMessage } from 'ai'
+import prettyMilliseconds from 'pretty-ms'
 import {
     Stack,
     SimpleGrid,
@@ -41,6 +42,8 @@ interface ImageData {
     mimeType: string
     caption: string | null
     processing: boolean
+    captionDuration: number | null
+    captionTTFT: number | null
 }
 
 // ============================================================================
@@ -107,7 +110,11 @@ function useNDJSON<T>(url: string) {
                             const data = JSON.parse(line)
                             onMessage(data)
                         } catch (parseError) {
-                            console.error('Failed to parse NDJSON line:', line, parseError)
+                            console.error(
+                                'Failed to parse NDJSON line:',
+                                line,
+                                parseError
+                            )
                         }
                     }
                 }
@@ -152,11 +159,13 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
 
     const maxSizeMb = 5
 
-    // NDJSON streaming hook provides progressive updates
+    // NDJSON streaming hook provides progressive updates with timing metrics
     interface CaptionResult {
         imageId: string
         text?: string
         error?: string
+        ttft?: number
+        duration?: number
     }
     const { trigger, isMutating, error } = useNDJSON<CaptionResult>(`${pathname}/api`)
 
@@ -172,6 +181,8 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
                     imageData: await getDataFromFile(file),
                     mimeType: file.type,
                     caption: null,
+                    captionDuration: null,
+                    captionTTFT: null,
                     processing: false,
                 }))
             )
@@ -222,11 +233,17 @@ export default function Recipe({ endpoint, model, pathname }: RecipeProps) {
                     batch,
                 },
                 (result) => {
-                    // Update UI with each caption as it arrives
+                    // Update UI with each caption as it arrives, including timing metrics
                     setImages((data) =>
                         data.map((prev) =>
                             prev.id === result.imageId
-                                ? { ...prev, processing: false, caption: result.text || null }
+                                ? {
+                                      ...prev,
+                                      processing: false,
+                                      caption: result.text || null,
+                                      captionTTFT: result.ttft || null,
+                                      captionDuration: result.duration || null,
+                                  }
                                 : prev
                         )
                     )
@@ -424,6 +441,18 @@ function Gallery({ images }: { images: ImageData[] }) {
                 </AspectRatio>
                 <Text c={!image.caption ? 'dimmed' : ''}>
                     {image.caption ?? 'Image not yet captioned'}
+                </Text>
+
+                <Text c="dimmed" size="sm">
+                    TTFT:{' '}
+                    {image.captionTTFT
+                        ? prettyMilliseconds(image.captionTTFT, { unitCount: 3 })
+                        : '--'}
+                    , Duration:{' '}
+                    {image.captionDuration
+                        ? '+' +
+                          prettyMilliseconds(image.captionDuration, { unitCount: 3 })
+                        : '--'}
                 </Text>
             </Box>
         )

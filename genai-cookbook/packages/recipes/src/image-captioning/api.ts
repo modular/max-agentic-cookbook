@@ -1,4 +1,4 @@
-import { generateText } from 'ai'
+import { streamText } from 'ai'
 import { RecipeContext } from '../types'
 import { createOpenAI } from '@ai-sdk/openai'
 
@@ -42,15 +42,38 @@ export default async function POST(req: Request, context: RecipeContext) {
                         await Promise.all(
                             body.batch.map(async (item: { imageId: string; messages: any }) => {
                                 try {
-                                    // Generate caption using Vercel AI SDK
-                                    const { text } = await generateText({
+                                    const startTime = Date.now()
+                                    let firstTokenTime: number | null = null
+                                    let ttft: number | null = null
+                                    let textChunks: string[] = []
+
+                                    // Stream caption generation to capture timing metrics
+                                    const result = streamText({
                                         model: model,
                                         messages: item.messages,
                                     })
 
-                                    // NDJSON format: JSON object + newline
-                                    // Client can parse each line as soon as it arrives
-                                    const line = JSON.stringify({ imageId: item.imageId, text }) + '\n'
+                                    // Consume the stream to collect text and timing
+                                    for await (const chunk of result.textStream) {
+                                        // Capture time to first token
+                                        if (ttft === null) {
+                                            firstTokenTime = Date.now()
+                                            ttft = firstTokenTime - startTime
+                                        }
+                                        textChunks.push(chunk)
+                                    }
+
+                                    // Duration is time from first token to completion
+                                    const duration = firstTokenTime ? Date.now() - firstTokenTime : null
+                                    const text = textChunks.join('')
+
+                                    // NDJSON format: JSON object + newline with timing metrics
+                                    const line = JSON.stringify({
+                                        imageId: item.imageId,
+                                        text,
+                                        ttft,
+                                        duration
+                                    }) + '\n'
                                     controller.enqueue(encoder.encode(line))
                                 } catch (error) {
                                     // Send errors per-image so UI can show partial results
@@ -77,12 +100,18 @@ export default async function POST(req: Request, context: RecipeContext) {
                 },
             })
         } else {
-            // Single caption request: return JSON immediately (no streaming needed)
-            const { text } = await generateText({
+            // Single caption request: stream and collect text
+            const result = streamText({
                 model: model,
                 messages: body.messages,
             })
-            return Response.json({ text })
+
+            let textChunks: string[] = []
+            for await (const chunk of result.textStream) {
+                textChunks.push(chunk)
+            }
+
+            return Response.json({ text: textChunks.join('') })
         }
     } catch (error) {
         const errorMessage = error instanceof Error ? `(${error.message})` : ''

@@ -20,6 +20,7 @@
         "ai": "catalog:",
         "nanoid": "catalog:",
         "openai": "catalog:",
+        "pretty-ms": "catalog:",
         "streamdown": "catalog:"
     },
     "peerDependencies": {

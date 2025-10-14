@@ -22,6 +22,7 @@
         "nanoid": "catalog:",
         "next": "^14",
         "openai": "catalog:",
+        "pretty-ms": "catalog:",
         "react": "^18",
         "react-dom": "^18",
         "react-syntax-highlighter": "^15.6.6",
