@@ -56,7 +56,6 @@ The recipes in this archive represent earlier explorations and examples that hav
 1. **Inconsistent structure** - Each recipe had its own setup, dependencies, and patterns
 2. **Maintenance burden** - Keeping numerous standalone projects up-to-date with MAX releases
 3. **User experience** - Difficult to compare approaches or reuse code across recipes
-4. **Modern approach** - The Agentic Cookbook provides a unified, well-documented framework
 
 ## What to Use Instead
 

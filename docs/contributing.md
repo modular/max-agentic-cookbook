@@ -116,6 +116,10 @@ git push origin main
 - **Issues**: [GitHub Issues](https://github.com/modular/max-recipes/issues)
 - **Forum**: [forum.modular.com](https://forum.modular.com/)
 
+## License
+
+By contributing, you agree that your contributions will be licensed under the Apache License 2.0 with LLVM Exception. See [LICENSE](../LICENSE) for details.
+
 ---
 
 Thanks for contributing!

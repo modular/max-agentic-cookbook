@@ -2,6 +2,7 @@
   "name": "@modular/genai-cookbook",
   "version": "0.1.0",
   "private": true,
+  "license": "Apache-2.0 WITH LLVM-exception",
   "scripts": {
     "dev": "pnpm --filter @modular/cookbook dev",
     "build": "pnpm --filter @modular/cookbook build",
