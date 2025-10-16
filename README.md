@@ -2,7 +2,7 @@
 
 A collection of recipes demonstrating how to build modern fullstack web apps using Modular MAX, Next.js, and the Vercel AI SDK. Each recipe demonstrates an end-to-end workflow with both frontend and backend implementations, including detailed code comments.
 
-<img src="https://github.com/user-attachments/assets/e2302038-a950-41a8-acec-47c0d9c09ed6" />
+<img src="https://github.com/user-attachments/assets/e2302038-a950-41a8-acec-47c0d9c09ed6" alt="Screenshot of the Modular Agentic Cookbook interface showing the Image Captioning recipe with AI-generated captions for two uploaded images." />
 
 > **📦 Looking for legacy recipes?** Older standalone recipes have been moved to the [`archive/`](./archive/) folder. These are provided as-is for historical reference only and are no longer maintained.
 
@@ -74,7 +74,7 @@ Create an intelligent image captioning system that generates natural language de
 
 The cookbook is organized as a pnpm workspace monorepo with a clean separation between the Next.js app and shared recipe implementations:
 
-```
+```plaintext
 ├── apps/cookbook/           # Next.js 14 App
 │   ├── app/                 # App Router pages & API routes
 │   ├── components/          # UI components
@@ -88,6 +88,8 @@ The cookbook is organized as a pnpm workspace monorepo with a clean separation b
         └── image-captioning/
 ```
 
+For a deep dive into the architecture, see the [Architecture Guide](./docs/architecture.md).
+
 ## Adding New Recipes
 
 Create a directory under `packages/recipes/src/your-recipe-name/` with:
@@ -96,6 +98,8 @@ Create a directory under `packages/recipes/src/your-recipe-name/` with:
 - **`api.ts`** - Backend API handler using Vercel AI SDK
 
 Each recipe follows consistent patterns: React hooks for state management, Mantine UI components, and detailed inline comments explaining architecture decisions and data flow.
+
+For detailed instructions, see the [Contributing Guide](./docs/contributing.md).
 
 ## Using with MAX
 
@@ -126,7 +130,7 @@ docker run --gpus all \
     max-cookbook:latest
 ```
 
-The container supports both NVIDIA and AMD GPUs. See build arguments (`MAX_GPU`, `MAX_TAG`) for customization options.
+The container supports both NVIDIA and AMD GPUs. For detailed instructions including AMD setup, build arguments, and troubleshooting, see the [Docker Guide](./docs/docker.md).
 
 ## Available Scripts
 
@@ -142,6 +146,7 @@ The container supports both NVIDIA and AMD GPUs. See build arguments (`MAX_GPU`,
 The best way to learn is by running the cookbook and exploring the recipes. Toggle "Show Code" in the UI to see implementations alongside demos. Each recipe contains extensive inline documentation explaining architecture decisions and integration patterns.
 
 **Documentation:**
+
 - [Modular MAX](https://docs.modular.com/)
 - [Vercel AI SDK](https://sdk.vercel.ai/docs)
 - [Next.js](https://nextjs.org/docs)
@@ -150,6 +155,8 @@ The best way to learn is by running the cookbook and exploring the recipes. Togg
 ## Contributing
 
 Contributions welcome! Fork the repo, create a feature branch, follow established patterns, and submit a pull request. Ensure proper TypeScript types and comprehensive inline documentation.
+
+See the [Contributing Guide](./docs/contributing.md) for detailed instructions on adding recipes, code standards, and the PR process.
 
 ## Support
 
