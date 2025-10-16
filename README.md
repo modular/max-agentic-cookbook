@@ -1,8 +1,10 @@
 # Modular Agentic Cookbook
 
-The Agentic Cookbook is collection of recipes demonstrating how to build modern fullstack web apps using Modular MAX, Next.js, and the Vercel AI SDK. Each recipe demonstrates an end-to-end workflow with both frontend and backend implementations, including detailed code comments.
+A collection of recipes demonstrating how to build modern fullstack web apps using Modular MAX, Next.js, and the Vercel AI SDK. Each recipe demonstrates an end-to-end workflow with both frontend and backend implementations, including detailed code comments.
 
 <img src="https://github.com/user-attachments/assets/e2302038-a950-41a8-acec-47c0d9c09ed6" />
+
+> **📦 Looking for legacy recipes?** Older standalone recipes have been moved to the [`archive/`](./archive/) folder. These are provided as-is for historical reference only and are no longer maintained.
 
 ## Requirements
 
@@ -10,30 +12,23 @@ The Agentic Cookbook is collection of recipes demonstrating how to build modern 
 - **pnpm** package manager
 - **MAX** server running locally or remotely—see the [MAX quickstart](https://docs.modular.com/max/get-started/)
 
-## Get Started
+## Quick Start
 
-1. **Clone the repository**
+1. **Clone and install**
 
     ```bash
     git clone https://github.com/modular/max-agentic-cookbook.git
     cd max-agentic-cookbook
-    ```
-
-2. **Install dependencies**
-
-    ```bash
     pnpm install
     ```
 
-3. **Configure environment variables**
-
-    Copy the sample environment file and configure your endpoints:
+2. **Configure endpoints**
 
     ```bash
     cp .sample.env .env.local
     ```
 
-    Edit `.env.local` to add your Modular MAX endpoint configuration:
+    Edit `.env.local` to add your MAX endpoint (or any OpenAI-compatible server):
 
     ```env
     COOKBOOK_ENDPOINTS='[
@@ -45,32 +40,13 @@ The Agentic Cookbook is collection of recipes demonstrating how to build modern 
     ]'
     ```
 
-    You may enter multiple endpoints for comparison with OpenAI and other compatible servers:
-
-    ```env
-    COOKBOOK_ENDPOINTS='[
-      {
-        "id": "max-local",
-        "baseUrl": "http://127.0.0.1:8000/v1",
-        "apiKey": "EMPTY"
-      },
-      {
-        "id": "openai",
-        "baseUrl": "https://api.openai.com/v1",
-        "apiKey": "your-openai-api-key"
-      }
-    ]'
-    ```
-
-4. **Start the development server**
+3. **Start developing**
 
     ```bash
     pnpm dev
     ```
 
-5. **Open the cookbook**
-
-    Navigate to [http://localhost:3000](http://localhost:3000) in your browser
+    Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Featured Recipes
 
@@ -96,176 +72,61 @@ Create an intelligent image captioning system that generates natural language de
 
 ## Architecture
 
-The Agentic Cookbook follows a modern fullstack architecture optimized for AI applications, organized as a pnpm workspace monorepo:
+The cookbook is organized as a pnpm workspace monorepo with a clean separation between the Next.js app and shared recipe implementations:
 
 ```
-genai-cookbook/
-├── apps/
-│   └── cookbook/                # Next.js 14 App with App Router
-│       ├── app/                 # Next.js app directory
-│       │   ├── api/             # API routes
-│       │   │   ├── endpoints/   # Endpoint API handler
-│       │   │   └── models/      # Models API handler
-│       │   │
-│       │   ├── cookbook/        # Cookbook pages
-│       │   │   ├── [recipe]/    # Dynamic recipe routes
-│       │   │   │   ├── page.tsx # Recipe UI (lazy-loaded)
-│       │   │   │   ├── code/    # Recipe code viewer
-│       │   │   │   └── api/     # Recipe API handler
-│       │   │   │
-│       │   │   ├── page.tsx     # Cookbook home
-│       │   │   └── layout.tsx   # Cookbook layout
-│       │   │
-│       │   ├── page.tsx     # Landing page
-│       │   └── layout.tsx   # Root layout
-│       │
-│       ├── components/      # Reusable UI components
-│       ├── context/         # React context providers
-│       ├── lib/             # Shared utilities
-│       ├── styles/          # Global styles
-│       └── Dockerfile       # Container configuration
+├── apps/cookbook/           # Next.js 14 App
+│   ├── app/                 # App Router pages & API routes
+│   ├── components/          # UI components
+│   └── context/             # React context
 │
-└── packages/
-    └── recipes/             # Shared recipe implementations
-        └── src/
-            ├── multiturn-chat/
-            │   ├── api.ts       # Backend API logic
-            │   └── ui.tsx       # Frontend UI component
-            │
-            ├── image-captioning/
-            │   ├── ui.tsx
-            │   └── api.ts
-            │
-            └── lib/         # Recipe utilities and types
+└── packages/recipes/        # Shared recipe implementations
+    └── src/
+        ├── multiturn-chat/  # Each recipe has:
+        │   ├── api.ts       # - Backend API logic
+        │   └── ui.tsx       # - Frontend UI component
+        └── image-captioning/
 ```
 
-## Development
+## Adding New Recipes
 
-### Adding a New Recipe
+Create a directory under `packages/recipes/src/your-recipe-name/` with:
 
-1. Create a new directory under `packages/recipes/src/your-recipe-name/`
-2. Add the following files:
-    - `ui.tsx`: Frontend UI component (React)
-    - `api.ts`: Backend API handler (receives Request and RecipeContext)
+- **`ui.tsx`** - Frontend React component with inline documentation
+- **`api.ts`** - Backend API handler using Vercel AI SDK
 
-Recipes will hot-reload changes when running in development, but the server must be restarted to load new recipes.
+Each recipe follows consistent patterns: React hooks for state management, Mantine UI components, and detailed inline comments explaining architecture decisions and data flow.
 
-### Code Structure Guidelines
+## Using with MAX
 
-Each recipe follows consistent patterns for maintainability:
+Start MAX model serving ([see quickstart](https://docs.modular.com/max/get-started/)):
 
-- **Frontend (`ui.tsx`)**: Uses React hooks for state management, Mantine for UI, and detailed inline comments explaining the workflow
-- **Backend (`api.ts`)**: Uses the Vercel AI SDK for communicating with MAX model serving
+```bash
+max serve --model google/gemma-3-27b-it
+```
 
-## Running with MAX
+Configure the endpoint in `.env.local` and select it in the cookbook UI. The cookbook works with MAX or any OpenAI-compatible API.
 
-To use the cookbook with MAX:
+## Docker Deployment
 
-1. **Start the model server** (in a separate terminal):
-
-    ```bash
-    max serve --model google/gemma-3-27b-it
-    ```
-
-    For more details, see the [MAX quickstart](https://docs.modular.com/max/get-started/).
-
-2. **Configure the endpoint** in `.env.local`:
-
-    ```env
-    COOKBOOK_ENDPOINTS='[
-      {
-        "id": "max",
-        "baseUrl": "http://127.0.0.1:8000/v1",
-        "apiKey": "EMPTY"
-      }
-    ]'
-    ```
-
-3. **Select MAX** in the cookbook UI endpoint selector
-
-## Running with Docker
-
-The Agentic Cookbook can be run entirely within a Docker container, including the MAX model server and web application. The container uses the universal MAX image with the nightly build, supporting both NVIDIA and AMD GPUs.
-
-### Building the Container
-
-Build the universal container image:
+The cookbook can run entirely in Docker with MAX model serving included. Build with:
 
 ```bash
 docker build --ulimit nofile=65535:65535 -t max-cookbook:latest .
 ```
 
-**Note:** The `--ulimit nofile=65535:65535` flag increases the file descriptor limit, which is needed for Next.js builds.
-
-#### Build Arguments
-
-You can customize the Docker build using these arguments to reduce container size:
-
-- **MAX_GPU**: Selects the base image (default: `universal`)
-    - `universal` → `modular/max-full` (larger, supports all GPU types)
-    - `amd` → `modular/max-amd` (smaller, AMD-specific)
-    - `nvidia` → `modular/max-nvidia-full` (smaller, NVIDIA-specific)
-
-- **MAX_TAG**: Selects the image version (default: `latest`)
-    - `latest` → Latest stable release
-    - `nightly` → Nightly development builds
-    - Specific versions (e.g., `25.7.0`)
-
-**Examples:**
-
-Build smaller AMD-specific container:
-
-```bash
-docker build --build-arg MAX_GPU=amd --ulimit nofile=65535:65535 -t max-cookbook:amd .
-```
-
-Build smaller NVIDIA-specific container with nightly builds:
-
-```bash
-docker build --build-arg MAX_GPU=nvidia --build-arg MAX_TAG=nightly --ulimit nofile=65535:65535 -t max-cookbook:nvidia-nightly .
-```
-
-### Running the Container
-
-#### NVIDIA GPU
+Run with GPU support (NVIDIA example):
 
 ```bash
 docker run --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
-    --env "HF_HUB_ENABLE_HF_TRANSFER=1" \
-    --env "HF_TOKEN=your-huggingface-token" \
-    --env "MAX_MODEL=mistral-community/pixtral-12b" \
-    -p 8000:8000 \
-    -p 3000:3000 \
+    -e "HF_TOKEN=your-token" \
+    -e "MAX_MODEL=mistral-community/pixtral-12b" \
+    -p 8000:8000 -p 3000:3000 \
     max-cookbook:latest
 ```
 
-#### AMD GPU
-
-```bash
-docker run \
-    --group-add keep-groups \
-    --rm \
-    --device /dev/kfd \
-    --device /dev/dri \
-    -v ~/.cache/huggingface:/root/.cache/huggingface \
-    --env "HF_HUB_ENABLE_HF_TRANSFER=1" \
-    --env "HF_TOKEN=your-huggingface-token" \
-    --env "MAX_MODEL=mistral-community/pixtral-12b" \
-    -p 8000:8000 \
-    -p 3000:3000 \
-    max-cookbook:latest
-```
-
-**Configuration:**
-
-- **Port 8000**: MAX model serving endpoint
-- **Port 3000**: Agentic Cookbook web application
-- **HF_TOKEN**: Your HuggingFace token for downloading models
-- **MAX_MODEL**: The model to serve (e.g., `google/gemma-3-27b-it`)
-- **Volume mount**: Caches downloaded models in `~/.cache/huggingface`
-
-Once running, navigate to [http://localhost:3000](http://localhost:3000) to access the cookbook.
+The container supports both NVIDIA and AMD GPUs. See build arguments (`MAX_GPU`, `MAX_TAG`) for customization options.
 
 ## Available Scripts
 
@@ -276,43 +137,22 @@ Once running, navigate to [http://localhost:3000](http://localhost:3000) to acce
 - `pnpm format` - Format code with Prettier
 - `pnpm format:check` - Check code formatting
 
-## Learn More
+## Learning Resources
 
-### Exploring the Recipes
+The best way to learn is by running the cookbook and exploring the recipes. Toggle "Show Code" in the UI to see implementations alongside demos. Each recipe contains extensive inline documentation explaining architecture decisions and integration patterns.
 
-The best way to learn is by exploring the live cookbook:
-
-1. **Run the cookbook** and browse through the recipes
-2. **Toggle "Show Code"** in the UI to see the implementation alongside the demo
-3. **Read the inline comments** - each recipe contains extensive documentation explaining:
-    - Architecture decisions
-    - Data flow patterns
-    - Integration points with Modular MAX
-    - UI/UX considerations
-
-### Documentation Resources
-
-- [Modular](https://docs.modular.com/)
+**Documentation:**
+- [Modular MAX](https://docs.modular.com/)
 - [Vercel AI SDK](https://sdk.vercel.ai/docs)
 - [Next.js](https://nextjs.org/docs)
-- [Mantine](https://mantine.dev/core/getting-started/)
+- [Mantine UI](https://mantine.dev/)
 
 ## Contributing
 
-We welcome contributions! Whether you're adding new recipes, improving existing ones, or fixing bugs:
-
-1. Fork the repository
-2. Create a feature branch
-3. Add your recipe following the established patterns
-4. Ensure all TypeScript types are properly defined
-5. Add comprehensive inline documentation
-6. Submit a pull request
+Contributions welcome! Fork the repo, create a feature branch, follow established patterns, and submit a pull request. Ensure proper TypeScript types and comprehensive inline documentation.
 
 ## Support
 
-- **Issues**: Report bugs or request features via [GitHub Issues](https://github.com/modular/max-recipes/issues)
-- **Forum**: Visit the [Modular Forum](https://forum.modular.com/) for in-depth technical discussions
-
-## License
-
-This project is part of the MAX Recipes collection. See the repository root for license information.
+- **Issues**: [GitHub Issues](https://github.com/modular/max-recipes/issues)
+- **Discussions**: [Modular Forum](https://forum.modular.com/)
+- **Community**: [Discord](https://discord.gg/modular)
