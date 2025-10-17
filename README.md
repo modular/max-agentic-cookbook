@@ -6,7 +6,7 @@ A collection of recipes demonstrating how to build modern fullstack web apps usi
 
 <figure>
   <img src="docs/images/cookbook-screenshot.png" alt="Screenshot of the Modular Agentic Cookbook interface showing the Multi-turn Chat recipe" />
-  <figcaption>
+  <figcaption style='display: none'>
     Example conversation: User asks for a joke about Mojo, the smiling fireball who makes GPUs go brrr. The assistant responds: "Why did Mojo the smiling fireball get a job optimizing GPUs? Because he said, 'I'm here to bring the heat! Watch these GPUs go brrr... with a smile, of course! Hope you enjoyed it!'"
   </figcaption>
 </figure>
