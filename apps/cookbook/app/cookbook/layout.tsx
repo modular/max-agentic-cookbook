@@ -32,7 +32,7 @@ export default function CookbookShell({ children }: CookbookShellProps) {
                     toggleDesktop={toggleDesktop}
                 />
             </AppShell.Header>
-            <AppShell.Navbar p="md">
+            <AppShell.Navbar>
                 <Navbar />
             </AppShell.Navbar>
             <AppShell.Main>{children}</AppShell.Main>
