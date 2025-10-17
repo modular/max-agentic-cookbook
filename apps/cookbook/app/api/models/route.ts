@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import type { Model } from '@modular/recipes'
-import cache from '@/utils/cache'
+import cache from '@/lib/cache'
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)

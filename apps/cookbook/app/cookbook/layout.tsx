@@ -2,7 +2,7 @@
 
 import { AppShell } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { headerHeight, navbarWidth } from '@/utils/theme'
+import { headerHeight, navbarWidth } from '@/lib/theme'
 
 import Header from '@/components/Header'
 import Navbar from '@/components/Navbar'
@@ -32,7 +32,7 @@ export default function CookbookShell({ children }: CookbookShellProps) {
                     toggleDesktop={toggleDesktop}
                 />
             </AppShell.Header>
-            <AppShell.Navbar p="md">
+            <AppShell.Navbar>
                 <Navbar />
             </AppShell.Navbar>
             <AppShell.Main>{children}</AppShell.Main>

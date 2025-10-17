@@ -4,7 +4,12 @@ A collection of recipes demonstrating how to build modern fullstack web apps usi
 
 > **📦 Looking for legacy recipes?** Older standalone recipes have been moved to the [`archive/`](./archive/) folder. These are provided as-is for historical reference only and are no longer maintained.
 
-<img src="https://github.com/user-attachments/assets/e2302038-a950-41a8-acec-47c0d9c09ed6" alt="Screenshot of the Modular Agentic Cookbook interface showing the Image Captioning recipe with AI-generated captions for two uploaded images." />
+<figure>
+  <img src="docs/images/cookbook-screenshot.png" alt="Screenshot of the Modular Agentic Cookbook interface showing the Multi-turn Chat recipe" />
+  <figcaption>
+    Example conversation: User asks for a joke about Mojo, the smiling fireball who makes GPUs go brrr. The assistant responds: "Why did Mojo the smiling fireball get a job optimizing GPUs? Because he said, 'I'm here to bring the heat! Watch these GPUs go brrr... with a smile, of course! Hope you enjoyed it!'"
+  </figcaption>
+</figure>
 
 ## Requirements
 

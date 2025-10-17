@@ -2,8 +2,8 @@
 
 import { redirect } from 'next/navigation'
 import { Toolbar } from '@/components/Toolbar'
-import { cookbookRoute } from '@/utils/constants'
-import { appShellContentHeight } from '@/utils/theme'
+import { cookbookRoute } from '@/lib/constants'
+import { appShellContentHeight } from '@/lib/theme'
 import { recipeMetadata, RecipeLayout } from '@modular/recipes'
 
 export default function Layout({

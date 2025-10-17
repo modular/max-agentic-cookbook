@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-import cache from '@/utils/cache'
+import cache from '@/lib/cache'
 import type { Endpoint } from '@modular/recipes'
 
 export function GET(_request: NextRequest) {

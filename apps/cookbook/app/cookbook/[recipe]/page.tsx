@@ -1,7 +1,7 @@
 'use client'
 
 import { redirect, usePathname } from 'next/navigation'
-import { cookbookRoute } from '@/utils/constants'
+import { cookbookRoute } from '@/lib/constants'
 import { useCookbook } from '@/context'
 import { recipeMetadata, recipeUiRegistry } from '@modular/recipes'
 
