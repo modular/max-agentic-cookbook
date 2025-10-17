@@ -1,4 +1,4 @@
-import cache from '@/utils/cache'
+import cache from '@/lib/cache'
 import { getRecipeApiHandler } from '@modular/recipes/server'
 
 function createErrorResponse(message: string, error?: unknown, status = 400): Response {

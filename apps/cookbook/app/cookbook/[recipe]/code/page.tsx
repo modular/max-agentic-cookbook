@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { cookbookRoute } from '@/utils/constants'
+import { cookbookRoute } from '@/lib/constants'
 import { CodeViewer } from '@/components/CodeViewer'
 import { getRecipeSource, getRecipeMetadata } from '@modular/recipes/server'
 

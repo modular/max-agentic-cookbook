@@ -4,9 +4,9 @@ import '@/styles/globals.scss'
 import type { Metadata } from 'next'
 import { MantineProvider } from '@mantine/core'
 
-import { theme } from '@/utils/theme'
+import { theme } from '@/lib/theme'
 import { CookbookProvider } from '@/context'
-import { endpointsRoute } from '@/utils/constants'
+import { endpointsRoute } from '@/lib/constants'
 
 export const metadata: Metadata = {
     title: 'Modular Agentic Cookbook',
