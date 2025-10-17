@@ -2,9 +2,9 @@
 
 A collection of recipes demonstrating how to build modern fullstack web apps using Modular MAX, Next.js, and the Vercel AI SDK. Each recipe demonstrates an end-to-end workflow with both frontend and backend implementations, including detailed code comments.
 
-<img src="https://github.com/user-attachments/assets/e2302038-a950-41a8-acec-47c0d9c09ed6" alt="Screenshot of the Modular Agentic Cookbook interface showing the Image Captioning recipe with AI-generated captions for two uploaded images." />
-
 > **📦 Looking for legacy recipes?** Older standalone recipes have been moved to the [`archive/`](./archive/) folder. These are provided as-is for historical reference only and are no longer maintained.
+
+<img src="https://github.com/user-attachments/assets/e2302038-a950-41a8-acec-47c0d9c09ed6" alt="Screenshot of the Modular Agentic Cookbook interface showing the Image Captioning recipe with AI-generated captions for two uploaded images." />
 
 ## Requirements
 
