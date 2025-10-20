@@ -16,8 +16,7 @@ export function ThemeToggle({ stroke }: { stroke: number }) {
     }
 
     const resolvedScheme = mounted ? colorScheme : 'light'
-    const label =
-        resolvedScheme === 'dark' ? 'Switch to light' : 'Switch to dark'
+    const label = resolvedScheme === 'dark' ? 'Switch to light' : 'Switch to dark'
 
     return (
         <Tooltip label={label}>

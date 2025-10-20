@@ -3,35 +3,35 @@
  */
 
 export interface Recipe {
-  id: string;
-  name: string;
-  description: string;
+    id: string
+    name: string
+    description: string
 }
 
 export interface HealthCheckResponse {
-  status: string;
-  message: string;
-  version: string;
+    status: string
+    message: string
+    version: string
 }
 
 export interface RecipesListResponse {
-  recipes: Recipe[];
+    recipes: Recipe[]
 }
 
 /**
  * Endpoint configuration for connecting to LLM servers
  */
 export interface Endpoint {
-  id: string;
-  baseUrl: string;
-  hwMake?: 'NVIDIA' | 'AMD';
-  hwModel?: string;
+    id: string
+    baseUrl: string
+    hwMake?: 'NVIDIA' | 'AMD'
+    hwModel?: string
 }
 
 /**
  * Model information from an LLM server
  */
 export interface Model {
-  id: string;
-  name: string;
+    id: string
+    name: string
 }

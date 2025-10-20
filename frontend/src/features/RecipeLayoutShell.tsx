@@ -13,28 +13,33 @@
  * </Route>
  */
 
-import { Flex } from '@mantine/core';
-import { Outlet, useLocation } from 'react-router-dom';
-import { Toolbar } from '../components/Toolbar';
-import { appShellContentHeight } from '../lib/theme';
-import { recipeMetadata } from '../lib/recipeMetadata';
+import { Flex } from '@mantine/core'
+import { Outlet, useLocation } from 'react-router-dom'
+import { Toolbar } from '../components/Toolbar'
+import { appShellContentHeight } from '../lib/theme'
+import { recipeMetadata } from '../lib/recipeMetadata'
 
 export function RecipeLayoutShell() {
-  const location = useLocation();
+    const location = useLocation()
 
-  // Extract recipe slug from pathname
-  // e.g., "/multiturn-chat" -> "multiturn-chat"
-  // e.g., "/multiturn-chat/code" -> "multiturn-chat"
-  const slug = location.pathname.split('/')[1].replace(/\/code$/, '');
+    // Extract recipe slug from pathname
+    // e.g., "/multiturn-chat" -> "multiturn-chat"
+    // e.g., "/multiturn-chat/code" -> "multiturn-chat"
+    const slug = location.pathname.split('/')[1].replace(/\/code$/, '')
 
-  // Look up recipe metadata
-  const recipe = recipeMetadata[slug];
-  const title = recipe?.title ?? '';
+    // Look up recipe metadata
+    const recipe = recipeMetadata[slug]
+    const title = recipe?.title ?? ''
 
-  return (
-    <Flex direction="column" gap="sm" style={{ overflow: 'hidden' }} h={appShellContentHeight}>
-      <Toolbar title={title} />
-      <Outlet />
-    </Flex>
-  );
+    return (
+        <Flex
+            direction="column"
+            gap="sm"
+            style={{ overflow: 'hidden' }}
+            h={appShellContentHeight}
+        >
+            <Toolbar title={title} />
+            <Outlet />
+        </Flex>
+    )
 }

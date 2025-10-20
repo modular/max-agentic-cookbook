@@ -11,11 +11,7 @@ interface HeaderProps {
     toggleDesktop: () => void
 }
 
-export function Header({
-    mobileOpened,
-    toggleMobile,
-    toggleDesktop,
-}: HeaderProps) {
+export function Header({ mobileOpened, toggleMobile, toggleDesktop }: HeaderProps) {
     return (
         <Flex h="100%" px="md" justify="space-between" align="center">
             <Burger
