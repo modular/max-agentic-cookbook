@@ -2,15 +2,16 @@
  * Layout component for /cookbook routes
  */
 
+import { Box, Title } from '@mantine/core';
 import { Outlet } from 'react-router-dom';
 
 export function CookbookLayout() {
   return (
-    <div>
-      <div style={{ padding: '1rem', background: '#f9f9f9' }}>
-        <h2>Cookbook</h2>
-      </div>
+    <Box>
+      <Box p="md" bg="gray.0">
+        <Title order={2}>Cookbook</Title>
+      </Box>
       <Outlet />
-    </div>
+    </Box>
   );
 }

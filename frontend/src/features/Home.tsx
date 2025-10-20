@@ -3,6 +3,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { Container, Title, Paper, Text, List, Loader, Alert, Anchor, Stack } from '@mantine/core';
 import { Link } from 'react-router-dom';
 import { fetchHealthCheck, fetchRecipes } from '../lib/api';
 import type { HealthCheckResponse, RecipesListResponse } from '../lib/types';
@@ -27,42 +28,54 @@ export function Home() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <Container mt="xl">
+        <Loader size="lg" />
+      </Container>
+    );
   }
 
   if (error) {
-    return <div style={{ color: 'red' }}>Error: {error}</div>;
+    return (
+      <Container mt="xl">
+        <Alert color="red" title="Error">
+          {error}
+        </Alert>
+      </Container>
+    );
   }
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h2>Welcome to MAX Recipes</h2>
+    <Container size="lg" py="xl">
+      <Stack gap="xl">
+        <Title order={2}>Welcome to MAX Recipes</Title>
 
-      {health && (
-        <div style={{ marginBottom: '2rem', padding: '1rem', background: '#f0f0f0', borderRadius: '4px' }}>
-          <h3>Backend Status</h3>
-          <p><strong>Status:</strong> {health.status}</p>
-          <p><strong>Message:</strong> {health.message}</p>
-          <p><strong>Version:</strong> {health.version}</p>
-        </div>
-      )}
+        {health && (
+          <Paper p="md" withBorder>
+            <Title order={3} size="h4" mb="sm">Backend Status</Title>
+            <Text><strong>Status:</strong> {health.status}</Text>
+            <Text><strong>Message:</strong> {health.message}</Text>
+            <Text><strong>Version:</strong> {health.version}</Text>
+          </Paper>
+        )}
 
-      {recipes && recipes.recipes.length > 0 && (
-        <div>
-          <h3>Available Recipes</h3>
-          <ul>
-            {recipes.recipes.map((recipe) => (
-              <li key={recipe.id}>
-                <Link to={`/cookbook/${recipe.id}`}>
-                  <strong>{recipe.name}</strong>
-                </Link>
-                {' - '}
-                {recipe.description}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
+        {recipes && recipes.recipes.length > 0 && (
+          <div>
+            <Title order={3} size="h4" mb="sm">Available Recipes</Title>
+            <List>
+              {recipes.recipes.map((recipe) => (
+                <List.Item key={recipe.id}>
+                  <Anchor component={Link} to={`/cookbook/${recipe.id}`} fw={700}>
+                    {recipe.name}
+                  </Anchor>
+                  {' - '}
+                  {recipe.description}
+                </List.Item>
+              ))}
+            </List>
+          </div>
+        )}
+      </Stack>
+    </Container>
   );
 }

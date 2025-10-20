@@ -2,19 +2,22 @@
  * Header component with navigation
  */
 
+import { Group, Title, Anchor, Box } from '@mantine/core';
 import { Link } from 'react-router-dom';
 
 export function Header() {
   return (
-    <header style={{ padding: '1rem', borderBottom: '1px solid #ccc' }}>
-      <nav style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-        <h1 style={{ margin: 0, fontSize: '1.5rem' }}>
-          <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+    <Box component="header" p="md" style={{ borderBottom: '1px solid var(--mantine-color-gray-3)' }}>
+      <Group>
+        <Title order={1} size="h2">
+          <Anchor component={Link} to="/" underline="never" c="inherit">
             MAX Recipes
-          </Link>
-        </h1>
-        <Link to="/cookbook">Cookbook</Link>
-      </nav>
-    </header>
+          </Anchor>
+        </Title>
+        <Anchor component={Link} to="/cookbook">
+          Cookbook
+        </Anchor>
+      </Group>
+    </Box>
   );
 }

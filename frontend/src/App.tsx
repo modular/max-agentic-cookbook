@@ -2,6 +2,7 @@
  * Root App component with React Router configuration
  */
 
+import { MantineProvider } from '@mantine/core';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Header } from './components/Header';
 import { Home } from './features/Home';
@@ -12,16 +13,18 @@ import './App.css';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/cookbook" element={<CookbookLayout />}>
-          <Route index element={<CookbookIndex />} />
-          <Route path=":recipe" element={<RecipePage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <MantineProvider>
+      <BrowserRouter>
+        <Header />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/cookbook" element={<CookbookLayout />}>
+            <Route index element={<CookbookIndex />} />
+            <Route path=":recipe" element={<RecipePage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </MantineProvider>
   );
 }
 

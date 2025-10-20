@@ -3,6 +3,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { Container, Title, Card, Text, Loader, SimpleGrid, Anchor } from '@mantine/core';
 import { Link } from 'react-router-dom';
 import { fetchRecipes } from '../lib/api';
 import type { RecipesListResponse } from '../lib/types';
@@ -24,34 +25,33 @@ export function CookbookIndex() {
   }, []);
 
   if (loading) {
-    return <div style={{ padding: '2rem' }}>Loading recipes...</div>;
+    return (
+      <Container py="xl">
+        <Loader size="lg" />
+      </Container>
+    );
   }
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h3>All Recipes</h3>
+    <Container size="lg" py="xl">
+      <Title order={3} mb="md">All Recipes</Title>
       {recipes && recipes.recipes.length > 0 ? (
-        <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
           {recipes.recipes.map((recipe) => (
-            <div
-              key={recipe.id}
-              style={{
-                padding: '1.5rem',
-                border: '1px solid #ddd',
-                borderRadius: '8px',
-              }}
-            >
-              <h4>{recipe.name}</h4>
-              <p>{recipe.description}</p>
-              <Link to={`/cookbook/${recipe.id}`}>
+            <Card key={recipe.id} shadow="sm" padding="lg" withBorder>
+              <Title order={4} mb="xs">{recipe.name}</Title>
+              <Text size="sm" c="dimmed" mb="md">
+                {recipe.description}
+              </Text>
+              <Anchor component={Link} to={`/cookbook/${recipe.id}`} size="sm">
                 View Recipe →
-              </Link>
-            </div>
+              </Anchor>
+            </Card>
           ))}
-        </div>
+        </SimpleGrid>
       ) : (
-        <p>No recipes available.</p>
+        <Text>No recipes available.</Text>
       )}
-    </div>
+    </Container>
   );
 }
