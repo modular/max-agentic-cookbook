@@ -46,3 +46,20 @@ next-env.d.ts
 
 # pixi
 **/.pixi
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+.uv/
+*.egg-info/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
