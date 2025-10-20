@@ -27,6 +27,11 @@ function App() {
                 path="image-captioning"
                 lazy={() => import('./features/image-captioning/ImageCaptioningPlaceholder')}
               />
+              {/* Dynamic code view route - matches any recipe's /code path */}
+              <Route
+                path=":slug/code"
+                lazy={() => import('./features/RecipeCodeView')}
+              />
             </Route>
           </Route>
         </Routes>

@@ -3,7 +3,7 @@
  *
  * This component wraps all recipe pages and provides:
  * - Toolbar with recipe title, CodeToggle, and endpoint/model selectors
- * - RecipeLayout wrapper with proper height
+ * - Flex layout with proper height and overflow handling
  * - Outlet for nested recipe routes
  *
  * Uses React Router v7 nested routes pattern:
@@ -13,8 +13,8 @@
  * </Route>
  */
 
+import { Flex } from '@mantine/core';
 import { Outlet, useLocation } from 'react-router-dom';
-import { RecipeLayout } from '../components/RecipeLayout';
 import { Toolbar } from '../components/Toolbar';
 import { appShellContentHeight } from '../lib/theme';
 import { recipeMetadata } from '../lib/recipeMetadata';
@@ -32,8 +32,9 @@ export function RecipeLayoutShell() {
   const title = recipe?.title ?? '';
 
   return (
-    <RecipeLayout height={appShellContentHeight} header={<Toolbar title={title} />}>
+    <Flex direction="column" gap="sm" style={{ overflow: 'hidden' }} h={appShellContentHeight}>
+      <Toolbar title={title} />
       <Outlet />
-    </RecipeLayout>
+    </Flex>
   );
 }
