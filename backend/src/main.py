@@ -1,7 +1,16 @@
 """FastAPI application entry point."""
 
+from pathlib import Path
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from src.recipes import endpoints, models
+
+# Load environment variables from .env.local
+env_path = Path(__file__).parent.parent / ".env.local"
+load_dotenv(dotenv_path=env_path)
 
 app = FastAPI(
     title="MAX Recipes API",
@@ -20,6 +29,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(endpoints.router)
+app.include_router(models.router)
 
 
 @app.get("/api/health")

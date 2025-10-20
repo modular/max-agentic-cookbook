@@ -17,3 +17,21 @@ export interface HealthCheckResponse {
 export interface RecipesListResponse {
   recipes: Recipe[];
 }
+
+/**
+ * Endpoint configuration for connecting to LLM servers
+ */
+export interface Endpoint {
+  id: string;
+  baseUrl: string;
+  hwMake?: 'NVIDIA' | 'AMD';
+  hwModel?: string;
+}
+
+/**
+ * Model information from an LLM server
+ */
+export interface Model {
+  id: string;
+  name: string;
+}
