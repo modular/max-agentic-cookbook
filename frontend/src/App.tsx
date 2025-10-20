@@ -4,23 +4,22 @@
 
 import { MantineProvider } from '@mantine/core';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Header } from './components/Header';
-import { Home } from './features/Home';
-import { CookbookLayout } from './features/CookbookLayout';
+import { theme } from './lib/theme';
+import { CookbookShell } from './features/CookbookShell';
 import { CookbookIndex } from './features/CookbookIndex';
-import { RecipePage } from './features/RecipePage';
+import { MultiturnChatPlaceholder } from './features/multiturn-chat/MultiturnChatPlaceholder';
+import { ImageCaptioningPlaceholder } from './features/image-captioning/ImageCaptioningPlaceholder';
 import './App.css';
 
 function App() {
   return (
-    <MantineProvider>
+    <MantineProvider theme={theme} defaultColorScheme="auto">
       <BrowserRouter>
-        <Header />
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/cookbook" element={<CookbookLayout />}>
+          <Route path="/" element={<CookbookShell />}>
             <Route index element={<CookbookIndex />} />
-            <Route path=":recipe" element={<RecipePage />} />
+            <Route path="multiturn-chat" element={<MultiturnChatPlaceholder />} />
+            <Route path="image-captioning" element={<ImageCaptioningPlaceholder />} />
           </Route>
         </Routes>
       </BrowserRouter>
