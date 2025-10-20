@@ -8,8 +8,6 @@ import { theme } from './lib/theme';
 import { CookbookShell } from './features/CookbookShell';
 import { CookbookIndex } from './features/CookbookIndex';
 import { RecipeLayoutShell } from './features/RecipeLayoutShell';
-import { MultiturnChatPlaceholder } from './features/multiturn-chat/MultiturnChatPlaceholder';
-import { ImageCaptioningPlaceholder } from './features/image-captioning/ImageCaptioningPlaceholder';
 import './App.css';
 
 function App() {
@@ -19,10 +17,16 @@ function App() {
         <Routes>
           <Route path="/" element={<CookbookShell />}>
             <Route index element={<CookbookIndex />} />
-            {/* Nested recipe layout wraps all recipe pages */}
+            {/* Nested recipe layout wraps all recipe pages with lazy loading */}
             <Route element={<RecipeLayoutShell />}>
-              <Route path="multiturn-chat" element={<MultiturnChatPlaceholder />} />
-              <Route path="image-captioning" element={<ImageCaptioningPlaceholder />} />
+              <Route
+                path="multiturn-chat"
+                lazy={() => import('./features/multiturn-chat/MultiturnChatPlaceholder')}
+              />
+              <Route
+                path="image-captioning"
+                lazy={() => import('./features/image-captioning/ImageCaptioningPlaceholder')}
+              />
             </Route>
           </Route>
         </Routes>
