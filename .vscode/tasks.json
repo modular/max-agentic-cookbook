@@ -15,7 +15,7 @@
             "presentation": {
                 // This is also from your advice.
                 "reveal": "always",
-                "panel": "new"
+                "panel": "dedicated"
             },
             // This is crucial. It tells VS Code when the server is ready.
             // This matcher is configured for Vite (which uses port 5173)
@@ -23,15 +23,15 @@
                 "owner": "vite",
                 "pattern": {
                     // This regex looks for "VITE vX.X.X  ready in XXX ms"
-                    "regexp": "VITE v.* ready in (\\d+)ms"
+                    "regexp": "\\s*VITE v.* ready in (\\d+)ms"
                 },
                 "background": {
                     "activeOnStart": true,
                     // Tells VS Code the task has started
-                    "beginsPattern": "VITE v.*",
+                    "beginsPattern": "VITE v",
                     // Tells VS Code the preLaunchTask is "finished"
-                    // and the "React Frontend" launch can proceed.
-                    "endsPattern": "VITE v.* ready in"
+                    // when Vite prints the Local URL (most reliable indicator it's ready)
+                    "endsPattern": "Local:.*http"
                 }
             }
         }
