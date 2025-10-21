@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Accordion, AppShell, Group, ScrollArea, Stack, Text } from '@mantine/core'
 import { IconChevronRight, IconPlus } from '@tabler/icons-react'
 import { iconStroke } from '../lib/theme'
@@ -19,16 +19,7 @@ function NavItem({ item, currentRecipe }: NavItemProps) {
         return (
             <Group justify="space-between" align="center">
                 <Link to={`/${item.slug}`} style={{ textDecoration: 'none' }}>
-                    <Text
-                        size="sm"
-                        c={
-                            currentRecipe === item.slug
-                                ? 'var(--mantine-primary-color-0)'
-                                : ''
-                        }
-                    >
-                        {item.title}
-                    </Text>
+                    <Text size="sm">{item.title}</Text>
                 </Link>
                 {currentRecipe === item.slug && (
                     <IconChevronRight
@@ -49,8 +40,9 @@ function NavItem({ item, currentRecipe }: NavItemProps) {
 }
 
 export function Navbar() {
-    const { recipe } = useParams<{ recipe: string }>()
-    const currentRecipe = recipe || null
+    const location = useLocation()
+    // Extract recipe slug from pathname (e.g., "/multiturn-chat" -> "multiturn-chat")
+    const currentRecipe = location.pathname.split('/')[1] || null
     const { selectedEndpoint } = useEndpointFromQuery()
 
     return (

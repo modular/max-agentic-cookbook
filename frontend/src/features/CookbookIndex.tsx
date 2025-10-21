@@ -22,9 +22,6 @@ export function CookbookIndex() {
         <Container size="lg" py="xl">
             <Stack gap="xl">
                 <Box>
-                    <Title order={1} mb="md">
-                        Modular Agentic Cookbook
-                    </Title>
                     <Text size="lg" c="dimmed">
                         Practical recipes for building AI agents with Modular MAX and
                         OpenAI-compatible endpoints.

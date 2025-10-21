@@ -33,7 +33,7 @@ export function Header({ mobileOpened, toggleMobile, toggleDesktop }: HeaderProp
                 >
                     <IconLayoutSidebar stroke={iconStroke} />
                 </ActionIcon>
-                <Title style={{ fontWeight: 'normal' }} order={5}>
+                <Title order={4}>
                     <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
                         Modular Agentic Cookbook
                     </Link>

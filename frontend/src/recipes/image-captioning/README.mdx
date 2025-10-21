@@ -1,0 +1,75 @@
+# Streaming Image Captions
+
+Generate captions for multiple images with progressive NDJSON streaming, watching captions appear instantly as they're generated.
+
+## Overview
+
+This recipe demonstrates how to:
+
+- **Process multiple images** - Upload and caption several images at once
+- **Stream results progressively** - Captions appear as they're generated, not all at once
+- **Customize prompts** - Adjust the captioning prompt to control output style
+- **Track performance** - View TTFT (Time To First Token) and total duration for each image
+
+## Key Features
+
+### NDJSON Streaming
+
+Uses newline-delimited JSON (NDJSON) streaming to send captions as they're completed:
+- Start processing immediately
+- Display results progressively
+- Better user experience for batch operations
+
+### Parallel Processing
+
+Multiple images are processed in parallel for maximum speed, with results streaming back as they complete.
+
+### Custom useNDJSON Hook
+
+Demonstrates how to build a custom React hook for handling NDJSON streams, useful for many AI workflows beyond image captioning.
+
+### Performance Metrics
+
+Track performance for each image:
+- **TTFT** - Time to first token (how quickly generation starts)
+- **Duration** - Total time to complete caption
+- Identify bottlenecks and optimize accordingly
+
+## Use Cases
+
+- **E-commerce** - Auto-generate product descriptions from images
+- **Content moderation** - Caption images for review and classification
+- **Accessibility** - Create alt text for images automatically
+- **Digital asset management** - Catalog and search image libraries
+- **Social media** - Generate engaging captions for posts
+
+## Customization
+
+The prompt can be customized to generate different styles of captions:
+- Detailed descriptions vs. brief summaries
+- Technical analysis vs. creative interpretation
+- Specific focus areas (people, objects, scenery, etc.)
+- Different tones (professional, casual, humorous)
+
+## Compatibility
+
+Works with:
+- Modular MAX endpoints with vision support
+- OpenAI-compatible vision APIs
+- Any vision-language model supporting streaming
+
+## Getting Started
+
+1. Select a vision-capable endpoint and model
+2. Upload one or more images (drag & drop or click to browse)
+3. Customize the caption prompt if desired
+4. Click "Generate Captions" and watch results stream in!
+
+## Technical Details
+
+Built using:
+- React for UI and state management
+- NDJSON streaming protocol
+- Custom useNDJSON hook for stream handling
+- Mantine Dropzone for file uploads
+- Performance measurement utilities

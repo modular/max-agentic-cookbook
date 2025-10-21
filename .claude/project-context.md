@@ -49,19 +49,24 @@ max-recipes/
 - **Port:** 5173
 - **Routing:** Manual route definitions in `App.tsx` with React Router v7 `lazy` prop for code splitting
 - **API:** Vite proxy to backend (no CORS issues)
-- **UI:** Mantine v7 with custom theme (nebula/twilight colors)
-- **Layout:** AppShell with collapsible sidebar, Header, Navbar
+- **UI:** Mantine v7 with custom theme (nebula/twilight colors), 70px header height
+- **Layout:** AppShell with collapsible sidebar, responsive Header (endpoint/model selectors in header on desktop, in navbar drawer on mobile)
 - **State Management:** URL query params (`?e=endpoint-id&m=model-name`) via custom hooks
 - **Structure:**
-  - `src/features/` - Recipe feature components (lazy loaded)
+  - `src/recipes/` - Recipe components (lazy loaded)
   - `src/components/` - Shared UI (Header, Navbar, Toolbar, SelectEndpoint, SelectModel, CodeToggle)
   - `src/lib/` - Custom hooks (useEndpointFromQuery, useModelFromQuery), types, theme, config
   - `src/App.tsx` - Manual `<Routes>` definitions with lazy loading
 
 **Routes:**
 - `/` - Recipe cards grid (dynamically generated from recipeMetadata)
-- `/multiturn-chat` - Multi-turn chat recipe (placeholder, lazy loaded)
-- `/image-captioning` - Image captioning recipe (placeholder, lazy loaded)
+- `/multiturn-chat` - Multi-turn chat recipe demo (lazy loaded)
+- `/multiturn-chat/readme` - Multi-turn chat README documentation (MDX)
+- `/multiturn-chat/code` - Multi-turn chat source code view
+- `/image-captioning` - Image captioning recipe demo (lazy loaded)
+- `/image-captioning/readme` - Image captioning README documentation (MDX)
+- `/image-captioning/code` - Image captioning source code view
+- `/:slug/readme` - Dynamic README route for any recipe
 - `/:slug/code` - Dynamic code view route for any recipe
 
 ## Key Architectural Decisions
@@ -83,28 +88,24 @@ max-recipes/
 - CORS and API proxy configured
 - Example endpoints: `/api/health`, `/api/recipes`
 
-### ✅ Completed (Phase 2: UI Shell)
-- Mantine v7 installed and configured with custom theme
-- Custom theme with nebula/twilight colors ported from monorepo
+### ✅ Completed (Phase 2: UI Shell & Responsive Header)
+- Mantine v7 with custom theme (nebula/twilight colors)
 - AppShell layout with collapsible sidebar (mobile + desktop)
-- Header component (burger menu, sidebar toggle, title, theme toggle)
-- Navbar component with accordion sections (6 sections, 19 items)
-- ThemeToggle component (light/dark mode)
-- Chapters configuration (Foundations, Data/Tools, Planning, Context, Advanced, Appendix)
+- Header component (70px height, responsive layout):
+  - Left: burger menu (mobile), sidebar toggle, title
+  - Right: endpoint/model selectors (desktop only), theme toggle
+- Navbar component with accordion sections + endpoint/model selectors at top (mobile only)
 - Recipe metadata for 2 recipes (multiturn-chat, image-captioning)
-- Placeholder recipe pages at `/multiturn-chat` and `/image-captioning`
+- Placeholder recipe pages
 - Routes consolidated to root level (no `/cookbook` prefix)
-- Favicon added
 
 ### ✅ Completed (Phase 3: Query Params & Routing)
-- Replaced CookbookProvider/useCookbook with URL query params
-- Custom hooks: `useEndpointFromQuery()` and `useModelFromQuery(endpointId)`
+- URL query params for endpoint/model selection via custom hooks
 - Backend routes: `/api/endpoints` and `/api/models` (stubbed)
-- RecipeLayoutShell with nested routing (wraps all recipe pages)
-- Toolbar component with title, CodeToggle, SelectEndpoint, SelectModel
+- RecipeLayoutShell with nested routing
+- Toolbar component (simplified: recipe title + CodeToggle only)
 - React Router v7 lazy loading with `lazy` prop
 - Dynamic `:slug/code` route for recipe source view
-- Prettier installed and configured
 
 ### ✅ Completed (Phase 4: Recipe Metadata Consolidation)
 - Restructured `recipeMetadata.ts` with nested section → recipes structure
@@ -120,36 +121,29 @@ max-recipes/
 
 ### 🔄 Next: Port Recipe UI Components
 
-From `monorepo/packages/recipes/src/`:
+Port recipe components from `monorepo/packages/recipes/src/` to `frontend/src/recipes/[recipe-name]/`
 
-**Recipes to port (UI only for now):**
-1. **Multi-turn Chat** (`multiturn-chat/ui.tsx`)
-   - Port to `frontend/src/features/multiturn-chat/MultiturnChat.tsx`
-   - Replace placeholder component
-   - May need shared utilities and types
+**To port:**
+- Multi-turn Chat UI (`multiturn-chat/ui.tsx`)
+- Image Captioning UI (`image-captioning/ui.tsx`)
+- Shared utilities and types as needed
+- Backend API routes (`api.ts` files → FastAPI routes)
 
-2. **Image Captioning** (`image-captioning/ui.tsx`)
-   - Port to `frontend/src/features/image-captioning/ImageCaptioning.tsx`
-   - Replace placeholder component
-   - May need Dropzone and NDJSON streaming utilities
+### Adding a New Recipe
 
-**Shared code (port as needed):**
-- Shared components from `monorepo/packages/recipes/src/components.tsx`
-- Utilities from `monorepo/packages/recipes/src/utils.ts`
-- Additional types from `monorepo/packages/recipes/src/types.ts`
+1. Add entry to `frontend/src/lib/recipeMetadata.ts`
+2. Create `backend/src/recipes/[recipe_name].py` with APIRouter
+3. Include router in `backend/src/main.py`
+4. Add UI component to `frontend/src/recipes/[recipe-name]/`
+5. Add `README.mdx` to `frontend/src/recipes/[recipe-name]/` for documentation
+6. Add recipe slug to `readmeComponents` in `RecipeReadmeView.tsx`
+7. Add route to `frontend/src/App.tsx` with lazy loading
+8. Index page, navigation, and recipe page update automatically
 
-**Backend API routes (later):**
-- Port `api.ts` files to FastAPI routes when ready to wire up functionality
-
-### Migration Pattern
-
-For each recipe:
-1. **Add to recipe metadata** - Add entry to `frontend/src/lib/recipeMetadata.ts` in appropriate section
-2. **Create backend route** - Create `backend/src/recipes/[recipe_name].py` with APIRouter
-3. **Include router** - Import and include router in `backend/src/main.py`
-4. **Copy UI component** - Copy to `frontend/src/features/[recipe]/`
-5. **Add route definition** - Add to `frontend/src/App.tsx` with lazy loading
-6. **Test** - Index page, navigation, and recipe page all update automatically
+**Routes created:**
+- `/:slug` - Demo view (interactive UI)
+- `/:slug/readme` - README documentation (auto-available if added to RecipeReadmeView)
+- `/:slug/code` - Source code view
 
 ## Development Workflow
 
@@ -245,78 +239,125 @@ export const recipes = {
 - Frontend already has the metadata (title, description)
 - No duplication needed
 
-## Important Notes
+## Key Patterns
 
-- Uses **manual routing** not file-based routing (explicitly chosen)
-- Avoid using loaders/actions patterns (plain React only)
-- Backend routes should be prefixed with `/api`
-- Keep recipe features self-contained in their own directories
-- Frontend can call `/api/*` directly (proxy handles it)
-- **Adding a recipe**: Just add to `recipeMetadata.ts` - everything else updates automatically
+- **Manual routing** (not file-based) with explicit route definitions in `App.tsx`
+- **Plain React patterns** - no loaders/actions, use hooks and fetch
+- **Backend routes** prefixed with `/api`
+- **Adding a recipe**: Update `recipeMetadata.ts` - everything else updates automatically
 
-## Frontend Structure (Current)
+### Responsive Layout Pattern
+
+The endpoint/model selectors appear in different locations based on screen size:
+
+- **Desktop (≥sm)**: Selectors in Header (right side, `visibleFrom="sm"`)
+- **Mobile (<sm)**: Selectors in Navbar drawer (top, `hiddenFrom="sm"`)
+
+This ensures controls are always accessible while optimizing for each screen size.
+
+## Frontend Structure
 
 ```
 frontend/src/
 ├── lib/
-│   ├── theme.ts                # Custom Mantine theme (nebula/twilight)
 │   ├── recipeMetadata.ts       # SINGLE SOURCE OF TRUTH for all recipe metadata
-│   │                           # - Nested section → recipes structure
-│   │                           # - Auto-numbering (1, 2, 3...)
-│   │                           # - Helper functions: isImplemented, getRecipeBySlug,
-│   │                           #   buildNavigation, getAllImplementedRecipes, isRecipeImplemented
-│   ├── chapters.ts             # Auto-derived from recipeMetadata (legacy compatibility)
-│   ├── types.ts                # Shared TypeScript types (Endpoint, Model)
+│   ├── chapters.ts             # Auto-derived from recipeMetadata
+│   ├── theme.ts                # Custom Mantine theme (70px header, nebula/twilight colors)
+│   ├── types.ts                # Shared TypeScript types
 │   ├── hooks.ts                # useEndpointFromQuery, useModelFromQuery
 │   ├── api.ts                  # API client utilities
-│   └── utils.ts                # (to be ported)
+│   └── utils.ts                # Shared utilities
 ├── components/
-│   ├── Header.tsx              # Top bar with menu + theme toggle
-│   ├── Navbar.tsx              # Sidebar with accordion (uses isRecipeImplemented helper)
-│   ├── Navbar.module.css       # Navbar styles
-│   ├── ThemeToggle.tsx         # Light/dark mode toggle
-│   ├── Toolbar.tsx             # Recipe toolbar with title + controls
-│   ├── CodeToggle.tsx          # Toggle between demo and code view
-│   ├── SelectEndpoint.tsx      # Endpoint selector (query params)
-│   └── SelectModel.tsx         # Model selector (query params)
+│   ├── Header.tsx              # 70px header with responsive endpoint/model selectors
+│   │                           # Desktop: selectors in header right side
+│   │                           # Mobile: only theme toggle (selectors in navbar)
+│   ├── Navbar.tsx              # Sidebar with accordion navigation
+│   │                           # Mobile: endpoint/model selectors at top
+│   ├── Toolbar.tsx             # Recipe page toolbar (title + ViewSelector)
+│   ├── SelectEndpoint.tsx      # Endpoint selector dropdown
+│   ├── SelectModel.tsx         # Model selector dropdown
+│   ├── ViewSelector.tsx        # SegmentedControl for Readme | Demo | Code views
+│   └── ThemeToggle.tsx         # Light/dark mode toggle
 ├── features/
 │   ├── CookbookShell.tsx       # AppShell layout wrapper
-│   ├── CookbookIndex.tsx       # Recipe cards grid (uses getAllImplementedRecipes)
+│   ├── CookbookIndex.tsx       # Recipe cards grid
 │   ├── RecipeLayoutShell.tsx   # Nested layout for recipe pages
-│   ├── RecipeCodeView.tsx      # Code view placeholder (lazy loaded)
-│   ├── multiturn-chat/
-│   │   └── MultiturnChatPlaceholder.tsx  # Exports Component (lazy loaded)
-│   └── image-captioning/
-│       └── ImageCaptioningPlaceholder.tsx  # Exports Component (lazy loaded)
+│   ├── RecipeReadmeView.tsx    # README view (lazy loaded, renders MDX)
+│   └── RecipeCodeView.tsx      # Code view (lazy loaded)
+├── recipes/
+│   ├── multiturn-chat/         # Multi-turn chat recipe components
+│   │   ├── README.mdx          # Recipe documentation
+│   │   └── ...                 # Demo component
+│   └── image-captioning/       # Image captioning recipe components
+│       ├── README.mdx          # Recipe documentation
+│       └── ...                 # Demo component
+├── mdx.d.ts                    # TypeScript declarations for .mdx files
 └── App.tsx                     # Route definitions with lazy loading
 ```
 
-## Next Steps
-
-1. **Port multi-turn chat UI component** (simpler, good starting point)
-   - Replace MultiturnChatPlaceholder with actual UI from monorepo
-   - Port Vercel AI SDK dependencies (`ai`, `streamdown`)
-   - Wire up to backend `/api/chat` endpoint
-
-2. **Port image captioning UI component** (more complex with file uploads)
-   - Replace ImageCaptioningPlaceholder with actual UI
-   - Port NDJSON streaming utilities
-   - Wire up to backend `/api/caption` endpoint
-
-3. **Implement `/api/models` endpoint**
-   - Proxy to LLM server's `/v1/models` endpoint
-   - Use cached endpoint data with API keys
-
-4. **Port shared utilities/types as needed**
-   - Copy utils from `monorepo/packages/recipes/src/utils.ts`
-
 ## Important Implementation Notes
 
-- **Recipe Metadata:** ALL recipe metadata (title, description, section, order) lives in `recipeMetadata.ts` - edit this file to add/reorder recipes
-- **Auto-numbering:** Recipe numbers are derived from array position - just reorder to renumber
-- **Lazy Loading:** Recipe components must export `Component` function (not default export) for React Router v7 lazy loading
-- **Query Params:** Endpoint/model state managed via URL (`?e=endpoint-id&m=model-name`)
-- **No React Context:** Use custom hooks (`useEndpointFromQuery`, `useModelFromQuery`) instead
-- **Code Splitting:** React Router v7's `lazy` prop handles automatic code splitting
-- **Formatting:** Run `npm run format` to format code with Prettier (4 spaces, no semis, single quotes)
-- **Backend Route Discovery:** `/api/recipes` automatically discovers available recipes from registered FastAPI routes
+- **Recipe Metadata:** Single source of truth in `recipeMetadata.ts` - edit to add/reorder recipes
+- **Lazy Loading:** Recipe components export `Component` function for React Router v7
+- **Query Params:** Endpoint/model state in URL (`?e=endpoint-id&m=model-name`) via custom hooks
+- **Responsive Layout:** Endpoint/model selectors in header (desktop) or navbar drawer (mobile)
+- **Formatting:** 4 spaces, no semis, single quotes (run `npm run format`)
+
+## Recipe Page Views (Readme | Demo | Code)
+
+Each recipe has three views accessible via the ViewSelector segmented control:
+
+### View Types
+- **Readme** (`/:slug/readme`) - MDX documentation rendered by `RecipeReadmeView.tsx`
+- **Demo** (`/:slug`) - Interactive recipe UI component
+- **Code** (`/:slug/code`) - Source code view rendered by `RecipeCodeView.tsx`
+
+### ViewSelector Component
+- Uses Mantine's `SegmentedControl` with three options
+- Lives in Toolbar, always visible on recipe pages
+- Handles navigation between the three views using React Router
+
+### RecipeLayoutShell Scrollable Layout Pattern
+
+**Critical layout pattern** for recipe pages:
+
+```tsx
+<Flex direction="column" h={appShellContentHeight} style={{ overflow: 'hidden' }}>
+  <Toolbar title={title} />
+  <Box style={{ flex: 1, overflow: 'auto' }}>
+    <Outlet />  {/* Child routes render here */}
+  </Box>
+</Flex>
+```
+
+**Key points:**
+- Parent Flex has **fixed height** (`appShellContentHeight`) and `overflow: 'hidden'`
+- Outlet wrapper (Box) has **`flex: 1`** (takes remaining space) and **`overflow: 'auto'`** (scrollable)
+- This keeps the Toolbar fixed at top while content scrolls
+- Without this pattern, content will be invisible/clipped!
+
+### MDX Support
+
+MDX files are rendered as React components using `@mdx-js/rollup`:
+
+**Configuration** (`vite.config.ts`):
+```ts
+plugins: [
+  { enforce: 'pre', ...mdx() },
+  react({ include: /\.(jsx|js|mdx|md|tsx|ts)$/ })
+]
+```
+
+**TypeScript declarations** (`src/mdx.d.ts`):
+```ts
+declare module '*.mdx' {
+  import { ComponentType } from 'react'
+  const Component: ComponentType
+  export default Component
+}
+```
+
+**Adding README to new recipe:**
+1. Create `README.mdx` in recipe folder (e.g., `recipes/my-recipe/README.mdx`)
+2. Add to `readmeComponents` in `RecipeReadmeView.tsx`
+3. README will automatically be available at `/my-recipe/readme`

@@ -15,6 +15,7 @@
     "@mantine/core": "^7.17.8",
     "@mantine/dropzone": "^7.17.8",
     "@mantine/hooks": "^7.17.8",
+    "@mdx-js/rollup": "^3.1.1",
     "@tabler/icons-react": "^3.35.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

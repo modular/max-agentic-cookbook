@@ -1,0 +1,59 @@
+# Multi-Turn Chat
+
+A streaming chat interface with multi-turn conversation support, demonstrating real-time token-by-token message streaming.
+
+## Overview
+
+This recipe showcases how to build an interactive chat interface that:
+
+- **Streams responses** - Messages appear token-by-token for fluid user experience
+- **Maintains conversation history** - Full multi-turn conversation support with context
+- **Auto-scrolls** - Automatically follows new messages as they stream in
+- **Renders markdown** - Uses Streamdown for markdown rendering with syntax highlighting
+
+## Key Features
+
+### Token Streaming
+
+Messages stream in real-time, creating a more engaging and responsive user experience compared to waiting for complete responses.
+
+### Conversation Context
+
+Each message includes the full conversation history, allowing the model to maintain context across multiple turns of dialogue.
+
+### Markdown Support
+
+Responses are rendered with full markdown support, including:
+- Code blocks with syntax highlighting
+- Lists and formatting
+- Links and images
+- Tables and more
+
+## Use Cases
+
+- **Customer support chatbots** - Interactive help and troubleshooting
+- **Virtual assistants** - Task-oriented conversations
+- **Educational tutors** - Step-by-step learning assistance
+- **Code helpers** - Programming assistance with formatted code examples
+
+## Compatibility
+
+This recipe works seamlessly with:
+- Modular MAX endpoints
+- OpenAI-compatible API endpoints
+- Any streaming-capable LLM service
+
+## Getting Started
+
+1. Select your endpoint from the header dropdown
+2. Choose a model compatible with chat completions
+3. Type your message and press enter
+4. Watch as responses stream in real-time!
+
+## Technical Details
+
+Built using modern web technologies:
+- React for the UI
+- Streaming API for real-time responses
+- Streamdown for markdown rendering
+- Mantine UI components
