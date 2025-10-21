@@ -4,6 +4,9 @@ import { IconLayoutSidebar } from '@tabler/icons-react'
 
 import { iconStroke } from '../lib/theme'
 import { ThemeToggle } from './ThemeToggle'
+import { SelectEndpoint } from './SelectEndpoint'
+import { SelectModel } from './SelectModel'
+import { useEndpointFromQuery } from '../lib/hooks'
 
 interface HeaderProps {
     mobileOpened: boolean
@@ -12,15 +15,17 @@ interface HeaderProps {
 }
 
 export function Header({ mobileOpened, toggleMobile, toggleDesktop }: HeaderProps) {
+    const { selectedEndpoint } = useEndpointFromQuery()
+
     return (
         <Flex h="100%" px="md" justify="space-between" align="center">
-            <Burger
-                opened={mobileOpened}
-                onClick={toggleMobile}
-                hiddenFrom="sm"
-                size="sm"
-            />
-            <Group>
+            <Group gap="md">
+                <Burger
+                    opened={mobileOpened}
+                    onClick={toggleMobile}
+                    hiddenFrom="sm"
+                    size="sm"
+                />
                 <ActionIcon
                     onClick={toggleDesktop}
                     visibleFrom="sm"
@@ -28,13 +33,19 @@ export function Header({ mobileOpened, toggleMobile, toggleDesktop }: HeaderProp
                 >
                     <IconLayoutSidebar stroke={iconStroke} />
                 </ActionIcon>
+                <Title style={{ fontWeight: 'normal' }} order={5}>
+                    <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        Modular Agentic Cookbook
+                    </Link>
+                </Title>
             </Group>
-            <Title style={{ fontWeight: 'normal' }} order={5}>
-                <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-                    Modular Agentic Cookbook
-                </Link>
-            </Title>
-            <ThemeToggle stroke={iconStroke} />
+            <Group gap="md">
+                <Group gap="md" visibleFrom="sm">
+                    <SelectEndpoint />
+                    <SelectModel endpointId={selectedEndpoint?.id ?? null} />
+                </Group>
+                <ThemeToggle stroke={iconStroke} />
+            </Group>
         </Flex>
     )
 }

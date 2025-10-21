@@ -30,15 +30,19 @@ max-recipes/
 - **CORS:** Configured for localhost:5173
 - **Env:** `.env.local` with COOKBOOK_ENDPOINTS JSON array
 - **Structure:**
-  - `src/main.py` - Entry point, loads .env.local
+  - `src/main.py` - Entry point, loads .env.local, includes recipe routers
   - `src/recipes/endpoints.py` - Endpoint management with caching
   - `src/recipes/models.py` - Models listing (stubbed)
+  - `src/recipes/multiturn_chat.py` - Multi-turn chat recipe router (stubbed)
+  - `src/recipes/image_captioning.py` - Image captioning recipe router (stubbed)
   - `src/core/` - Config and utilities
 - **Endpoints:**
   - `GET /api/health` - Health check
-  - `GET /api/recipes` - List available recipes
+  - `GET /api/recipes` - List available recipe slugs (programmatically discovers registered routes)
   - `GET /api/endpoints` - List configured LLM endpoints (from .env.local)
   - `GET /api/models?endpointId=xxx` - List models for endpoint (stubbed)
+  - `POST /api/recipes/multiturn-chat` - Multi-turn chat endpoint (stubbed)
+  - `POST /api/recipes/image-captioning` - Image captioning endpoint (stubbed)
 
 ### Frontend (Vite + React)
 - **Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, Prettier
@@ -55,7 +59,7 @@ max-recipes/
   - `src/App.tsx` - Manual `<Routes>` definitions with lazy loading
 
 **Routes:**
-- `/` - Welcome page with AppShell
+- `/` - Recipe cards grid (dynamically generated from recipeMetadata)
 - `/multiturn-chat` - Multi-turn chat recipe (placeholder, lazy loaded)
 - `/image-captioning` - Image captioning recipe (placeholder, lazy loaded)
 - `/:slug/code` - Dynamic code view route for any recipe
@@ -69,6 +73,7 @@ max-recipes/
 5. ✅ **Plain React patterns** (useState, useEffect, fetch - no framework abstractions)
 6. ✅ **URL query params for state** (no React Context - endpoint/model selection via ?e= and ?m=)
 7. ✅ **Lazy loading with React Router v7** (using `lazy` prop, exports `Component` function)
+8. ✅ **Single source of truth for recipes** (frontend owns metadata, backend advertises availability)
 
 ## Current Status
 
@@ -101,6 +106,18 @@ max-recipes/
 - Dynamic `:slug/code` route for recipe source view
 - Prettier installed and configured
 
+### ✅ Completed (Phase 4: Recipe Metadata Consolidation)
+- Restructured `recipeMetadata.ts` with nested section → recipes structure
+- Auto-numbering based on array position (1, 2, 3...)
+- Display titles auto-generated ("1: Introduction", "2: Multi-Turn Chat", etc.)
+- Helper functions: `isImplemented()`, `getRecipeBySlug()`, `buildNavigation()`, `getAllImplementedRecipes()`, `isRecipeImplemented()`
+- `chapters.ts` now auto-derived from `recipeMetadata.ts` (single source of truth)
+- Backend `/api/recipes` programmatically discovers available routes (returns array of slugs)
+- Individual recipe routers: `multiturn_chat.py` and `image_captioning.py` (stubbed)
+- CookbookIndex now shows dynamic grid of recipe cards
+- Navbar uses shared `isRecipeImplemented()` helper
+- No duplication between frontend and backend metadata
+
 ### 🔄 Next: Port Recipe UI Components
 
 From `monorepo/packages/recipes/src/`:
@@ -127,11 +144,12 @@ From `monorepo/packages/recipes/src/`:
 ### Migration Pattern
 
 For each recipe:
-1. Copy UI component to `frontend/src/features/[recipe]/`
-2. Convert Next.js API route handler to FastAPI endpoint
-3. Update imports (remove workspace protocol `@modular/recipes`)
-4. Add route definition to `frontend/src/App.tsx`
-5. Test integration
+1. **Add to recipe metadata** - Add entry to `frontend/src/lib/recipeMetadata.ts` in appropriate section
+2. **Create backend route** - Create `backend/src/recipes/[recipe_name].py` with APIRouter
+3. **Include router** - Import and include router in `backend/src/main.py`
+4. **Copy UI component** - Copy to `frontend/src/features/[recipe]/`
+5. **Add route definition** - Add to `frontend/src/App.tsx` with lazy loading
+6. **Test** - Index page, navigation, and recipe page all update automatically
 
 ## Development Workflow
 
@@ -153,7 +171,9 @@ Visit: `http://localhost:5173`
 
 ### Key Files to Know
 
-- `backend/src/main.py` - Add new FastAPI routes here or import from recipes/
+- `frontend/src/lib/recipeMetadata.ts` - **SINGLE SOURCE OF TRUTH** for all recipe metadata
+- `backend/src/recipes/[recipe_name].py` - Individual recipe API routers
+- `backend/src/main.py` - Include recipe routers, programmatic route discovery
 - `frontend/src/App.tsx` - Add new route definitions here
 - `frontend/src/lib/api.ts` - Add new API client functions
 - `frontend/src/lib/types.ts` - Add shared TypeScript types
@@ -181,6 +201,50 @@ Visit: `http://localhost:5173`
 - OpenAI client or similar for AI inference
 - Other dependencies based on recipe needs
 
+## Recipe Metadata Architecture
+
+### Single Source of Truth (`recipeMetadata.ts`)
+
+All recipe metadata lives in `frontend/src/lib/recipeMetadata.ts`:
+
+```ts
+export const recipes = {
+  "Foundations": [
+    { title: 'Introduction' },  // placeholder (no slug)
+    { slug: 'multiturn-chat', title: 'Multi-Turn Chat', description: '...' },
+    { title: 'Batch Safety Classification' },  // placeholder
+    { slug: 'image-captioning', title: 'Streaming Image Captions', description: '...' }
+  ],
+  "Data, Tools & Reasoning": [...],
+  // ... more sections
+}
+```
+
+**Key features:**
+- Nested `section → recipes[]` structure
+- Placeholders have only `title` (dimmed in nav)
+- Implemented recipes have `slug` + `description` (clickable in nav + shown as cards)
+- Numbers auto-derived from array position (just reorder to renumber)
+- Display format auto-generated ("1: Introduction", "2: Multi-Turn Chat")
+
+**Helper functions:**
+- `isImplemented(recipe)` - Type guard for checking if recipe has slug
+- `getRecipeBySlug(slug)` - Lookup recipe by slug
+- `buildNavigation()` - Generate nav with auto-numbering
+- `getAllImplementedRecipes()` - Get all recipes with slugs
+- `isRecipeImplemented(slug)` - Check if slug is implemented
+
+**Frontend usage:**
+- `CookbookIndex.tsx` uses `getAllImplementedRecipes()` for card grid
+- `Navbar.tsx` uses `isRecipeImplemented()` to check if clickable
+- `chapters.ts` auto-derives navigation from `buildNavigation()`
+
+**Backend usage:**
+- Backend `/api/recipes` programmatically discovers routes
+- Returns array of slugs like `["multiturn-chat", "image-captioning"]`
+- Frontend already has the metadata (title, description)
+- No duplication needed
+
 ## Important Notes
 
 - Uses **manual routing** not file-based routing (explicitly chosen)
@@ -188,6 +252,7 @@ Visit: `http://localhost:5173`
 - Backend routes should be prefixed with `/api`
 - Keep recipe features self-contained in their own directories
 - Frontend can call `/api/*` directly (proxy handles it)
+- **Adding a recipe**: Just add to `recipeMetadata.ts` - everything else updates automatically
 
 ## Frontend Structure (Current)
 
@@ -195,15 +260,19 @@ Visit: `http://localhost:5173`
 frontend/src/
 ├── lib/
 │   ├── theme.ts                # Custom Mantine theme (nebula/twilight)
-│   ├── chapters.ts             # Recipe sections config
-│   ├── recipeMetadata.ts       # Recipe metadata
+│   ├── recipeMetadata.ts       # SINGLE SOURCE OF TRUTH for all recipe metadata
+│   │                           # - Nested section → recipes structure
+│   │                           # - Auto-numbering (1, 2, 3...)
+│   │                           # - Helper functions: isImplemented, getRecipeBySlug,
+│   │                           #   buildNavigation, getAllImplementedRecipes, isRecipeImplemented
+│   ├── chapters.ts             # Auto-derived from recipeMetadata (legacy compatibility)
 │   ├── types.ts                # Shared TypeScript types (Endpoint, Model)
 │   ├── hooks.ts                # useEndpointFromQuery, useModelFromQuery
 │   ├── api.ts                  # API client utilities
 │   └── utils.ts                # (to be ported)
 ├── components/
 │   ├── Header.tsx              # Top bar with menu + theme toggle
-│   ├── Navbar.tsx              # Sidebar with accordion navigation
+│   ├── Navbar.tsx              # Sidebar with accordion (uses isRecipeImplemented helper)
 │   ├── Navbar.module.css       # Navbar styles
 │   ├── ThemeToggle.tsx         # Light/dark mode toggle
 │   ├── Toolbar.tsx             # Recipe toolbar with title + controls
@@ -212,7 +281,7 @@ frontend/src/
 │   └── SelectModel.tsx         # Model selector (query params)
 ├── features/
 │   ├── CookbookShell.tsx       # AppShell layout wrapper
-│   ├── CookbookIndex.tsx       # Welcome page (root /)
+│   ├── CookbookIndex.tsx       # Recipe cards grid (uses getAllImplementedRecipes)
 │   ├── RecipeLayoutShell.tsx   # Nested layout for recipe pages
 │   ├── RecipeCodeView.tsx      # Code view placeholder (lazy loaded)
 │   ├── multiturn-chat/
@@ -243,8 +312,11 @@ frontend/src/
 
 ## Important Implementation Notes
 
+- **Recipe Metadata:** ALL recipe metadata (title, description, section, order) lives in `recipeMetadata.ts` - edit this file to add/reorder recipes
+- **Auto-numbering:** Recipe numbers are derived from array position - just reorder to renumber
 - **Lazy Loading:** Recipe components must export `Component` function (not default export) for React Router v7 lazy loading
 - **Query Params:** Endpoint/model state managed via URL (`?e=endpoint-id&m=model-name`)
 - **No React Context:** Use custom hooks (`useEndpointFromQuery`, `useModelFromQuery`) instead
 - **Code Splitting:** React Router v7's `lazy` prop handles automatic code splitting
 - **Formatting:** Run `npm run format` to format code with Prettier (4 spaces, no semis, single quotes)
+- **Backend Route Discovery:** `/api/recipes` automatically discovers available recipes from registered FastAPI routes

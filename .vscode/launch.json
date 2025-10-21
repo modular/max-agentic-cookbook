@@ -21,7 +21,8 @@
             "url": "http://localhost:5173",
             "webRoot": "${workspaceFolder}/frontend",
             "sourceMaps": true,
-            "preLaunchTask": "Start Frontend Dev Server"
+            "preLaunchTask": "Start Frontend Dev Server",
+            "port": 9222 // specify Chrome DevTools port for MCP server
         }
     ],
     "compounds": [

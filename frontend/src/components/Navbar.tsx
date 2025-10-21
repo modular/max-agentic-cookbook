@@ -3,6 +3,9 @@ import { Accordion, AppShell, Group, ScrollArea, Stack, Text } from '@mantine/co
 import { IconChevronRight, IconPlus } from '@tabler/icons-react'
 import { iconStroke } from '../lib/theme'
 import { isRecipeImplemented } from '../lib/recipeMetadata'
+import { useEndpointFromQuery } from '../lib/hooks'
+import { SelectEndpoint } from './SelectEndpoint'
+import { SelectModel } from './SelectModel'
 import chapters from '../lib/chapters'
 import classes from './Navbar.module.css'
 
@@ -48,33 +51,42 @@ function NavItem({ item, currentRecipe }: NavItemProps) {
 export function Navbar() {
     const { recipe } = useParams<{ recipe: string }>()
     const currentRecipe = recipe || null
+    const { selectedEndpoint } = useEndpointFromQuery()
 
     return (
-        <AppShell.Section grow component={ScrollArea}>
-            <Accordion
-                multiple
-                chevronPosition="left"
-                defaultValue={['Foundations', 'Data, Tools & Reasoning']}
-                chevron={<IconPlus size={16} stroke={iconStroke} />}
-                classNames={{ chevron: classes.chevron }}
-            >
-                {chapters.sections.map((section) => (
-                    <Accordion.Item key={section.title} value={section.title}>
-                        <Accordion.Control>{section.title}</Accordion.Control>
-                        <Accordion.Panel bg="">
-                            <Stack gap="sm">
-                                {section.items.map((item) => (
-                                    <NavItem
-                                        key={item.slug || item.title}
-                                        item={item}
-                                        currentRecipe={currentRecipe}
-                                    />
-                                ))}
-                            </Stack>
-                        </Accordion.Panel>
-                    </Accordion.Item>
-                ))}
-            </Accordion>
-        </AppShell.Section>
+        <>
+            <AppShell.Section p="md" hiddenFrom="sm">
+                <Stack gap="md">
+                    <SelectEndpoint />
+                    <SelectModel endpointId={selectedEndpoint?.id ?? null} />
+                </Stack>
+            </AppShell.Section>
+            <AppShell.Section grow component={ScrollArea}>
+                <Accordion
+                    multiple
+                    chevronPosition="left"
+                    defaultValue={['Foundations', 'Data, Tools & Reasoning']}
+                    chevron={<IconPlus size={16} stroke={iconStroke} />}
+                    classNames={{ chevron: classes.chevron }}
+                >
+                    {chapters.sections.map((section) => (
+                        <Accordion.Item key={section.title} value={section.title}>
+                            <Accordion.Control>{section.title}</Accordion.Control>
+                            <Accordion.Panel bg="">
+                                <Stack gap="sm">
+                                    {section.items.map((item) => (
+                                        <NavItem
+                                            key={item.slug || item.title}
+                                            item={item}
+                                            currentRecipe={currentRecipe}
+                                        />
+                                    ))}
+                                </Stack>
+                            </Accordion.Panel>
+                        </Accordion.Item>
+                    ))}
+                </Accordion>
+            </AppShell.Section>
+        </>
     )
 }
