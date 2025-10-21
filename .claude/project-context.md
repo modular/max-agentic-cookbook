@@ -25,42 +25,50 @@ max-recipes/
 ```
 
 ### Backend (FastAPI + uv)
-- **Tech:** FastAPI, uvicorn, uv for dependency management
+- **Tech:** FastAPI, uvicorn, uv for dependency management, python-dotenv
 - **Port:** 8000
 - **CORS:** Configured for localhost:5173
+- **Env:** `.env.local` with COOKBOOK_ENDPOINTS JSON array
 - **Structure:**
-  - `src/main.py` - Entry point
-  - `src/recipes/` - Recipe route modules (to be populated)
+  - `src/main.py` - Entry point, loads .env.local
+  - `src/recipes/endpoints.py` - Endpoint management with caching
+  - `src/recipes/models.py` - Models listing (stubbed)
   - `src/core/` - Config and utilities
 - **Endpoints:**
   - `GET /api/health` - Health check
   - `GET /api/recipes` - List available recipes
+  - `GET /api/endpoints` - List configured LLM endpoints (from .env.local)
+  - `GET /api/models?endpointId=xxx` - List models for endpoint (stubbed)
 
 ### Frontend (Vite + React)
-- **Tech:** Vite, React 18, TypeScript, React Router, Mantine v7
+- **Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, Prettier
 - **Port:** 5173
-- **Routing:** Manual route definitions in `App.tsx` (NO file-based routing, NO loaders/actions)
+- **Routing:** Manual route definitions in `App.tsx` with React Router v7 `lazy` prop for code splitting
 - **API:** Vite proxy to backend (no CORS issues)
 - **UI:** Mantine v7 with custom theme (nebula/twilight colors)
 - **Layout:** AppShell with collapsible sidebar, Header, Navbar
+- **State Management:** URL query params (`?e=endpoint-id&m=model-name`) via custom hooks
 - **Structure:**
-  - `src/features/` - Recipe feature components
-  - `src/components/` - Shared UI components (Header, Navbar, ThemeToggle)
-  - `src/lib/` - API client, types, utilities, theme, chapters config
-  - `src/App.tsx` - Manual `<Routes>` definitions
+  - `src/features/` - Recipe feature components (lazy loaded)
+  - `src/components/` - Shared UI (Header, Navbar, Toolbar, SelectEndpoint, SelectModel, CodeToggle)
+  - `src/lib/` - Custom hooks (useEndpointFromQuery, useModelFromQuery), types, theme, config
+  - `src/App.tsx` - Manual `<Routes>` definitions with lazy loading
 
 **Routes:**
 - `/` - Welcome page with AppShell
-- `/multiturn-chat` - Multi-turn chat recipe (placeholder)
-- `/image-captioning` - Image captioning recipe (placeholder)
+- `/multiturn-chat` - Multi-turn chat recipe (placeholder, lazy loaded)
+- `/image-captioning` - Image captioning recipe (placeholder, lazy loaded)
+- `/:slug/code` - Dynamic code view route for any recipe
 
 ## Key Architectural Decisions
 
 1. ✅ **Separate projects** not monorepo (frontend/ and backend/ at root)
 2. ✅ **uv** for Python dependency management (fast, modern)
-3. ✅ **Manual React Router** (explicit route definitions, no file-system routing)
+3. ✅ **Manual React Router v7** (explicit route definitions, no file-system routing, native lazy loading)
 4. ✅ **Separate dev servers** (backend :8000, frontend :5173 with proxy)
 5. ✅ **Plain React patterns** (useState, useEffect, fetch - no framework abstractions)
+6. ✅ **URL query params for state** (no React Context - endpoint/model selection via ?e= and ?m=)
+7. ✅ **Lazy loading with React Router v7** (using `lazy` prop, exports `Component` function)
 
 ## Current Status
 
@@ -82,6 +90,16 @@ max-recipes/
 - Placeholder recipe pages at `/multiturn-chat` and `/image-captioning`
 - Routes consolidated to root level (no `/cookbook` prefix)
 - Favicon added
+
+### ✅ Completed (Phase 3: Query Params & Routing)
+- Replaced CookbookProvider/useCookbook with URL query params
+- Custom hooks: `useEndpointFromQuery()` and `useModelFromQuery(endpointId)`
+- Backend routes: `/api/endpoints` and `/api/models` (stubbed)
+- RecipeLayoutShell with nested routing (wraps all recipe pages)
+- Toolbar component with title, CodeToggle, SelectEndpoint, SelectModel
+- React Router v7 lazy loading with `lazy` prop
+- Dynamic `:slug/code` route for recipe source view
+- Prettier installed and configured
 
 ### 🔄 Next: Port Recipe UI Components
 
@@ -147,12 +165,17 @@ Visit: `http://localhost:5173`
 - ✅ `@mantine/hooks@^7` - React hooks
 - ✅ `@mantine/dropzone@^7` - File upload
 - ✅ `@tabler/icons-react` - Icons
+- ✅ `react-router-dom@^7` - React Router v7 with lazy loading
+- ✅ `prettier@^3` - Code formatter
 - ✅ `postcss-preset-mantine` - Mantine PostCSS preset
 
 **Frontend (To Add When Porting Recipes):**
 - `ai` - Vercel AI SDK (for streaming)
 - `streamdown` - Markdown streaming with syntax highlighting
 - Other dependencies as needed
+
+**Backend (Installed):**
+- ✅ `python-dotenv` - Load .env.local for configuration
 
 **Backend (To Add):**
 - OpenAI client or similar for AI inference
@@ -174,28 +197,54 @@ frontend/src/
 │   ├── theme.ts                # Custom Mantine theme (nebula/twilight)
 │   ├── chapters.ts             # Recipe sections config
 │   ├── recipeMetadata.ts       # Recipe metadata
-│   ├── types.ts                # Shared TypeScript types
+│   ├── types.ts                # Shared TypeScript types (Endpoint, Model)
+│   ├── hooks.ts                # useEndpointFromQuery, useModelFromQuery
 │   ├── api.ts                  # API client utilities
 │   └── utils.ts                # (to be ported)
 ├── components/
 │   ├── Header.tsx              # Top bar with menu + theme toggle
 │   ├── Navbar.tsx              # Sidebar with accordion navigation
 │   ├── Navbar.module.css       # Navbar styles
-│   └── ThemeToggle.tsx         # Light/dark mode toggle
+│   ├── ThemeToggle.tsx         # Light/dark mode toggle
+│   ├── Toolbar.tsx             # Recipe toolbar with title + controls
+│   ├── CodeToggle.tsx          # Toggle between demo and code view
+│   ├── SelectEndpoint.tsx      # Endpoint selector (query params)
+│   └── SelectModel.tsx         # Model selector (query params)
 ├── features/
 │   ├── CookbookShell.tsx       # AppShell layout wrapper
 │   ├── CookbookIndex.tsx       # Welcome page (root /)
+│   ├── RecipeLayoutShell.tsx   # Nested layout for recipe pages
+│   ├── RecipeCodeView.tsx      # Code view placeholder (lazy loaded)
 │   ├── multiturn-chat/
-│   │   └── MultiturnChatPlaceholder.tsx  # (to be replaced)
+│   │   └── MultiturnChatPlaceholder.tsx  # Exports Component (lazy loaded)
 │   └── image-captioning/
-│       └── ImageCaptioningPlaceholder.tsx  # (to be replaced)
-└── App.tsx                     # Route definitions
+│       └── ImageCaptioningPlaceholder.tsx  # Exports Component (lazy loaded)
+└── App.tsx                     # Route definitions with lazy loading
 ```
 
 ## Next Steps
 
-1. Port multi-turn chat UI component (simpler, good starting point)
-2. Port shared utilities/types as needed
-3. Port image captioning UI component (more complex with file uploads)
-4. Wire up backend API routes when ready
-5. Consider porting CookbookProvider context if needed for endpoint/model selection
+1. **Port multi-turn chat UI component** (simpler, good starting point)
+   - Replace MultiturnChatPlaceholder with actual UI from monorepo
+   - Port Vercel AI SDK dependencies (`ai`, `streamdown`)
+   - Wire up to backend `/api/chat` endpoint
+
+2. **Port image captioning UI component** (more complex with file uploads)
+   - Replace ImageCaptioningPlaceholder with actual UI
+   - Port NDJSON streaming utilities
+   - Wire up to backend `/api/caption` endpoint
+
+3. **Implement `/api/models` endpoint**
+   - Proxy to LLM server's `/v1/models` endpoint
+   - Use cached endpoint data with API keys
+
+4. **Port shared utilities/types as needed**
+   - Copy utils from `monorepo/packages/recipes/src/utils.ts`
+
+## Important Implementation Notes
+
+- **Lazy Loading:** Recipe components must export `Component` function (not default export) for React Router v7 lazy loading
+- **Query Params:** Endpoint/model state managed via URL (`?e=endpoint-id&m=model-name`)
+- **No React Context:** Use custom hooks (`useEndpointFromQuery`, `useModelFromQuery`) instead
+- **Code Splitting:** React Router v7's `lazy` prop handles automatic code splitting
+- **Formatting:** Run `npm run format` to format code with Prettier (4 spaces, no semis, single quotes)

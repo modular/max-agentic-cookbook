@@ -1,0 +1,39 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Backend",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": ["src.main:app", "--reload", "--port", "8000"],
+            "cwd": "${workspaceFolder}/backend",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/backend"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "React Frontend",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}/frontend",
+            "sourceMaps": true,
+            "preLaunchTask": "Start Frontend Dev Server"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Full-Stack Debug",
+            "configurations": ["Python Backend", "React Frontend"],
+            "presentation": {
+                "hidden": false,
+                "group": "Full-Stack",
+                "order": 1
+            },
+            "stopAll": true
+        }
+    ]
+}

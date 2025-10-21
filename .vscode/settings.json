@@ -1,0 +1,37 @@
+{
+    // Python settings
+    "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/backend"
+    ],
+
+    // Debug settings
+    "debug.javascript.unmapMissingSources": true,
+    "debug.javascript.terminalOptions": {
+        "skipFiles": [
+            "<node_internals>/**"
+        ]
+    },
+
+    // Terminal settings for multi-root workspace
+    "terminal.integrated.cwd": "${workspaceFolder}",
+
+    // File associations
+    "files.associations": {
+        "*.tsx": "typescriptreact",
+        "*.ts": "typescript"
+    },
+
+    // Formatter settings
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.python",
+        "editor.formatOnSave": true
+    },
+
+    // ESLint settings
+    "eslint.workingDirectories": [
+        "./frontend"
+    ]
+}

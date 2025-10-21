@@ -1,0 +1,39 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Frontend Dev Server",
+            "type": "shell",
+            // Assumes your frontend start script is "npm run dev"
+            "command": "npm run dev",
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}/frontend"
+            },
+            // This is from your advice. It's essential for a long-running server task.
+            "isBackground": true,
+            "presentation": {
+                // This is also from your advice.
+                "reveal": "always",
+                "panel": "new"
+            },
+            // This is crucial. It tells VS Code when the server is ready.
+            // This matcher is configured for Vite (which uses port 5173)
+            "problemMatcher": {
+                "owner": "vite",
+                "pattern": {
+                    // This regex looks for "VITE vX.X.X  ready in XXX ms"
+                    "regexp": "VITE v.* ready in (\\d+)ms"
+                },
+                "background": {
+                    "activeOnStart": true,
+                    // Tells VS Code the task has started
+                    "beginsPattern": "VITE v.*",
+                    // Tells VS Code the preLaunchTask is "finished"
+                    // and the "React Frontend" launch can proceed.
+                    "endsPattern": "VITE v.* ready in"
+                }
+            }
+        }
+    ]
+}
