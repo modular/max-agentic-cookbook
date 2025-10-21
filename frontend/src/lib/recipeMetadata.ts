@@ -1,27 +1,24 @@
 // Recipe metadata organized by section
 // Order in array determines numbering (1, 2, 3...)
 
-interface RecipeBase {
+interface RecipePlaceholder {
     title: string
 }
 
-interface RecipePlaceholder extends RecipeBase {
-    // Placeholder - not yet implemented
-}
-
-interface RecipeImplemented extends RecipeBase {
+interface RecipeImplemented {
+    title: string
     slug: string
     description: string
 }
 
 export type Recipe = RecipePlaceholder | RecipeImplemented
 
-export interface RecipeSection {
+export interface RecipeMetadata {
     [sectionName: string]: Recipe[]
 }
 
 // Single source of truth for all recipes
-export const recipes: RecipeSection = {
+export const recipes: RecipeMetadata = {
     Foundations: [
         { title: 'Introduction' },
         {
@@ -123,6 +120,25 @@ export function buildNavigation(): NavSection[] {
     }
 
     return sections
+}
+
+// Helper: Get all implemented recipes
+export function getAllImplementedRecipes(): RecipeImplemented[] {
+    const implemented: RecipeImplemented[] = []
+    for (const section of Object.values(recipes)) {
+        for (const recipe of section) {
+            if (isImplemented(recipe)) {
+                implemented.push(recipe)
+            }
+        }
+    }
+    return implemented
+}
+
+// Helper: Check if a slug corresponds to an implemented recipe
+export function isRecipeImplemented(slug: string | undefined): boolean {
+    if (!slug) return false
+    return getRecipeBySlug(slug) !== null
 }
 
 // Backwards compatibility: export recipeMetadata object for lookup

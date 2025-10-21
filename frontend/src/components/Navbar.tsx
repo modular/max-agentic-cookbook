@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Accordion, AppShell, Group, ScrollArea, Stack, Text } from '@mantine/core'
 import { IconChevronRight, IconPlus } from '@tabler/icons-react'
 import { iconStroke } from '../lib/theme'
-import { recipeMetadata } from '../lib/recipeMetadata'
+import { isRecipeImplemented } from '../lib/recipeMetadata'
 import chapters from '../lib/chapters'
 import classes from './Navbar.module.css'
 
@@ -12,7 +12,7 @@ interface NavItemProps {
 }
 
 function NavItem({ item, currentRecipe }: NavItemProps) {
-    if (item.slug && recipeMetadata[item.slug]) {
+    if (isRecipeImplemented(item.slug)) {
         return (
             <Group justify="space-between" align="center">
                 <Link to={`/${item.slug}`} style={{ textDecoration: 'none' }}>
