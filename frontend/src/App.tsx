@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { theme } from './lib/theme'
 import { CookbookShell } from './features/CookbookShell'
 import { CookbookIndex } from './features/CookbookIndex'
-import { RecipeLayoutShell } from './features/RecipeLayoutShell'
+import { RecipeLayoutShell } from './features/RecipeLayout'
 import './App.css'
 
 function App() {

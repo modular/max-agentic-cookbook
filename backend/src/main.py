@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.recipes import endpoints, models
+from src.recipes import endpoints, image_captioning, models, multiturn_chat
 
 # Load environment variables from .env.local
 env_path = Path(__file__).parent.parent / ".env.local"
@@ -33,6 +33,8 @@ app.add_middleware(
 # Include routers
 app.include_router(endpoints.router)
 app.include_router(models.router)
+app.include_router(multiturn_chat.router)
+app.include_router(image_captioning.router)
 
 
 @app.get("/api/health")
@@ -47,18 +49,22 @@ async def health_check():
 
 @app.get("/api/recipes")
 async def list_recipes():
-    """List available recipes."""
-    return {
-        "recipes": [
-            {
-                "id": "multiturn-chat",
-                "name": "Multi-turn Chat",
-                "description": "Streaming chat interface with conversation context",
-            },
-            {
-                "id": "image-captioning",
-                "name": "Image Captioning",
-                "description": "Generate captions for uploaded images",
-            },
-        ]
-    }
+    """
+    List available recipes by discovering registered routes.
+
+    Returns an array of recipe slugs based on routes matching /api/recipes/{slug}.
+    Frontend owns the full metadata (title, description) for each recipe.
+    """
+    recipe_slugs = []
+
+    # Inspect registered routes to find recipe endpoints
+    for route in app.routes:
+        if hasattr(route, "path"):
+            path = route.path
+            # Match routes like /api/recipes/multiturn-chat
+            if path.startswith("/api/recipes/") and path != "/api/recipes":
+                slug = path.replace("/api/recipes/", "")
+                if slug not in recipe_slugs:
+                    recipe_slugs.append(slug)
+
+    return recipe_slugs
