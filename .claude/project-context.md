@@ -194,69 +194,67 @@ This section documents the detailed migration strategy for porting recipes from 
 
 ---
 
-### Multi-turn Chat Recipe
+### Multi-turn Chat Recipe ✅ Completed
 
-**Architecture Decision:** Keep Vercel AI SDK v5 (Frontend + Backend Integration)
+**Architecture Decision:** Python SSE Streaming + Vercel AI SDK Frontend
+
+**Implementation Status:** Fully implemented and tested with Python SSE streaming, token-by-token streaming, multi-turn conversation context, and auto-focus UX.
 
 **Backend Implementation:**
-- Use Vercel AI SDK's `streamText` helper for token streaming
-- Leverage `convertToModelMessages` for message format conversion
-- Use `toUIMessageStreamResponse` for client-compatible SSE streaming
+- Python SSE (Server-Sent Events) streaming with FastAPI `StreamingResponse`
+- Custom UIMessage → OpenAI format conversion
+- AsyncOpenAI client for token streaming (already installed)
+- Vercel AI SDK protocol compliance with correct event types:
+  - `{"type": "start", "messageId": "..."}` (message start)
+  - `{"type": "text-delta", "id": "...", "delta": "..."}` (streaming text)
+  - `{"type": "finish"}` and `[DONE]` (completion)
 - Route: `POST /api/recipes/multiturn-chat`
-- Note: May need Node.js runtime for Vercel AI SDK or evaluate Python alternatives
 
 **Frontend Implementation:**
-- Use Vercel AI SDK's `useChat` hook (handles 90% of boilerplate)
-- Use `Streamdown` component for markdown rendering with syntax highlighting
-- Implement auto-scroll with manual scroll detection
-- Mantine UI components: ScrollArea, Input, Button
-
-**Key Features to Preserve:**
-- Token-by-token streaming for real-time response
-- Multi-turn conversation with full message history
+- Vercel AI SDK's `useChat` hook with `DefaultChatTransport`
+- Flex layout pattern: messages area fills viewport, composer pinned at bottom
+- Auto-focus on mount and after sending messages (excellent UX)
 - Auto-scroll behavior with smart manual scroll detection
-- Markdown rendering with syntax-highlighted code blocks
-- Message state management (submitted, streaming, complete)
+- Streamdown component for markdown rendering with syntax highlighting
+- Component exports `Component` function for lazy loading via registry
+
+**Key Features Implemented:**
+- Token-by-token streaming for real-time response
+- Multi-turn conversation with full message history maintained
+- Auto-scroll behavior with smart manual scroll detection
+- Markdown rendering with syntax-highlighted code blocks (Streamdown)
+- Auto-focus input field on load and after sending
 
 **Dependencies:**
-- Backend: `ai` SDK (Node.js), or evaluate Python equivalent
-- Frontend: `ai`, `@ai-sdk/react`, `streamdown`
-- Both: May need hybrid Node.js/Python backend or full Node.js sidecar
+- Backend: `openai` (AsyncOpenAI - ✅ already installed), FastAPI streaming
+- Frontend: `ai` (✅ installed), `@ai-sdk/react` (✅ installed), `streamdown` (✅ installed)
 
 **Why This Approach:**
-- Vercel AI SDK v5 is mature (released July 2025), battle-tested
+- Successfully demonstrates Python SSE can work seamlessly with Vercel AI SDK frontend
+- Clean separation: Python-first backend, React frontend with proven AI SDK
 - `useChat` hook handles complex state: streaming, message history, error recovery
-- `Streamdown` handles markdown rendering with streaming updates
-- SSE-based streaming (Server-Sent Events) is production-ready
-- Supports advanced features: tools, agents, multi-step reasoning
-- Reinventing this wheel with TanStack Query would require significant effort
-
-**Alternative Considered:** OpenAI ChatKit
-- ❌ Too new (released Oct 2025) - likely has bugs, incomplete docs
-- ❌ Frontend-only (still need backend server)
-- ❌ Adds complexity without clear benefit over proven Vercel AI SDK
+- No Node.js dependency needed - pure Python backend
+- Streamdown handles markdown rendering with streaming updates
+- SSE-based streaming is production-ready and standardized
 
 ---
 
 ### Migration Dependency Summary
 
-**Frontend packages to add:**
-- `ai` - Vercel AI SDK core (for multi-turn chat)
-- `@ai-sdk/react` - React hooks (`useChat`) for Vercel AI SDK
-- `streamdown` - Markdown streaming with syntax highlighting
-
 **Frontend packages installed:**
+- ✅ `ai` - Vercel AI SDK core (for multi-turn chat)
+- ✅ `@ai-sdk/react` - React hooks (`useChat`) for Vercel AI SDK
+- ✅ `streamdown` - Markdown streaming with syntax highlighting
 - ✅ `nanoid` - Unique ID generation (used in image captioning)
 - ✅ `pretty-ms` - Human-readable time formatting (used for performance metrics)
 
-**Backend considerations:**
-- Image captioning: Pure Python with `openai` client ✅
-- Multi-turn chat: Evaluate Vercel AI SDK with Python or Node.js sidecar
-- Alternative: Implement custom SSE streaming in Python (more work, less features)
+**Backend implementation:**
+- ✅ Image captioning: Pure Python with `openai` client and NDJSON streaming
+- ✅ Multi-turn chat: Pure Python SSE streaming compatible with Vercel AI SDK frontend
 
-**Migration order:**
-1. **Start with Image Captioning** (simpler, pure Python, good learning experience)
-2. **Then Multi-turn Chat** (more complex, evaluate Node.js vs Python approach)
+**Migration completed:**
+1. ✅ **Image Captioning** - Pure Python with NDJSON streaming, parallel processing, performance metrics
+2. ✅ **Multi-turn Chat** - Python SSE streaming with Vercel AI SDK frontend, token streaming, multi-turn context
 
 ### Adding a New Recipe
 

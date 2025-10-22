@@ -109,7 +109,7 @@ function App() {
                     </Routes>
                 </BrowserRouter>
             </MantineProvider>
-            <ReactQueryDevtools initialIsOpen={false} />
+            {/* <ReactQueryDevtools initialIsOpen={false} /> */}
         </QueryClientProvider>
     )
 }
