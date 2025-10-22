@@ -59,13 +59,8 @@ max-recipes/
   - `src/App.tsx` - Manual `<Routes>` definitions with lazy loading
 
 **Routes:**
-- `/` - Recipe cards grid (dynamically generated from recipeMetadata)
-- `/multiturn-chat` - Multi-turn chat recipe demo (lazy loaded)
-- `/multiturn-chat/readme` - Multi-turn chat README documentation (MDX)
-- `/multiturn-chat/code` - Multi-turn chat source code view
-- `/image-captioning` - Image captioning recipe demo (lazy loaded)
-- `/image-captioning/readme` - Image captioning README documentation (MDX)
-- `/image-captioning/code` - Image captioning source code view
+- `/` - Recipe cards grid (dynamically generated from registry)
+- `/:slug` - Recipe demo (auto-generated from registry, lazy loaded)
 - `/:slug/readme` - Dynamic README route for any recipe
 - `/:slug/code` - Dynamic code view route for any recipe
 
@@ -73,12 +68,12 @@ max-recipes/
 
 1. ✅ **Separate projects** not monorepo (frontend/ and backend/ at root)
 2. ✅ **uv** for Python dependency management (fast, modern)
-3. ✅ **Manual React Router v7** (explicit route definitions, no file-system routing, native lazy loading)
+3. ✅ **React Router v7 with auto-generated routes** (routes generated from registry, no manual route definitions per recipe)
 4. ✅ **Separate dev servers** (backend :8000, frontend :5173 with proxy)
 5. ✅ **Plain React patterns** (useState, useEffect, fetch - no framework abstractions)
 6. ✅ **URL query params for state** (no React Context - endpoint/model selection via ?e= and ?m=)
-7. ✅ **Lazy loading with React Router v7** (using `lazy` prop, exports `Component` function)
-8. ✅ **Single source of truth for recipes** (frontend owns metadata, backend advertises availability)
+7. ✅ **Lazy loading with React Router v7** (exports `Component` function, generic `lazyComponentExport` helper)
+8. ✅ **Single source of truth for recipes** (registry in recipes/ folder, backend advertises availability)
 
 ## Current Status
 
@@ -107,15 +102,17 @@ max-recipes/
 - React Router v7 lazy loading with `lazy` prop
 - Dynamic `:slug/code` route for recipe source view
 
-### ✅ Completed (Phase 4: Recipe Metadata Consolidation)
-- Restructured `recipeMetadata.ts` with nested section → recipes structure
+### ✅ Completed (Phase 4: Recipe Registry & Auto-Generated Routes)
+- Restructured recipe metadata into `registry.ts` (in recipes/ folder, co-located with recipe components)
 - Auto-numbering based on array position (1, 2, 3...)
 - Display titles auto-generated ("1: Introduction", "2: Multi-Turn Chat", etc.)
-- Helper functions: `isImplemented()`, `getRecipeBySlug()`, `buildNavigation()`, `getAllImplementedRecipes()`, `isRecipeImplemented()`
-- `chapters.ts` now auto-derived from `recipeMetadata.ts` (single source of truth)
+- Helper functions: `isImplemented()`, `getRecipeBySlug()`, `buildNavigation()`, `getAllImplementedRecipes()`, `getAllRecipesWithComponents()`, `isRecipeImplemented()`
+- Recipe components registered directly in registry with optional `component` property
+- Routes auto-generated in App.tsx from registry (no manual route definitions per recipe)
+- `chapters.ts` now auto-derived from `registry.ts` (single source of truth)
 - Backend `/api/recipes` programmatically discovers available routes (returns array of slugs)
 - Individual recipe routers: `multiturn_chat.py` and `image_captioning.py` (stubbed)
-- CookbookIndex now shows dynamic grid of recipe cards
+- CookbookIndex shows dynamic grid of recipe cards
 - Navbar uses shared `isRecipeImplemented()` helper
 - No duplication between frontend and backend metadata
 
@@ -131,19 +128,18 @@ Port recipe components from `monorepo/packages/recipes/src/` to `frontend/src/re
 
 ### Adding a New Recipe
 
-1. Add entry to `frontend/src/lib/recipeMetadata.ts`
+1. Add entry to `frontend/src/recipes/registry.ts` (include `component` property for interactive UI)
 2. Create `backend/src/recipes/[recipe_name].py` with APIRouter
 3. Include router in `backend/src/main.py`
 4. Add UI component to `frontend/src/recipes/[recipe-name]/`
 5. Add `README.mdx` to `frontend/src/recipes/[recipe-name]/` for documentation
-6. Add recipe slug to `readmeComponents` in `RecipeReadmeView.tsx`
-7. Add route to `frontend/src/App.tsx` with lazy loading
-8. Index page, navigation, and recipe page update automatically
+6. Add recipe slug to `readmeComponents` in `registry.ts`
+7. Routes, index page, and navigation update automatically
 
 **Routes created:**
-- `/:slug` - Demo view (interactive UI)
-- `/:slug/readme` - README documentation (auto-available if added to RecipeReadmeView)
-- `/:slug/code` - Source code view
+- `/:slug` - Demo view (interactive UI, auto-generated if `component` in registry)
+- `/:slug/readme` - README documentation (auto-available for all recipes)
+- `/:slug/code` - Source code view (auto-available for all recipes)
 
 ## Development Workflow
 
@@ -165,10 +161,10 @@ Visit: `http://localhost:5173`
 
 ### Key Files to Know
 
-- `frontend/src/lib/recipeMetadata.ts` - **SINGLE SOURCE OF TRUTH** for all recipe metadata
+- `frontend/src/recipes/registry.ts` - **SINGLE SOURCE OF TRUTH** for all recipe metadata
 - `backend/src/recipes/[recipe_name].py` - Individual recipe API routers
 - `backend/src/main.py` - Include recipe routers, programmatic route discovery
-- `frontend/src/App.tsx` - Add new route definitions here
+- `frontend/src/App.tsx` - Auto-generates routes from registry (no manual edits needed per recipe)
 - `frontend/src/lib/api.ts` - Add new API client functions
 - `frontend/src/lib/types.ts` - Add shared TypeScript types
 
@@ -195,19 +191,29 @@ Visit: `http://localhost:5173`
 - OpenAI client or similar for AI inference
 - Other dependencies based on recipe needs
 
-## Recipe Metadata Architecture
+## Recipe Registry Architecture
 
-### Single Source of Truth (`recipeMetadata.ts`)
+### Single Source of Truth (`registry.ts`)
 
-All recipe metadata lives in `frontend/src/lib/recipeMetadata.ts`:
+All recipe metadata lives in `frontend/src/recipes/registry.ts`:
 
 ```ts
 export const recipes = {
   "Foundations": [
     { title: 'Introduction' },  // placeholder (no slug)
-    { slug: 'multiturn-chat', title: 'Multi-Turn Chat', description: '...' },
+    {
+      slug: 'multiturn-chat',
+      title: 'Multi-Turn Chat',
+      description: '...',
+      component: lazyComponentExport(() => import('./multiturn-chat/MultiturnChatPlaceholder'))
+    },
     { title: 'Batch Safety Classification' },  // placeholder
-    { slug: 'image-captioning', title: 'Streaming Image Captions', description: '...' }
+    {
+      slug: 'image-captioning',
+      title: 'Streaming Image Captions',
+      description: '...',
+      component: lazyComponentExport(() => import('./image-captioning/ImageCaptioningPlaceholder'))
+    }
   ],
   "Data, Tools & Reasoning": [...],
   // ... more sections
@@ -218,6 +224,7 @@ export const recipes = {
 - Nested `section → recipes[]` structure
 - Placeholders have only `title` (dimmed in nav)
 - Implemented recipes have `slug` + `description` (clickable in nav + shown as cards)
+- Optional `component` property for interactive recipe UI (routes auto-generated)
 - Numbers auto-derived from array position (just reorder to renumber)
 - Display format auto-generated ("1: Introduction", "2: Multi-Turn Chat")
 
@@ -226,9 +233,12 @@ export const recipes = {
 - `getRecipeBySlug(slug)` - Lookup recipe by slug
 - `buildNavigation()` - Generate nav with auto-numbering
 - `getAllImplementedRecipes()` - Get all recipes with slugs
+- `getAllRecipesWithComponents()` - Get recipes with interactive UI components
 - `isRecipeImplemented(slug)` - Check if slug is implemented
+- `lazyComponentExport()` - Helper for lazy loading components that export `Component`
 
 **Frontend usage:**
+- `App.tsx` uses `getAllRecipesWithComponents()` to auto-generate routes
 - `CookbookIndex.tsx` uses `getAllImplementedRecipes()` for card grid
 - `Navbar.tsx` uses `isRecipeImplemented()` to check if clickable
 - `chapters.ts` auto-derives navigation from `buildNavigation()`
@@ -241,10 +251,10 @@ export const recipes = {
 
 ## Key Patterns
 
-- **Manual routing** (not file-based) with explicit route definitions in `App.tsx`
+- **Auto-generated routing** - routes generated from registry, no manual definitions per recipe
 - **Plain React patterns** - no loaders/actions, use hooks and fetch
 - **Backend routes** prefixed with `/api`
-- **Adding a recipe**: Update `recipeMetadata.ts` - everything else updates automatically
+- **Adding a recipe**: Update `registry.ts` with component property - routes update automatically
 
 ### Responsive Layout Pattern
 
@@ -259,9 +269,16 @@ This ensures controls are always accessible while optimizing for each screen siz
 
 ```
 frontend/src/
+├── recipes/
+│   ├── registry.ts             # SINGLE SOURCE OF TRUTH for all recipe metadata
+│   ├── multiturn-chat/         # Multi-turn chat recipe components
+│   │   ├── README.mdx          # Recipe documentation
+│   │   └── ...                 # Demo component
+│   └── image-captioning/       # Image captioning recipe components
+│       ├── README.mdx          # Recipe documentation
+│       └── ...                 # Demo component
 ├── lib/
-│   ├── recipeMetadata.ts       # SINGLE SOURCE OF TRUTH for all recipe metadata
-│   ├── chapters.ts             # Auto-derived from recipeMetadata
+│   ├── chapters.ts             # Auto-derived from registry
 │   ├── theme.ts                # Custom Mantine theme (70px header, nebula/twilight colors)
 │   ├── types.ts                # Shared TypeScript types
 │   ├── hooks.ts                # useEndpointFromQuery, useModelFromQuery
@@ -284,21 +301,14 @@ frontend/src/
 │   ├── RecipeLayoutShell.tsx   # Nested layout for recipe pages
 │   ├── RecipeReadmeView.tsx    # README view (lazy loaded, renders MDX)
 │   └── RecipeCodeView.tsx      # Code view (lazy loaded)
-├── recipes/
-│   ├── multiturn-chat/         # Multi-turn chat recipe components
-│   │   ├── README.mdx          # Recipe documentation
-│   │   └── ...                 # Demo component
-│   └── image-captioning/       # Image captioning recipe components
-│       ├── README.mdx          # Recipe documentation
-│       └── ...                 # Demo component
 ├── mdx.d.ts                    # TypeScript declarations for .mdx files
-└── App.tsx                     # Route definitions with lazy loading
+└── App.tsx                     # Auto-generates routes from registry
 ```
 
 ## Important Implementation Notes
 
-- **Recipe Metadata:** Single source of truth in `recipeMetadata.ts` - edit to add/reorder recipes
-- **Lazy Loading:** Recipe components export `Component` function for React Router v7
+- **Recipe Registry:** Single source of truth in `registry.ts` - edit to add/reorder recipes, routes auto-generate
+- **Lazy Loading:** Recipe components export `Component` function, use `lazyComponentExport()` helper
 - **Query Params:** Endpoint/model state in URL (`?e=endpoint-id&m=model-name`) via custom hooks
 - **Responsive Layout:** Endpoint/model selectors in header (desktop) or navbar drawer (mobile)
 - **Formatting:** 4 spaces, no semis, single quotes (run `npm run format`)
@@ -359,5 +369,5 @@ declare module '*.mdx' {
 
 **Adding README to new recipe:**
 1. Create `README.mdx` in recipe folder (e.g., `recipes/my-recipe/README.mdx`)
-2. Add to `readmeComponents` in `RecipeReadmeView.tsx`
+2. Add to `readmeComponents` in `registry.ts`
 3. README will automatically be available at `/my-recipe/readme`
