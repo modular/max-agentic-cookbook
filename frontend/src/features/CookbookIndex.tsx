@@ -14,9 +14,11 @@ import {
     Box,
 } from '@mantine/core'
 import { getAllImplementedRecipes } from '../recipes/registry'
+import { usePreserveQueryParams } from '../lib/hooks'
 
 export function CookbookIndex() {
     const recipes = getAllImplementedRecipes()
+    const buildPath = usePreserveQueryParams()
 
     return (
         <Container size="lg" py="xl">
@@ -40,7 +42,7 @@ export function CookbookIndex() {
                             radius="md"
                             withBorder
                             component={Link}
-                            to={`/${recipe.slug}`}
+                            to={buildPath(`/${recipe.slug}`)}
                             style={{ textDecoration: 'none', height: '100%' }}
                         >
                             <Stack gap="md" h="100%">

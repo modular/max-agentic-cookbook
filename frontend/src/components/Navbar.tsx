@@ -3,7 +3,7 @@ import { Accordion, AppShell, Group, ScrollArea, Stack, Text } from '@mantine/co
 import { IconChevronRight, IconPlus } from '@tabler/icons-react'
 import { iconStroke } from '../lib/theme'
 import { isRecipeImplemented } from '../recipes/registry'
-import { useEndpointFromQuery } from '../lib/hooks'
+import { useEndpointFromQuery, usePreserveQueryParams } from '../lib/hooks'
 import { SelectEndpoint } from './SelectEndpoint'
 import { SelectModel } from './SelectModel'
 import chapters from '../lib/chapters'
@@ -12,13 +12,14 @@ import classes from './Navbar.module.css'
 interface NavItemProps {
     item: { title: string; slug?: string }
     currentRecipe: string | null
+    buildPath: (path: string) => string
 }
 
-function NavItem({ item, currentRecipe }: NavItemProps) {
+function NavItem({ item, currentRecipe, buildPath }: NavItemProps) {
     if (isRecipeImplemented(item.slug)) {
         return (
             <Group justify="space-between" align="center">
-                <Link to={`/${item.slug}`} style={{ textDecoration: 'none' }}>
+                <Link to={buildPath(`/${item.slug}`)} style={{ textDecoration: 'none' }}>
                     <Text size="sm">{item.title}</Text>
                 </Link>
                 {currentRecipe === item.slug && (
@@ -36,6 +37,7 @@ function NavItem({ item, currentRecipe }: NavItemProps) {
 
 export function Navbar() {
     const location = useLocation()
+    const buildPath = usePreserveQueryParams()
     // Extract recipe slug from pathname (e.g., "/multiturn-chat" -> "multiturn-chat")
     const currentRecipe = location.pathname.split('/')[1] || null
     const { selectedEndpoint } = useEndpointFromQuery()
@@ -66,6 +68,7 @@ export function Navbar() {
                                             key={item.slug || item.title}
                                             item={item}
                                             currentRecipe={currentRecipe}
+                                            buildPath={buildPath}
                                         />
                                     ))}
                                 </Stack>

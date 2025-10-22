@@ -2,7 +2,7 @@
  * Custom hooks for managing endpoint and model selection via URL query params
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import type { Endpoint, Model } from './types'
@@ -151,4 +151,32 @@ export function useModelFromQuery(endpointId: string | null) {
         loading,
         error,
     }
+}
+
+/**
+ * Hook to build navigation paths with preserved query parameters
+ *
+ * Preserves the 'd' (devtools) parameter across navigation
+ *
+ * Usage:
+ * const buildPath = usePreserveQueryParams()
+ * <Link to={buildPath('/recipe-slug')}>
+ */
+export function usePreserveQueryParams() {
+    const [searchParams] = useSearchParams()
+
+    return useCallback(
+        (path: string) => {
+            const params = new URLSearchParams()
+
+            // Preserve 'd' parameter if it exists
+            if (searchParams.has('d')) {
+                params.set('d', searchParams.get('d')!)
+            }
+
+            const queryString = params.toString()
+            return queryString ? `${path}?${queryString}` : path
+        },
+        [searchParams]
+    )
 }

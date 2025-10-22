@@ -6,7 +6,7 @@ import { iconStroke } from '../lib/theme'
 import { ThemeToggle } from './ThemeToggle'
 import { SelectEndpoint } from './SelectEndpoint'
 import { SelectModel } from './SelectModel'
-import { useEndpointFromQuery } from '../lib/hooks'
+import { useEndpointFromQuery, usePreserveQueryParams } from '../lib/hooks'
 
 interface HeaderProps {
     mobileOpened: boolean
@@ -16,6 +16,7 @@ interface HeaderProps {
 
 export function Header({ mobileOpened, toggleMobile, toggleDesktop }: HeaderProps) {
     const { selectedEndpoint } = useEndpointFromQuery()
+    const buildPath = usePreserveQueryParams()
 
     return (
         <Flex h="100%" px="md" justify="space-between" align="center">
@@ -34,7 +35,7 @@ export function Header({ mobileOpened, toggleMobile, toggleDesktop }: HeaderProp
                     <IconLayoutSidebar stroke={iconStroke} />
                 </ActionIcon>
                 <Title order={4}>
-                    <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <Link to={buildPath('/')} style={{ textDecoration: 'none', color: 'inherit' }}>
                         Modular Agentic Cookbook
                     </Link>
                 </Title>

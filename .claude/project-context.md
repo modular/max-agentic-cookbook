@@ -47,18 +47,19 @@ max-recipes/
 ### Frontend (Vite + React)
 - **Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, TanStack Query v5, Prettier
 - **Port:** 5173
-- **Routing:** Manual route definitions in `App.tsx` with React Router v7 `lazy` prop for code splitting
+- **Routing:** Auto-generated routes from registry using utility functions in `routing/`
 - **API:** Vite proxy to backend (no CORS issues)
 - **UI:** Mantine v7 with custom theme (nebula/twilight colors), 70px header height
 - **Layout:** AppShell with collapsible sidebar, responsive Header (endpoint/model selectors in header on desktop, in navbar drawer on mobile)
 - **State Management:**
   - Server State: TanStack Query (API data fetching, caching, background refetching)
-  - Client State: URL query params (`?e=endpoint-id&m=model-name`) via custom hooks
+  - Client State: URL query params (`?e=endpoint-id&m=model-name&d=1`) via custom hooks
 - **Structure:**
   - `src/recipes/` - Recipe components (lazy loaded)
   - `src/components/` - Shared UI (Header, Navbar, Toolbar, SelectEndpoint, SelectModel, CodeToggle)
-  - `src/lib/` - Custom hooks with TanStack Query (useEndpointFromQuery, useModelFromQuery), query keys, types, theme, config
-  - `src/App.tsx` - QueryClientProvider wrapper + auto-generated `<Routes>` definitions with lazy loading
+  - `src/routing/` - Routing infrastructure (AppProviders, RecipeRoutes utility functions)
+  - `src/lib/` - Custom hooks with TanStack Query (useEndpointFromQuery, useModelFromQuery, usePreserveQueryParams), query keys, types, theme, config
+  - `src/App.tsx` - Simplified entry point using routing utilities
 
 **Routes:**
 - `/` - Recipe cards grid (dynamically generated from registry)
@@ -87,7 +88,10 @@ The frontend uses a **hybrid state management approach**:
 - **Request deduplication** - Multiple components requesting same data share one request
 - **Background refetching** - Data stays fresh automatically
 - **Centralized query keys** in `lib/api.ts` for type safety and cache invalidation
-- **React Query DevTools** included for debugging (toggle in bottom-left corner)
+- **React Query DevTools** - Enable with `?d=1` query parameter (e.g., `http://localhost:5173/?d=1`)
+  - DevTools button appears in bottom-right when `d` parameter present
+  - Parameter persists across navigation via `usePreserveQueryParams` hook
+  - Useful for debugging queries, cache, and network requests
 
 **Example:**
 ```ts
@@ -102,6 +106,9 @@ const { data: endpoints, isLoading, error } = useQuery({
 - Enables shareable URLs and browser back/forward
 - Custom hooks (`useEndpointFromQuery`, `useModelFromQuery`) combine TanStack Query with URL param syncing
 - Auto-selection logic: first endpoint/model selected by default
+- **Query param preservation:** `usePreserveQueryParams` hook ensures `d` parameter persists across navigation
+  - All `<Link>` components use `buildPath()` function from this hook
+  - Prevents DevTools toggle from being lost during navigation
 
 **Why this approach?**
 - **Server state** (API data) needs caching, refetching, deduplication → TanStack Query
@@ -414,11 +421,14 @@ frontend/src/
 │   └── image-captioning/       # Image captioning recipe components
 │       ├── README.mdx          # Recipe documentation
 │       └── ...                 # Demo component
+├── routing/
+│   ├── AppProviders.tsx        # Providers wrapper (QueryClient, Mantine, BrowserRouter, DevTools)
+│   └── RecipeRoutes.tsx        # Utility functions for generating routes (getDynamicRecipeRoutes, getStaticRecipeRoutes)
 ├── lib/
 │   ├── chapters.ts             # Auto-derived from registry
 │   ├── theme.ts                # Custom Mantine theme (70px header, nebula/twilight colors)
 │   ├── types.ts                # Shared TypeScript types
-│   ├── hooks.ts                # useQuery-based hooks with URL param syncing (useEndpointFromQuery, useModelFromQuery)
+│   ├── hooks.ts                # useQuery-based hooks (useEndpointFromQuery, useModelFromQuery, usePreserveQueryParams)
 │   ├── api.ts                  # Query functions, centralized query keys for TanStack Query
 │   └── utils.ts                # Shared utilities
 ├── components/
@@ -439,7 +449,7 @@ frontend/src/
 │   ├── RecipeReadmeView.tsx    # README view (lazy loaded, renders MDX)
 │   └── RecipeCodeView.tsx      # Code view (lazy loaded)
 ├── mdx.d.ts                    # TypeScript declarations for .mdx files
-└── App.tsx                     # QueryClientProvider wrapper + auto-generates routes from registry
+└── App.tsx                     # Simplified routing entry point (uses routing/ utilities)
 ```
 
 ## Important Implementation Notes

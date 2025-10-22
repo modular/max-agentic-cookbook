@@ -1,11 +1,13 @@
 /**
- * RecipeRoutes - Components for rendering dynamic and static recipe routes
+ * RecipeRoutes - Utility functions for rendering dynamic and static recipe routes
  */
 
-import { Suspense } from 'react'
-import { Route } from 'react-router-dom'
+import { Suspense, type ComponentType } from 'react'
+import { Route, useLocation } from 'react-router-dom'
+import { Text } from '@mantine/core'
 import { getAllRecipesWithComponents, lazyComponentExport } from '../recipes/registry'
-import { RecipeRoute } from './RecipeRoute'
+import { useEndpointFromQuery, useModelFromQuery } from '../lib/hooks'
+import type { RecipeProps } from '../lib/types'
 
 // Lazy load feature components
 const RecipeReadmeView = lazyComponentExport(
@@ -16,37 +18,74 @@ const RecipeCodeView = lazyComponentExport(() => import('../features/RecipeCodeV
 // Loading fallback component
 const Loading = () => <div>Loading...</div>
 
-// Component for rendering all dynamic recipe routes
-export function DynamicRecipeRoutes() {
+// Wrapper component that provides endpoint, model, and pathname props to recipes
+function RecipeWithProps({
+    Component: RecipeComponent,
+}: {
+    Component: ComponentType<RecipeProps>
+}) {
+    const location = useLocation()
+    const { selectedEndpoint } = useEndpointFromQuery()
+    const { selectedModel } = useModelFromQuery(selectedEndpoint?.id || null)
+
     return (
-        <>
-            {getAllRecipesWithComponents().map((recipe) => (
-                <RecipeRoute key={recipe.slug} recipe={recipe} />
-            ))}
-        </>
+        <RecipeComponent
+            endpoint={selectedEndpoint}
+            model={selectedModel}
+            pathname={location.pathname}
+        />
     )
 }
 
-// Component for rendering static recipe routes (readme and code views)
-export function StaticRecipeRoutes() {
-    return (
-        <>
+// Utility function for rendering all dynamic recipe routes
+export function getDynamicRecipeRoutes() {
+    return getAllRecipesWithComponents().map((recipe) => {
+        const RecipeComponent = recipe.component
+
+        if (!RecipeComponent) {
+            return (
+                <Route
+                    key={recipe.slug}
+                    path={recipe.slug}
+                    element={<Text>Recipe component not found</Text>}
+                />
+            )
+        }
+
+        return (
             <Route
-                path=":slug/readme"
+                key={recipe.slug}
+                path={recipe.slug}
                 element={
                     <Suspense fallback={<Loading />}>
-                        <RecipeReadmeView />
+                        <RecipeWithProps Component={RecipeComponent} />
                     </Suspense>
                 }
             />
-            <Route
-                path=":slug/code"
-                element={
-                    <Suspense fallback={<Loading />}>
-                        <RecipeCodeView />
-                    </Suspense>
-                }
-            />
-        </>
-    )
+        )
+    })
+}
+
+// Utility function for rendering static recipe routes (readme and code views)
+export function getStaticRecipeRoutes() {
+    return [
+        <Route
+            key="readme"
+            path=":slug/readme"
+            element={
+                <Suspense fallback={<Loading />}>
+                    <RecipeReadmeView />
+                </Suspense>
+            }
+        />,
+        <Route
+            key="code"
+            path=":slug/code"
+            element={
+                <Suspense fallback={<Loading />}>
+                    <RecipeCodeView />
+                </Suspense>
+            }
+        />
+    ]
 }
