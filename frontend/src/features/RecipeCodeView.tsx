@@ -7,7 +7,7 @@
 
 import { Container, Title, Text, Paper, Code } from '@mantine/core'
 import { useLocation } from 'react-router-dom'
-import { recipeMetadata } from '../lib/recipeMetadata'
+import { recipeMetadata } from '../recipes/registry'
 
 export function Component() {
     const location = useLocation()

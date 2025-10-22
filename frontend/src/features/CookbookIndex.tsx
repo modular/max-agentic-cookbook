@@ -13,7 +13,7 @@ import {
     Anchor,
     Box,
 } from '@mantine/core'
-import { getAllImplementedRecipes } from '../lib/recipeMetadata'
+import { getAllImplementedRecipes } from '../recipes/registry'
 
 export function CookbookIndex() {
     const recipes = getAllImplementedRecipes()

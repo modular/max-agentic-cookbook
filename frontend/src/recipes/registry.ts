@@ -1,6 +1,8 @@
 // Recipe metadata organized by section
 // Order in array determines numbering (1, 2, 3...)
 
+import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
+
 interface RecipePlaceholder {
     title: string
 }
@@ -9,12 +11,20 @@ interface RecipeImplemented {
     title: string
     slug: string
     description: string
+    component?: LazyExoticComponent<ComponentType>
 }
 
 export type Recipe = RecipePlaceholder | RecipeImplemented
 
 export interface RecipeMetadata {
     [sectionName: string]: Recipe[]
+}
+
+// Helper: Create a lazy-loaded component that maps named 'Component' export to default
+export function lazyComponentExport<T = unknown>(
+    factory: () => Promise<{ Component: ComponentType<T> }>
+): LazyExoticComponent<ComponentType<T>> {
+    return lazy(() => factory().then((module) => ({ default: module.Component })))
 }
 
 // Single source of truth for all recipes
@@ -27,12 +37,14 @@ export const recipes: RecipeMetadata = {
             title: 'Streaming Image Captions',
             description:
                 "Generate captions for multiple images with progressive NDJSON streaming. Upload images, customize the prompt, and watch captions appear instantly as they're generated. Includes a custom useNDJSON hook for streaming, parallel processing for speed, and performance metrics (TTFT and duration) for each image. Works with Modular MAX or any OpenAI-compatible endpoint.",
+            component: lazyComponentExport(() => import('./image-captioning/ImageCaptioningPlaceholder')),
         },
         {
             slug: 'multiturn-chat',
             title: 'Multi-Turn Chat',
             description:
                 'Streaming chat interface with multi-turn conversation support. Messages stream token-by-token for fluid responses, with automatic scroll-follow. Uses Streamdown for markdown rendering with syntax highlighting. Seamlessly compatible with Modular MAX and other OpenAI-compatible endpoints.',
+            component: lazyComponentExport(() => import('./multiturn-chat/MultiturnChatPlaceholder')),
         },
     ],
     'Data, Tools & Reasoning': [
@@ -135,6 +147,11 @@ export function getAllImplementedRecipes(): RecipeImplemented[] {
     return implemented
 }
 
+// Helper: Get all recipes with interactive components
+export function getAllRecipesWithComponents(): RecipeImplemented[] {
+    return getAllImplementedRecipes().filter((recipe) => recipe.component !== undefined)
+}
+
 // Helper: Check if a slug corresponds to an implemented recipe
 export function isRecipeImplemented(slug: string | undefined): boolean {
     if (!slug) return false
@@ -149,4 +166,15 @@ for (const section of Object.values(recipes)) {
             recipeMetadata[recipe.slug] = recipe
         }
     }
+}
+
+// README components: Lazy-loaded MDX components for recipe documentation
+export const readmeComponents: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
+    'multiturn-chat': lazy(() => import('./multiturn-chat/README.mdx')),
+    'image-captioning': lazy(() => import('./image-captioning/README.mdx')),
+}
+
+// Helper: Get README component for a recipe slug
+export function getReadmeComponent(slug: string): React.LazyExoticComponent<React.ComponentType> | null {
+    return readmeComponents[slug] || null
 }

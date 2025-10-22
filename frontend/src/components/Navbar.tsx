@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { Accordion, AppShell, Group, ScrollArea, Stack, Text } from '@mantine/core'
 import { IconChevronRight, IconPlus } from '@tabler/icons-react'
 import { iconStroke } from '../lib/theme'
-import { isRecipeImplemented } from '../lib/recipeMetadata'
+import { isRecipeImplemented } from '../recipes/registry'
 import { useEndpointFromQuery } from '../lib/hooks'
 import { SelectEndpoint } from './SelectEndpoint'
 import { SelectModel } from './SelectModel'
@@ -22,12 +22,7 @@ function NavItem({ item, currentRecipe }: NavItemProps) {
                     <Text size="sm">{item.title}</Text>
                 </Link>
                 {currentRecipe === item.slug && (
-                    <IconChevronRight
-                        size={16}
-                        opacity={0.8}
-                        stroke={iconStroke}
-                        color="var(--mantine-primary-color-0)"
-                    />
+                    <IconChevronRight size={16} opacity={0.8} stroke={iconStroke} />
                 )}
             </Group>
         )

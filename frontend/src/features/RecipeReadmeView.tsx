@@ -7,36 +7,27 @@
 
 import { Container, Paper } from '@mantine/core'
 import { useParams } from 'react-router-dom'
-import { lazy, Suspense } from 'react'
-
-// Lazy load README components based on slug
-const readmeComponents: Record<string, React.LazyExoticComponent<any>> = {
-    'multiturn-chat': lazy(
-        () => import('../recipes/multiturn-chat/README.mdx')
-    ),
-    'image-captioning': lazy(
-        () => import('../recipes/image-captioning/README.mdx')
-    ),
-}
+import { Suspense } from 'react'
+import { getReadmeComponent } from '../recipes/registry'
 
 export function Component() {
     const { slug } = useParams<{ slug: string }>()
 
-    if (!slug || !readmeComponents[slug]) {
+    const ReadmeComponent = slug ? getReadmeComponent(slug) : null
+
+    if (!ReadmeComponent) {
         return (
-            <Container size='lg' py='xl'>
-                <Paper p='xl' withBorder>
-                    README not found for this recipe.
+            <Container size="lg" py="xl">
+                <Paper p="xl" withBorder>
+                    This recipe does not have a README.
                 </Paper>
             </Container>
         )
     }
 
-    const ReadmeComponent = readmeComponents[slug]
-
     return (
-        <Container size='lg' py='xl'>
-            <Paper p='xl' withBorder>
+        <Container size="lg" py="xl">
+            <Paper p="xl" withBorder>
                 <Suspense fallback={<div>Loading...</div>}>
                     <ReadmeComponent />
                 </Suspense>
