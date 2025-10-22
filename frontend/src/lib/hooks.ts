@@ -4,49 +4,33 @@
 
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import type { Endpoint, Model } from './types'
+import { fetchEndpoints, fetchModels, queryKeys } from './api'
 
 /**
  * Hook to manage endpoint selection via URL query param `?e=endpoint-id`
  *
- * - Fetches endpoints from /api/endpoints
+ * - Fetches endpoints from /api/endpoints using TanStack Query
  * - Reads current selection from query param
  * - Auto-selects first endpoint if none specified
  * - Updates query param when selection changes
  */
 export function useEndpointFromQuery() {
     const [searchParams, setSearchParams] = useSearchParams()
-    const [endpoints, setEndpoints] = useState<Endpoint[]>([])
     const [selectedEndpoint, setSelectedEndpoint] = useState<Endpoint | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
 
-    // Fetch endpoints on mount
-    useEffect(() => {
-        const fetchEndpoints = async () => {
-            try {
-                setLoading(true)
-                setError(null)
-                const response = await fetch('/api/endpoints')
+    // Fetch endpoints using TanStack Query
+    const {
+        data: endpoints = [],
+        isLoading: loading,
+        error: queryError,
+    } = useQuery({
+        queryKey: queryKeys.endpoints,
+        queryFn: fetchEndpoints,
+    })
 
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch endpoints: ${response.statusText}`)
-                }
-
-                const data: Endpoint[] = await response.json()
-                setEndpoints(data)
-            } catch (err) {
-                const message = err instanceof Error ? err.message : 'Unknown error'
-                console.error('Failed to fetch endpoints:', message)
-                setError(message)
-                setEndpoints([])
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchEndpoints()
-    }, [])
+    const error = queryError ? String(queryError) : null
 
     // Sync selected endpoint with query param
     useEffect(() => {
@@ -99,52 +83,27 @@ export function useEndpointFromQuery() {
 /**
  * Hook to manage model selection via URL query param `?m=model-id`
  *
- * - Fetches models from /api/models?endpointId=xxx when endpoint changes
+ * - Fetches models from /api/models?endpointId=xxx using TanStack Query
  * - Reads current selection from query param
  * - Auto-selects first model if none specified
  * - Updates query param when selection changes
  */
 export function useModelFromQuery(endpointId: string | null) {
     const [searchParams, setSearchParams] = useSearchParams()
-    const [models, setModels] = useState<Model[]>([])
     const [selectedModel, setSelectedModel] = useState<Model | null>(null)
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
 
-    // Fetch models when endpoint changes
-    useEffect(() => {
-        if (!endpointId) {
-            setModels([])
-            setSelectedModel(null)
-            return
-        }
+    // Fetch models using TanStack Query (only when endpointId is present)
+    const {
+        data: models = [],
+        isLoading: loading,
+        error: queryError,
+    } = useQuery({
+        queryKey: queryKeys.models(endpointId || ''),
+        queryFn: () => fetchModels(endpointId!),
+        enabled: !!endpointId,
+    })
 
-        const fetchModels = async () => {
-            try {
-                setLoading(true)
-                setError(null)
-
-                const params = new URLSearchParams({ endpointId })
-                const response = await fetch(`/api/models?${params}`)
-
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch models: ${response.statusText}`)
-                }
-
-                const data: Model[] = await response.json()
-                setModels(data)
-            } catch (err) {
-                const message = err instanceof Error ? err.message : 'Unknown error'
-                console.error('Failed to fetch models:', message)
-                setError(message)
-                setModels([])
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchModels()
-    }, [endpointId])
+    const error = queryError ? String(queryError) : null
 
     // Sync selected model with query param
     useEffect(() => {

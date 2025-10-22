@@ -2,6 +2,7 @@
 // Order in array determines numbering (1, 2, 3...)
 
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
+import type { RecipeProps } from '../lib/types'
 
 interface RecipePlaceholder {
     title: string
@@ -11,7 +12,7 @@ interface RecipeImplemented {
     title: string
     slug: string
     description: string
-    component?: LazyExoticComponent<ComponentType>
+    component?: LazyExoticComponent<ComponentType<RecipeProps>>
 }
 
 export type Recipe = RecipePlaceholder | RecipeImplemented

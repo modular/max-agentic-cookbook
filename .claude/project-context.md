@@ -12,7 +12,7 @@ MAX Recipes is a fullstack cookbook application for AI recipes, demonstrating in
 - Don't need SSR/SEO features of Next.js
 - Want Python backend for better AI ecosystem integration (MAX, transformers, etc.)
 - Simpler architecture without monorepo complexity
-- Prefer plain React patterns over framework abstractions
+- Prefer React patterns with targeted best-in-class libraries over opinionated framework abstractions
 
 ## Current Architecture
 
@@ -32,31 +32,33 @@ max-recipes/
 - **Structure:**
   - `src/main.py` - Entry point, loads .env.local, includes recipe routers
   - `src/recipes/endpoints.py` - Endpoint management with caching
-  - `src/recipes/models.py` - Models listing (stubbed)
+  - `src/recipes/models.py` - Models listing (proxies /v1/models)
   - `src/recipes/multiturn_chat.py` - Multi-turn chat recipe router (stubbed)
-  - `src/recipes/image_captioning.py` - Image captioning recipe router (stubbed)
+  - `src/recipes/image_captioning.py` - Image captioning with NDJSON streaming (✅ implemented)
   - `src/core/` - Config and utilities
 - **Endpoints:**
   - `GET /api/health` - Health check
   - `GET /api/recipes` - List available recipe slugs (programmatically discovers registered routes)
   - `GET /api/endpoints` - List configured LLM endpoints (from .env.local)
-  - `GET /api/models?endpointId=xxx` - List models for endpoint (stubbed)
+  - `GET /api/models?endpointId=xxx` - List models for endpoint (proxies OpenAI-compatible /v1/models)
   - `POST /api/recipes/multiturn-chat` - Multi-turn chat endpoint (stubbed)
-  - `POST /api/recipes/image-captioning` - Image captioning endpoint (stubbed)
+  - `POST /api/recipes/image-captioning` - Image captioning with NDJSON streaming, parallel processing, performance metrics (✅ implemented)
 
 ### Frontend (Vite + React)
-- **Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, Prettier
+- **Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, TanStack Query v5, Prettier
 - **Port:** 5173
 - **Routing:** Manual route definitions in `App.tsx` with React Router v7 `lazy` prop for code splitting
 - **API:** Vite proxy to backend (no CORS issues)
 - **UI:** Mantine v7 with custom theme (nebula/twilight colors), 70px header height
 - **Layout:** AppShell with collapsible sidebar, responsive Header (endpoint/model selectors in header on desktop, in navbar drawer on mobile)
-- **State Management:** URL query params (`?e=endpoint-id&m=model-name`) via custom hooks
+- **State Management:**
+  - Server State: TanStack Query (API data fetching, caching, background refetching)
+  - Client State: URL query params (`?e=endpoint-id&m=model-name`) via custom hooks
 - **Structure:**
   - `src/recipes/` - Recipe components (lazy loaded)
   - `src/components/` - Shared UI (Header, Navbar, Toolbar, SelectEndpoint, SelectModel, CodeToggle)
-  - `src/lib/` - Custom hooks (useEndpointFromQuery, useModelFromQuery), types, theme, config
-  - `src/App.tsx` - Manual `<Routes>` definitions with lazy loading
+  - `src/lib/` - Custom hooks with TanStack Query (useEndpointFromQuery, useModelFromQuery), query keys, types, theme, config
+  - `src/App.tsx` - QueryClientProvider wrapper + auto-generated `<Routes>` definitions with lazy loading
 
 **Routes:**
 - `/` - Recipe cards grid (dynamically generated from registry)
@@ -70,10 +72,41 @@ max-recipes/
 2. ✅ **uv** for Python dependency management (fast, modern)
 3. ✅ **React Router v7 with auto-generated routes** (routes generated from registry, no manual route definitions per recipe)
 4. ✅ **Separate dev servers** (backend :8000, frontend :5173 with proxy)
-5. ✅ **Plain React patterns** (useState, useEffect, fetch - no framework abstractions)
-6. ✅ **URL query params for state** (no React Context - endpoint/model selection via ?e= and ?m=)
+5. ✅ **TanStack Query for server state** (API data fetching with automatic caching, background refetching, request deduplication)
+6. ✅ **URL query params for client state** (no React Context - endpoint/model selection via ?e= and ?m=)
 7. ✅ **Lazy loading with React Router v7** (exports `Component` function, generic `lazyComponentExport` helper)
 8. ✅ **Single source of truth for recipes** (registry in recipes/ folder, backend advertises availability)
+
+## Data Fetching Strategy
+
+The frontend uses a **hybrid state management approach**:
+
+### Server State (TanStack Query)
+- All API calls use TanStack Query's `useQuery()` hook
+- **Automatic caching** - API responses cached for 5 minutes (configurable)
+- **Request deduplication** - Multiple components requesting same data share one request
+- **Background refetching** - Data stays fresh automatically
+- **Centralized query keys** in `lib/api.ts` for type safety and cache invalidation
+- **React Query DevTools** included for debugging (toggle in bottom-left corner)
+
+**Example:**
+```ts
+const { data: endpoints, isLoading, error } = useQuery({
+  queryKey: queryKeys.endpoints,
+  queryFn: fetchEndpoints,
+})
+```
+
+### Client State (URL Query Params)
+- User selections (endpoint, model) stored in URL query params
+- Enables shareable URLs and browser back/forward
+- Custom hooks (`useEndpointFromQuery`, `useModelFromQuery`) combine TanStack Query with URL param syncing
+- Auto-selection logic: first endpoint/model selected by default
+
+**Why this approach?**
+- **Server state** (API data) needs caching, refetching, deduplication → TanStack Query
+- **Client state** (user selections) needs persistence, shareability → URL query params
+- Clean separation of concerns with minimal boilerplate
 
 ## Current Status
 
@@ -96,7 +129,8 @@ max-recipes/
 
 ### ✅ Completed (Phase 3: Query Params & Routing)
 - URL query params for endpoint/model selection via custom hooks
-- Backend routes: `/api/endpoints` and `/api/models` (stubbed)
+- Backend routes: `/api/endpoints` and `/api/models` (proxies OpenAI-compatible endpoints)
+- TanStack Query v5 for server state management (automatic caching, background refetching, request deduplication)
 - RecipeLayoutShell with nested routing
 - Toolbar component (simplified: recipe title + CodeToggle only)
 - React Router v7 lazy loading with `lazy` prop
@@ -111,20 +145,118 @@ max-recipes/
 - Routes auto-generated in App.tsx from registry (no manual route definitions per recipe)
 - `chapters.ts` now auto-derived from `registry.ts` (single source of truth)
 - Backend `/api/recipes` programmatically discovers available routes (returns array of slugs)
-- Individual recipe routers: `multiturn_chat.py` and `image_captioning.py` (stubbed)
+- Individual recipe routers: `multiturn_chat.py` (stubbed) and `image_captioning.py` (✅ implemented)
 - CookbookIndex shows dynamic grid of recipe cards
 - Navbar uses shared `isRecipeImplemented()` helper
 - No duplication between frontend and backend metadata
 
-### 🔄 Next: Port Recipe UI Components
+## Recipe Migration Plans
 
-Port recipe components from `monorepo/packages/recipes/src/` to `frontend/src/recipes/[recipe-name]/`
+This section documents the detailed migration strategy for porting recipes from the Next.js monorepo to the FastAPI + React SPA architecture. Each recipe uses a targeted approach based on its complexity and requirements.
 
-**To port:**
-- Multi-turn Chat UI (`multiturn-chat/ui.tsx`)
-- Image Captioning UI (`image-captioning/ui.tsx`)
-- Shared utilities and types as needed
-- Backend API routes (`api.ts` files → FastAPI routes)
+### Image Captioning Recipe ✅ Completed
+
+**Architecture Decision:** Python OpenAI Client + FastAPI Streaming + Custom useNDJSON Hook
+
+**Implementation Status:** Fully implemented and tested with NDJSON streaming, parallel processing, and performance metrics.
+
+**Backend Implementation:**
+- Use Python `openai` client (already installed) with FastAPI streaming response
+- Implement NDJSON (newline-delimited JSON) streaming for progressive updates
+- Support batch processing: parallel requests for multiple images
+- Track performance metrics: TTFT (time to first token) and duration per image
+- Route: `POST /api/recipes/image-captioning`
+
+**Frontend Implementation:**
+- Custom `useNDJSON<T>` hook for progressive NDJSON streaming (framework-agnostic, reusable)
+- File upload with `@mantine/dropzone` component
+- Image gallery with loading overlays and real-time caption updates
+- Performance metrics display: TTFT and duration formatted with `pretty-ms`
+- Component exports `Component` function for lazy loading via registry
+
+**Key Features to Preserve:**
+- Batch image captioning with parallel processing
+- Progressive streaming (results appear as they complete)
+- Performance metrics (TTFT and duration timing)
+- NDJSON streaming format for progressive updates
+
+**Dependencies:**
+- Backend: `openai` (✅ installed), FastAPI streaming
+- Frontend: `@tanstack/react-query` (✅ installed), `nanoid` (✅ installed), `pretty-ms` (✅ installed)
+- No Vercel AI SDK needed - clean Python approach
+
+**Why This Approach:**
+- Frontend already has framework-agnostic NDJSON streaming (useNDJSON hook)
+- Python OpenAI client handles streaming naturally with `for chunk in stream`
+- TanStack Query perfect for mutations with loading/error states
+- Fits our Python-first backend architecture
+- Simple, clean, no unnecessary dependencies
+
+---
+
+### Multi-turn Chat Recipe
+
+**Architecture Decision:** Keep Vercel AI SDK v5 (Frontend + Backend Integration)
+
+**Backend Implementation:**
+- Use Vercel AI SDK's `streamText` helper for token streaming
+- Leverage `convertToModelMessages` for message format conversion
+- Use `toUIMessageStreamResponse` for client-compatible SSE streaming
+- Route: `POST /api/recipes/multiturn-chat`
+- Note: May need Node.js runtime for Vercel AI SDK or evaluate Python alternatives
+
+**Frontend Implementation:**
+- Use Vercel AI SDK's `useChat` hook (handles 90% of boilerplate)
+- Use `Streamdown` component for markdown rendering with syntax highlighting
+- Implement auto-scroll with manual scroll detection
+- Mantine UI components: ScrollArea, Input, Button
+
+**Key Features to Preserve:**
+- Token-by-token streaming for real-time response
+- Multi-turn conversation with full message history
+- Auto-scroll behavior with smart manual scroll detection
+- Markdown rendering with syntax-highlighted code blocks
+- Message state management (submitted, streaming, complete)
+
+**Dependencies:**
+- Backend: `ai` SDK (Node.js), or evaluate Python equivalent
+- Frontend: `ai`, `@ai-sdk/react`, `streamdown`
+- Both: May need hybrid Node.js/Python backend or full Node.js sidecar
+
+**Why This Approach:**
+- Vercel AI SDK v5 is mature (released July 2025), battle-tested
+- `useChat` hook handles complex state: streaming, message history, error recovery
+- `Streamdown` handles markdown rendering with streaming updates
+- SSE-based streaming (Server-Sent Events) is production-ready
+- Supports advanced features: tools, agents, multi-step reasoning
+- Reinventing this wheel with TanStack Query would require significant effort
+
+**Alternative Considered:** OpenAI ChatKit
+- ❌ Too new (released Oct 2025) - likely has bugs, incomplete docs
+- ❌ Frontend-only (still need backend server)
+- ❌ Adds complexity without clear benefit over proven Vercel AI SDK
+
+---
+
+### Migration Dependency Summary
+
+**Frontend packages to add:**
+- `ai` - Vercel AI SDK core (for multi-turn chat)
+- `@ai-sdk/react` - React hooks (`useChat`) for Vercel AI SDK
+- `streamdown` - Markdown streaming with syntax highlighting
+
+**Frontend packages installed:**
+- ✅ `nanoid` - Unique ID generation (used in image captioning)
+- ✅ `pretty-ms` - Human-readable time formatting (used for performance metrics)
+
+**Backend considerations:**
+- Image captioning: Pure Python with `openai` client ✅
+- Multi-turn chat: Evaluate Vercel AI SDK with Python or Node.js sidecar
+- Alternative: Implement custom SSE streaming in Python (more work, less features)
+
+**Migration order:**
+1. **Start with Image Captioning** (simpler, pure Python, good learning experience)
+2. **Then Multi-turn Chat** (more complex, evaluate Node.js vs Python approach)
 
 ### Adding a New Recipe
 
@@ -176,19 +308,24 @@ Visit: `http://localhost:5173`
 - ✅ `@mantine/dropzone@^7` - File upload
 - ✅ `@tabler/icons-react` - Icons
 - ✅ `react-router-dom@^7` - React Router v7 with lazy loading
+- ✅ `@tanstack/react-query@^5` - Server state management with automatic caching, background refetching
+- ✅ `@tanstack/react-query-devtools` - Development tools for debugging queries
+- ✅ `nanoid` - Unique ID generation
+- ✅ `pretty-ms` - Human-readable time formatting
 - ✅ `prettier@^3` - Code formatter
 - ✅ `postcss-preset-mantine` - Mantine PostCSS preset
 
 **Frontend (To Add When Porting Recipes):**
-- `ai` - Vercel AI SDK (for streaming)
+- `ai` - Vercel AI SDK (for multi-turn chat streaming)
+- `@ai-sdk/react` - React hooks for Vercel AI SDK
 - `streamdown` - Markdown streaming with syntax highlighting
 - Other dependencies as needed
 
 **Backend (Installed):**
 - ✅ `python-dotenv` - Load .env.local for configuration
+- ✅ `openai` - OpenAI Python client for API proxying
 
 **Backend (To Add):**
-- OpenAI client or similar for AI inference
 - Other dependencies based on recipe needs
 
 ## Recipe Registry Architecture
@@ -212,7 +349,7 @@ export const recipes = {
       slug: 'image-captioning',
       title: 'Streaming Image Captions',
       description: '...',
-      component: lazyComponentExport(() => import('./image-captioning/ImageCaptioningPlaceholder'))
+      component: lazyComponentExport(() => import('./image-captioning/ui'))
     }
   ],
   "Data, Tools & Reasoning": [...],
@@ -252,7 +389,9 @@ export const recipes = {
 ## Key Patterns
 
 - **Auto-generated routing** - routes generated from registry, no manual definitions per recipe
-- **Plain React patterns** - no loaders/actions, use hooks and fetch
+- **Server state via TanStack Query** - automatic caching, background refetch, request deduplication
+- **Query keys centralized** in `api.ts` for type safety and cache invalidation
+- **Client state via URL params** - shareable URLs, browser back/forward support
 - **Backend routes** prefixed with `/api`
 - **Adding a recipe**: Update `registry.ts` with component property - routes update automatically
 
@@ -281,8 +420,8 @@ frontend/src/
 │   ├── chapters.ts             # Auto-derived from registry
 │   ├── theme.ts                # Custom Mantine theme (70px header, nebula/twilight colors)
 │   ├── types.ts                # Shared TypeScript types
-│   ├── hooks.ts                # useEndpointFromQuery, useModelFromQuery
-│   ├── api.ts                  # API client utilities
+│   ├── hooks.ts                # useQuery-based hooks with URL param syncing (useEndpointFromQuery, useModelFromQuery)
+│   ├── api.ts                  # Query functions, centralized query keys for TanStack Query
 │   └── utils.ts                # Shared utilities
 ├── components/
 │   ├── Header.tsx              # 70px header with responsive endpoint/model selectors
@@ -302,16 +441,54 @@ frontend/src/
 │   ├── RecipeReadmeView.tsx    # README view (lazy loaded, renders MDX)
 │   └── RecipeCodeView.tsx      # Code view (lazy loaded)
 ├── mdx.d.ts                    # TypeScript declarations for .mdx files
-└── App.tsx                     # Auto-generates routes from registry
+└── App.tsx                     # QueryClientProvider wrapper + auto-generates routes from registry
 ```
 
 ## Important Implementation Notes
 
 - **Recipe Registry:** Single source of truth in `registry.ts` - edit to add/reorder recipes, routes auto-generate
 - **Lazy Loading:** Recipe components export `Component` function, use `lazyComponentExport()` helper
+- **Data Fetching:** TanStack Query for all API calls - see `api.ts` for query keys and query functions
+- **State Management:** Server state (TanStack Query) + Client state (URL query params)
 - **Query Params:** Endpoint/model state in URL (`?e=endpoint-id&m=model-name`) via custom hooks
 - **Responsive Layout:** Endpoint/model selectors in header (desktop) or navbar drawer (mobile)
 - **Formatting:** 4 spaces, no semis, single quotes (run `npm run format`)
+
+## TypeScript Coding Standards
+
+**Critical:** Never use the `any` type in TypeScript code. This project maintains strict type safety.
+
+**Type Safety Guidelines:**
+- ❌ **Never use `any`** - bypasses type checking and defeats the purpose of TypeScript
+- ✅ **Use `unknown`** - for truly dynamic data that will be validated at runtime (e.g., `body: unknown` in fetch calls)
+- ✅ **Use proper interfaces** - define explicit interfaces like `RecipeProps` for component props
+- ✅ **Use generic types** - e.g., `ComponentType<RecipeProps>` instead of `ComponentType<any>`
+- ✅ **Use type guards** - `isImplemented(recipe)` for runtime type narrowing
+
+**Examples:**
+```typescript
+// ❌ BAD - bypasses type checking
+function process(data: any) { ... }
+const Component: ComponentType<any> = ...
+
+// ✅ GOOD - maintains type safety
+function process(data: unknown) { ... }  // Will validate before use
+const Component: ComponentType<RecipeProps> = ...
+interface RecipeProps {
+  endpoint: Endpoint | null
+  model: Model | null
+  pathname: string
+}
+```
+
+**Why This Matters:**
+- Catches bugs at compile time instead of runtime
+- Enables IDE autocomplete and refactoring
+- Documents expected data shapes
+- Makes code more maintainable
+
+**Shared Types:**
+All shared types live in `frontend/src/lib/types.ts` for consistency across the codebase.
 
 ## Recipe Page Views (Readme | Demo | Code)
 

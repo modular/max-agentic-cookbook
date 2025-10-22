@@ -35,3 +35,12 @@ export interface Model {
     id: string
     name: string
 }
+
+/**
+ * Props passed to all recipe components
+ */
+export interface RecipeProps {
+    endpoint: Endpoint | null
+    model: Model | null
+    pathname: string
+}
