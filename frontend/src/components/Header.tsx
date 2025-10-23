@@ -33,10 +33,6 @@ export function Header({ mobileOpened, toggleMobile, toggleDesktop }: HeaderProp
                 </Title>
             </Group>
             <Group gap="md">
-                <Group gap="md" visibleFrom="sm">
-                    <SelectEndpoint />
-                    <SelectModel endpointId={selectedEndpoint?.id ?? null} />
-                </Group>
                 <ActionIcon
                     onClick={toggleDesktop}
                     visibleFrom="sm"
@@ -45,6 +41,10 @@ export function Header({ mobileOpened, toggleMobile, toggleDesktop }: HeaderProp
                     <IconListTree stroke={iconStroke} />
                 </ActionIcon>
                 <ThemeToggle stroke={iconStroke} />
+                <Group gap="md" visibleFrom="sm">
+                    <SelectEndpoint />
+                    <SelectModel endpointId={selectedEndpoint?.id ?? null} />
+                </Group>
             </Group>
         </Flex>
     )
