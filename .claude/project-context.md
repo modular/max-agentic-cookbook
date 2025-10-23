@@ -86,9 +86,9 @@ The frontend uses a **hybrid state management approach**:
 - All API calls use SWR's `useSWR()` hook
 - **Automatic caching** - API responses cached and deduplicated (default 2 second deduplication interval)
 - **Request deduplication** - Multiple components requesting same data share one request
-- **Automatic revalidation** - Data stays fresh with configurable revalidation strategies:
-  - `revalidateOnFocus: false` - Don't refetch on window focus
-  - `revalidateOnReconnect: false` - Don't refetch on reconnect
+- **Automatic revalidation** - Data stays fresh with SWR's default revalidation strategies:
+  - Revalidates on window focus (shows fresh data when switching back to tab)
+  - Revalidates on network reconnect (recovers from network issues)
   - Manual revalidation via `mutate()` when needed
 - **URL-based cache keys** - Simple, intuitive cache keys based on API endpoints
 - **Lightweight** - ~15KB bundle size (much smaller than alternatives)
@@ -96,14 +96,6 @@ The frontend uses a **hybrid state management approach**:
 **Example:**
 ```ts
 const { data: endpoints, isLoading, error } = useSWR('/api/endpoints', fetchEndpoints)
-```
-
-**SWR Configuration** (in `AppProviders.tsx`):
-```ts
-<SWRConfig value={{
-  revalidateOnFocus: false,
-  revalidateOnReconnect: false
-}}>
 ```
 
 ### Client State (URL Query Params)
@@ -310,7 +302,7 @@ Visit: `http://localhost:5173`
 - `backend/src/recipes/[recipe_name].py` - Individual recipe API routers
 - `backend/src/main.py` - Include recipe routers, programmatic route discovery
 - `frontend/src/App.tsx` - Auto-generates routes from registry (no manual edits needed per recipe)
-- `frontend/src/routing/AppProviders.tsx` - SWR config, Mantine provider, Router wrapper
+- `frontend/src/routing/AppProviders.tsx` - Mantine provider, Router wrapper
 - `frontend/src/routing/routeUtils.tsx` - Route generation utilities (lazyLoadDemoRoutes, lazyLoadDetailRoutes)
 - `frontend/src/lib/api.ts` - Add new API client functions
 - `frontend/src/lib/hooks.ts` - Custom hooks with SWR integration
@@ -427,7 +419,7 @@ frontend/src/
 │       ├── README.mdx          # Recipe documentation
 │       └── ui.tsx              # Demo component (exports Component function)
 ├── routing/
-│   ├── AppProviders.tsx        # Providers wrapper (SWRConfig, Mantine, BrowserRouter)
+│   ├── AppProviders.tsx        # Providers wrapper (Mantine, BrowserRouter)
 │   ├── Loading.tsx             # Loading fallback component for Suspense boundaries
 │   ├── RecipeWithProps.tsx     # Wrapper component that provides endpoint, model, pathname props
 │   └── routeUtils.tsx          # Route generation utilities (lazyLoadDemoRoutes, lazyLoadDetailRoutes)
