@@ -10,6 +10,7 @@ from openai import AsyncOpenAI
 from pydantic import BaseModel
 
 from .endpoints import get_cached_endpoint
+from ..core.code_reader import read_source_file
 
 router = APIRouter(prefix="/api/recipes", tags=["recipes"])
 
@@ -140,3 +141,20 @@ async def multiturn_chat(request: ChatRequest):
             "X-Vercel-AI-UI-Message-Stream": "v1"
         }
     )
+
+@router.get("/multiturn-chat/code")
+async def get_image_captioning_code():
+    """
+    Get the source code for the image captioning recipe.
+
+    Returns the Python source code of this file as JSON.
+    """
+    try:
+        # Use __file__ to get the path to this source file
+        code_data = read_source_file(__file__)
+        return code_data
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error reading source code: {str(e)}"
+        )
