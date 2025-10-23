@@ -51,6 +51,15 @@ export function ViewSelector() {
         <SegmentedControl
             value={currentView}
             onChange={handleChange}
+            tt="uppercase"
+            size="xs"
+            styles={{
+                label: {
+                    fontWeight: 700,
+                    paddingLeft: 'var(--mantine-spacing-md)',
+                    paddingRight: 'var(--mantine-spacing-md)',
+                },
+            }}
             data={[
                 { label: 'Demo', value: 'demo' },
                 { label: 'Readme', value: 'readme' },
