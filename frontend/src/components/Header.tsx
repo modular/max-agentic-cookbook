@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ActionIcon, Burger, Flex, Group, Title } from '@mantine/core'
-import { IconLayoutSidebar } from '@tabler/icons-react'
+import { IconListTree } from '@tabler/icons-react'
 
 import { iconStroke } from '../lib/theme'
 import { ThemeToggle } from './ThemeToggle'
@@ -26,13 +26,6 @@ export function Header({ mobileOpened, toggleMobile, toggleDesktop }: HeaderProp
                     hiddenFrom="sm"
                     size="sm"
                 />
-                <ActionIcon
-                    onClick={toggleDesktop}
-                    visibleFrom="sm"
-                    variant="transparent"
-                >
-                    <IconLayoutSidebar stroke={iconStroke} />
-                </ActionIcon>
                 <Title order={4}>
                     <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
                         Modular Agentic Cookbook
@@ -44,6 +37,13 @@ export function Header({ mobileOpened, toggleMobile, toggleDesktop }: HeaderProp
                     <SelectEndpoint />
                     <SelectModel endpointId={selectedEndpoint?.id ?? null} />
                 </Group>
+                <ActionIcon
+                    onClick={toggleDesktop}
+                    visibleFrom="sm"
+                    variant="transparent"
+                >
+                    <IconListTree stroke={iconStroke} />
+                </ActionIcon>
                 <ThemeToggle stroke={iconStroke} />
             </Group>
         </Flex>
