@@ -20,7 +20,7 @@ function App() {
                     <Route element={<RecipeLayoutShell />}>
                         {/* Dynamic routes for interactive recipe components */}
                         {getDynamicRecipeRoutes()}
-                        {/* Static routes for all recipes */}
+                        {/* Static routes for recipe readmes + code */}
                         {getStaticRecipeRoutes()}
                     </Route>
                 </Route>

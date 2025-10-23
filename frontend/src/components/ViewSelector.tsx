@@ -6,7 +6,7 @@
  */
 
 import { SegmentedControl } from '@mantine/core'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 export function ViewSelector() {
     const location = useLocation()

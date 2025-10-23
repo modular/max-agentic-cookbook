@@ -155,7 +155,7 @@ import { Streamdown } from 'streamdown'
  */
 interface MessagesPanelProps {
     messages: UIMessage[]
-    bottomRef?: RefObject<HTMLDivElement>
+    bottomRef?: RefObject<HTMLDivElement | null>
 }
 
 /**

@@ -7,17 +7,6 @@ import type { Endpoint, Model } from './types'
 const API_BASE_URL = '/api'
 
 /**
- * Query keys for TanStack Query
- * Used for caching and invalidation
- */
-export const queryKeys = {
-    endpoints: ['endpoints'] as const,
-    models: (endpointId: string) => ['models', endpointId] as const,
-    recipes: ['recipes'] as const,
-    health: ['health'] as const,
-}
-
-/**
  * Fetch available endpoints
  */
 export async function fetchEndpoints(): Promise<Endpoint[]> {

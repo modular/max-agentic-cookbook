@@ -2,16 +2,16 @@
  * Custom hooks for managing endpoint and model selection via URL query params
  */
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import useSWR from 'swr'
 import type { Endpoint, Model } from './types'
-import { fetchEndpoints, fetchModels, queryKeys } from './api'
+import { fetchEndpoints, fetchModels } from './api'
 
 /**
  * Hook to manage endpoint selection via URL query param `?e=endpoint-id`
  *
- * - Fetches endpoints from /api/endpoints using TanStack Query
+ * - Fetches endpoints from /api/endpoints using SWR
  * - Reads current selection from query param
  * - Auto-selects first endpoint if none specified
  * - Updates query param when selection changes
@@ -20,15 +20,12 @@ export function useEndpointFromQuery() {
     const [searchParams, setSearchParams] = useSearchParams()
     const [selectedEndpoint, setSelectedEndpoint] = useState<Endpoint | null>(null)
 
-    // Fetch endpoints using TanStack Query
+    // Fetch endpoints using SWR
     const {
         data: endpoints = [],
         isLoading: loading,
         error: queryError,
-    } = useQuery({
-        queryKey: queryKeys.endpoints,
-        queryFn: fetchEndpoints,
-    })
+    } = useSWR<Endpoint[]>('/api/endpoints', fetchEndpoints)
 
     const error = queryError ? String(queryError) : null
 
@@ -83,7 +80,7 @@ export function useEndpointFromQuery() {
 /**
  * Hook to manage model selection via URL query param `?m=model-id`
  *
- * - Fetches models from /api/models?endpointId=xxx using TanStack Query
+ * - Fetches models from /api/models?endpointId=xxx using SWR
  * - Reads current selection from query param
  * - Auto-selects first model if none specified
  * - Updates query param when selection changes
@@ -92,16 +89,15 @@ export function useModelFromQuery(endpointId: string | null) {
     const [searchParams, setSearchParams] = useSearchParams()
     const [selectedModel, setSelectedModel] = useState<Model | null>(null)
 
-    // Fetch models using TanStack Query (only when endpointId is present)
+    // Fetch models using SWR (only when endpointId is present)
     const {
         data: models = [],
         isLoading: loading,
         error: queryError,
-    } = useQuery({
-        queryKey: queryKeys.models(endpointId || ''),
-        queryFn: () => fetchModels(endpointId!),
-        enabled: !!endpointId,
-    })
+    } = useSWR<Model[]>(
+        endpointId ? `/api/models?endpointId=${endpointId}` : null,
+        () => fetchModels(endpointId!)
+    )
 
     const error = queryError ? String(queryError) : null
 
@@ -153,30 +149,3 @@ export function useModelFromQuery(endpointId: string | null) {
     }
 }
 
-/**
- * Hook to build navigation paths with preserved query parameters
- *
- * Preserves the 'd' (devtools) parameter across navigation
- *
- * Usage:
- * const buildPath = usePreserveQueryParams()
- * <Link to={buildPath('/recipe-slug')}>
- */
-export function usePreserveQueryParams() {
-    const [searchParams] = useSearchParams()
-
-    return useCallback(
-        (path: string) => {
-            const params = new URLSearchParams()
-
-            // Preserve 'd' parameter if it exists
-            if (searchParams.has('d')) {
-                params.set('d', searchParams.get('d')!)
-            }
-
-            const queryString = params.toString()
-            return queryString ? `${path}?${queryString}` : path
-        },
-        [searchParams]
-    )
-}

@@ -45,20 +45,20 @@ max-recipes/
   - `POST /api/recipes/image-captioning` - Image captioning with NDJSON streaming, parallel processing, performance metrics (✅ implemented)
 
 ### Frontend (Vite + React)
-- **Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, TanStack Query v5, Prettier
+- **Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, SWR, Prettier
 - **Port:** 5173
 - **Routing:** Auto-generated routes from registry using utility functions in `routing/`
 - **API:** Vite proxy to backend (no CORS issues)
 - **UI:** Mantine v7 with custom theme (nebula/twilight colors), 70px header height
 - **Layout:** AppShell with collapsible sidebar, responsive Header (endpoint/model selectors in header on desktop, in navbar drawer on mobile)
 - **State Management:**
-  - Server State: TanStack Query (API data fetching, caching, background refetching)
-  - Client State: URL query params (`?e=endpoint-id&m=model-name&d=1`) via custom hooks
+  - Server State: SWR (API data fetching, caching, automatic revalidation)
+  - Client State: URL query params (`?e=endpoint-id&m=model-name`) via custom hooks
 - **Structure:**
   - `src/recipes/` - Recipe components (lazy loaded)
   - `src/components/` - Shared UI (Header, Navbar, Toolbar, SelectEndpoint, SelectModel, CodeToggle)
   - `src/routing/` - Routing infrastructure (AppProviders, RecipeRoutes utility functions)
-  - `src/lib/` - Custom hooks with TanStack Query (useEndpointFromQuery, useModelFromQuery, usePreserveQueryParams), query keys, types, theme, config
+  - `src/lib/` - Custom hooks with SWR (useEndpointFromQuery, useModelFromQuery), API fetchers, types, theme, config
   - `src/App.tsx` - Simplified entry point using routing utilities
 
 **Routes:**
@@ -73,7 +73,7 @@ max-recipes/
 2. ✅ **uv** for Python dependency management (fast, modern)
 3. ✅ **React Router v7 with auto-generated routes** (routes generated from registry, no manual route definitions per recipe)
 4. ✅ **Separate dev servers** (backend :8000, frontend :5173 with proxy)
-5. ✅ **TanStack Query for server state** (API data fetching with automatic caching, background refetching, request deduplication)
+5. ✅ **SWR for server state** (Lightweight API data fetching with automatic caching and revalidation)
 6. ✅ **URL query params for client state** (no React Context - endpoint/model selection via ?e= and ?m=)
 7. ✅ **Lazy loading with React Router v7** (exports `Component` function, generic `lazyComponentExport` helper)
 8. ✅ **Single source of truth for recipes** (registry in recipes/ folder, backend advertises availability)
@@ -82,36 +82,27 @@ max-recipes/
 
 The frontend uses a **hybrid state management approach**:
 
-### Server State (TanStack Query)
-- All API calls use TanStack Query's `useQuery()` hook
-- **Automatic caching** - API responses cached for 5 minutes (configurable)
+### Server State (SWR)
+- All API calls use SWR's `useSWR()` hook
+- **Automatic caching** - API responses cached and deduplicated (5 second deduplication interval)
 - **Request deduplication** - Multiple components requesting same data share one request
-- **Background refetching** - Data stays fresh automatically
-- **Centralized query keys** in `lib/api.ts` for type safety and cache invalidation
-- **React Query DevTools** - Enable with `?d=1` query parameter (e.g., `http://localhost:5173/?d=1`)
-  - DevTools button appears in bottom-right when `d` parameter present
-  - Parameter persists across navigation via `usePreserveQueryParams` hook
-  - Useful for debugging queries, cache, and network requests
+- **Automatic revalidation** - Data stays fresh with configurable revalidation strategies
+- **URL-based cache keys** - Simple, intuitive cache keys based on API endpoints
+- **Lightweight** - ~15KB bundle size vs ~50KB for alternatives
 
 **Example:**
 ```ts
-const { data: endpoints, isLoading, error } = useQuery({
-  queryKey: queryKeys.endpoints,
-  queryFn: fetchEndpoints,
-})
+const { data: endpoints, isLoading, error } = useSWR('/api/endpoints', fetchEndpoints)
 ```
 
 ### Client State (URL Query Params)
 - User selections (endpoint, model) stored in URL query params
 - Enables shareable URLs and browser back/forward
-- Custom hooks (`useEndpointFromQuery`, `useModelFromQuery`) combine TanStack Query with URL param syncing
+- Custom hooks (`useEndpointFromQuery`, `useModelFromQuery`) combine SWR with URL param syncing
 - Auto-selection logic: first endpoint/model selected by default
-- **Query param preservation:** `usePreserveQueryParams` hook ensures `d` parameter persists across navigation
-  - All `<Link>` components use `buildPath()` function from this hook
-  - Prevents DevTools toggle from being lost during navigation
 
 **Why this approach?**
-- **Server state** (API data) needs caching, refetching, deduplication → TanStack Query
+- **Server state** (API data) needs caching, revalidation, deduplication → SWR
 - **Client state** (user selections) needs persistence, shareability → URL query params
 - Clean separation of concerns with minimal boilerplate
 
@@ -137,7 +128,7 @@ const { data: endpoints, isLoading, error } = useQuery({
 ### ✅ Completed (Phase 3: Query Params & Routing)
 - URL query params for endpoint/model selection via custom hooks
 - Backend routes: `/api/endpoints` and `/api/models` (proxies OpenAI-compatible endpoints)
-- TanStack Query v5 for server state management (automatic caching, background refetching, request deduplication)
+- SWR for server state management (lightweight caching and automatic revalidation)
 - RecipeLayoutShell with nested routing
 - Toolbar component (simplified: recipe title + CodeToggle only)
 - React Router v7 lazy loading with `lazy` prop
@@ -313,8 +304,7 @@ Visit: `http://localhost:5173`
 - ✅ `@mantine/dropzone@^7` - File upload
 - ✅ `@tabler/icons-react` - Icons
 - ✅ `react-router-dom@^7` - React Router v7 with lazy loading
-- ✅ `@tanstack/react-query@^5` - Server state management with automatic caching, background refetching
-- ✅ `@tanstack/react-query-devtools` - Development tools for debugging queries
+- ✅ `swr` - Lightweight server state management with automatic caching and revalidation (~15KB)
 - ✅ `nanoid` - Unique ID generation
 - ✅ `pretty-ms` - Human-readable time formatting
 - ✅ `prettier@^3` - Code formatter
@@ -394,8 +384,8 @@ export const recipes = {
 ## Key Patterns
 
 - **Auto-generated routing** - routes generated from registry, no manual definitions per recipe
-- **Server state via TanStack Query** - automatic caching, background refetch, request deduplication
-- **Query keys centralized** in `api.ts` for type safety and cache invalidation
+- **Server state via SWR** - lightweight caching, automatic revalidation, request deduplication
+- **URL-based cache keys** - SWR uses API URLs directly as cache keys (simple and intuitive)
 - **Client state via URL params** - shareable URLs, browser back/forward support
 - **Backend routes** prefixed with `/api`
 - **Adding a recipe**: Update `registry.ts` with component property - routes update automatically
@@ -422,14 +412,14 @@ frontend/src/
 │       ├── README.mdx          # Recipe documentation
 │       └── ...                 # Demo component
 ├── routing/
-│   ├── AppProviders.tsx        # Providers wrapper (QueryClient, Mantine, BrowserRouter, DevTools)
+│   ├── AppProviders.tsx        # Providers wrapper (SWRConfig, Mantine, BrowserRouter)
 │   └── RecipeRoutes.tsx        # Utility functions for generating routes (getDynamicRecipeRoutes, getStaticRecipeRoutes)
 ├── lib/
 │   ├── chapters.ts             # Auto-derived from registry
 │   ├── theme.ts                # Custom Mantine theme (70px header, nebula/twilight colors)
 │   ├── types.ts                # Shared TypeScript types
-│   ├── hooks.ts                # useQuery-based hooks (useEndpointFromQuery, useModelFromQuery, usePreserveQueryParams)
-│   ├── api.ts                  # Query functions, centralized query keys for TanStack Query
+│   ├── hooks.ts                # useSWR-based hooks (useEndpointFromQuery, useModelFromQuery)
+│   ├── api.ts                  # API fetch functions for SWR
 │   └── utils.ts                # Shared utilities
 ├── components/
 │   ├── Header.tsx              # 70px header with responsive endpoint/model selectors
@@ -456,8 +446,8 @@ frontend/src/
 
 - **Recipe Registry:** Single source of truth in `registry.ts` - edit to add/reorder recipes, routes auto-generate
 - **Lazy Loading:** Recipe components export `Component` function, use `lazyComponentExport()` helper
-- **Data Fetching:** TanStack Query for all API calls - see `api.ts` for query keys and query functions
-- **State Management:** Server state (TanStack Query) + Client state (URL query params)
+- **Data Fetching:** SWR for all API calls - see `api.ts` for fetch functions
+- **State Management:** Server state (SWR) + Client state (URL query params)
 - **Query Params:** Endpoint/model state in URL (`?e=endpoint-id&m=model-name`) via custom hooks
 - **Responsive Layout:** Endpoint/model selectors in header (desktop) or navbar drawer (mobile)
 - **Formatting:** 4 spaces, no semis, single quotes (run `npm run format`)
