@@ -7,7 +7,7 @@ import { CookbookShell } from './features/CookbookShell'
 import { CookbookIndex } from './features/CookbookIndex'
 import { RecipeLayoutShell } from './features/RecipeLayout'
 import { AppProviders } from './routing/AppProviders'
-import { getDynamicRecipeRoutes, getStaticRecipeRoutes } from './routing/RecipeRoutes'
+import { lazyLoadDemoRoutes, lazyLoadDetailRoutes } from './routing/RecipeRoutes'
 import './App.css'
 
 function App() {
@@ -19,9 +19,9 @@ function App() {
                     {/* Nested recipe layout wraps all recipe pages with lazy loading */}
                     <Route element={<RecipeLayoutShell />}>
                         {/* Dynamic routes for interactive recipe components */}
-                        {getDynamicRecipeRoutes()}
+                        {lazyLoadDemoRoutes()}
                         {/* Static routes for recipe readmes + code */}
-                        {getStaticRecipeRoutes()}
+                        {lazyLoadDetailRoutes()}
                     </Route>
                 </Route>
             </Routes>

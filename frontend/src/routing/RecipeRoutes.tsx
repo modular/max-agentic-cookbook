@@ -38,7 +38,7 @@ function RecipeWithProps({
 }
 
 // Utility function for rendering all dynamic recipe routes
-export function getDynamicRecipeRoutes() {
+export function lazyLoadDemoRoutes() {
     return getAllRecipesWithComponents().map((recipe) => {
         const RecipeComponent = recipe.component
 
@@ -67,7 +67,7 @@ export function getDynamicRecipeRoutes() {
 }
 
 // Utility function for rendering static recipe routes (readme and code views)
-export function getStaticRecipeRoutes() {
+export function lazyLoadDetailRoutes() {
     return [
         <Route
             key="readme"
@@ -86,6 +86,6 @@ export function getStaticRecipeRoutes() {
                     <RecipeCodeView />
                 </Suspense>
             }
-        />
+        />,
     ]
 }

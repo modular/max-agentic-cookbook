@@ -1,6 +1,7 @@
+import { useEffect } from 'react'
 import { AppShell } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { headerHeight, navbarWidth } from '../lib/theme'
 import { Header } from '../components/Header'
 import { Navbar } from '../components/Navbar'
@@ -8,6 +9,13 @@ import { Navbar } from '../components/Navbar'
 export function CookbookShell() {
     const [mobileOpened, { toggle: toggleMobile }] = useDisclosure()
     const [desktopOpened, { toggle: toggleDesktop }] = useDisclosure(true)
+    const location = useLocation()
+
+    useEffect(() => {
+        if (mobileOpened) {
+            toggleMobile()
+        }
+    }, [location.pathname, toggleMobile])
 
     return (
         <AppShell
