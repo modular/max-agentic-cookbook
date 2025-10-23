@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Accordion, AppShell, Group, ScrollArea, Stack, Text } from '@mantine/core'
+import { Accordion, Anchor, AppShell, Group, ScrollArea, Stack, Text } from '@mantine/core'
 import { IconChevronRight, IconPlus } from '@tabler/icons-react'
 import { iconStroke } from '../lib/theme'
 import { isRecipeImplemented } from '../recipes/registry'
@@ -18,9 +18,9 @@ function NavItem({ item, currentRecipe }: NavItemProps) {
     if (isRecipeImplemented(item.slug)) {
         return (
             <Group justify="space-between" align="center">
-                <Link to={`/${item.slug}`} style={{ textDecoration: 'none' }}>
-                    <Text size="sm">{item.title}</Text>
-                </Link>
+                <Anchor component={Link} to={`/${item.slug}`} size="sm" underline="never">
+                    {item.title}
+                </Anchor>
                 {currentRecipe === item.slug && (
                     <IconChevronRight size={16} opacity={0.8} stroke={iconStroke} />
                 )}

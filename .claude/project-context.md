@@ -84,27 +84,40 @@ The frontend uses a **hybrid state management approach**:
 
 ### Server State (SWR)
 - All API calls use SWR's `useSWR()` hook
-- **Automatic caching** - API responses cached and deduplicated (5 second deduplication interval)
+- **Automatic caching** - API responses cached and deduplicated (default 2 second deduplication interval)
 - **Request deduplication** - Multiple components requesting same data share one request
-- **Automatic revalidation** - Data stays fresh with configurable revalidation strategies
+- **Automatic revalidation** - Data stays fresh with configurable revalidation strategies:
+  - `revalidateOnFocus: false` - Don't refetch on window focus
+  - `revalidateOnReconnect: false` - Don't refetch on reconnect
+  - Manual revalidation via `mutate()` when needed
 - **URL-based cache keys** - Simple, intuitive cache keys based on API endpoints
-- **Lightweight** - ~15KB bundle size vs ~50KB for alternatives
+- **Lightweight** - ~15KB bundle size (much smaller than alternatives)
 
 **Example:**
 ```ts
 const { data: endpoints, isLoading, error } = useSWR('/api/endpoints', fetchEndpoints)
 ```
 
+**SWR Configuration** (in `AppProviders.tsx`):
+```ts
+<SWRConfig value={{
+  revalidateOnFocus: false,
+  revalidateOnReconnect: false
+}}>
+```
+
 ### Client State (URL Query Params)
-- User selections (endpoint, model) stored in URL query params
+- User selections (endpoint, model) stored in URL query params (`?e=endpoint-id&m=model-name`)
 - Enables shareable URLs and browser back/forward
 - Custom hooks (`useEndpointFromQuery`, `useModelFromQuery`) combine SWR with URL param syncing
 - Auto-selection logic: first endpoint/model selected by default
+- Implemented using React Router's `useSearchParams` hook
 
 **Why this approach?**
 - **Server state** (API data) needs caching, revalidation, deduplication → SWR
 - **Client state** (user selections) needs persistence, shareability → URL query params
 - Clean separation of concerns with minimal boilerplate
+- Replaced TanStack Query for simplicity (simpler API, smaller bundle)
 
 ## Current Status
 
@@ -130,9 +143,10 @@ const { data: endpoints, isLoading, error } = useSWR('/api/endpoints', fetchEndp
 - Backend routes: `/api/endpoints` and `/api/models` (proxies OpenAI-compatible endpoints)
 - SWR for server state management (lightweight caching and automatic revalidation)
 - RecipeLayoutShell with nested routing
-- Toolbar component (simplified: recipe title + CodeToggle only)
-- React Router v7 lazy loading with `lazy` prop
-- Dynamic `:slug/code` route for recipe source view
+- Toolbar component with ViewSelector (Readme | Demo | Code)
+- React Router v7 lazy loading with `Component` export pattern
+- Dynamic routes: `:slug` (demo), `:slug/readme`, `:slug/code`
+- MDX support for README files with `@mdx-js/rollup`
 
 ### ✅ Completed (Phase 4: Recipe Registry & Auto-Generated Routes)
 - Restructured recipe metadata into `registry.ts` (in recipes/ folder, co-located with recipe components)
@@ -140,10 +154,11 @@ const { data: endpoints, isLoading, error } = useSWR('/api/endpoints', fetchEndp
 - Display titles auto-generated ("1: Introduction", "2: Multi-Turn Chat", etc.)
 - Helper functions: `isImplemented()`, `getRecipeBySlug()`, `buildNavigation()`, `getAllImplementedRecipes()`, `getAllRecipesWithComponents()`, `isRecipeImplemented()`
 - Recipe components registered directly in registry with optional `component` property
-- Routes auto-generated in App.tsx from registry (no manual route definitions per recipe)
+- Routes auto-generated in App.tsx from registry using routing utilities
+- Routing utilities extracted to `routing/` folder: `AppProviders.tsx`, `RecipeRoutes.tsx`
 - `chapters.ts` now auto-derived from `registry.ts` (single source of truth)
 - Backend `/api/recipes` programmatically discovers available routes (returns array of slugs)
-- Individual recipe routers: `multiturn_chat.py` (stubbed) and `image_captioning.py` (✅ implemented)
+- Individual recipe routers: `multiturn_chat.py` (✅ implemented) and `image_captioning.py` (✅ implemented)
 - CookbookIndex shows dynamic grid of recipe cards
 - Navbar uses shared `isRecipeImplemented()` helper
 - No duplication between frontend and backend metadata
@@ -171,6 +186,7 @@ This section documents the detailed migration strategy for porting recipes from 
 - Image gallery with loading overlays and real-time caption updates
 - Performance metrics display: TTFT and duration formatted with `pretty-ms`
 - Component exports `Component` function for lazy loading via registry
+- README.mdx with documentation
 
 **Key Features to Preserve:**
 - Batch image captioning with parallel processing
@@ -180,13 +196,13 @@ This section documents the detailed migration strategy for porting recipes from 
 
 **Dependencies:**
 - Backend: `openai` (✅ installed), FastAPI streaming
-- Frontend: `@tanstack/react-query` (✅ installed), `nanoid` (✅ installed), `pretty-ms` (✅ installed)
+- Frontend: `nanoid` (✅ installed), `pretty-ms` (✅ installed), custom hooks
 - No Vercel AI SDK needed - clean Python approach
 
 **Why This Approach:**
 - Frontend already has framework-agnostic NDJSON streaming (useNDJSON hook)
 - Python OpenAI client handles streaming naturally with `for chunk in stream`
-- TanStack Query perfect for mutations with loading/error states
+- Custom hooks provide mutation state management (loading/error states)
 - Fits our Python-first backend architecture
 - Simple, clean, no unnecessary dependencies
 
@@ -215,6 +231,7 @@ This section documents the detailed migration strategy for porting recipes from 
 - Auto-scroll behavior with smart manual scroll detection
 - Streamdown component for markdown rendering with syntax highlighting
 - Component exports `Component` function for lazy loading via registry
+- README.mdx with documentation
 
 **Key Features Implemented:**
 - Token-by-token streaming for real-time response
@@ -251,8 +268,8 @@ This section documents the detailed migration strategy for porting recipes from 
 - ✅ Multi-turn chat: Pure Python SSE streaming compatible with Vercel AI SDK frontend
 
 **Migration completed:**
-1. ✅ **Image Captioning** - Pure Python with NDJSON streaming, parallel processing, performance metrics
-2. ✅ **Multi-turn Chat** - Python SSE streaming with Vercel AI SDK frontend, token streaming, multi-turn context
+1. ✅ **Image Captioning** (91a39bc) - Pure Python with NDJSON streaming, parallel processing, performance metrics
+2. ✅ **Multi-turn Chat** (343f5d9) - Python SSE streaming with Vercel AI SDK frontend, token streaming, multi-turn context
 
 ### Adding a New Recipe
 
@@ -293,7 +310,10 @@ Visit: `http://localhost:5173`
 - `backend/src/recipes/[recipe_name].py` - Individual recipe API routers
 - `backend/src/main.py` - Include recipe routers, programmatic route discovery
 - `frontend/src/App.tsx` - Auto-generates routes from registry (no manual edits needed per recipe)
+- `frontend/src/routing/AppProviders.tsx` - SWR config, Mantine provider, Router wrapper
+- `frontend/src/routing/RecipeRoutes.tsx` - Route generation utilities
 - `frontend/src/lib/api.ts` - Add new API client functions
+- `frontend/src/lib/hooks.ts` - Custom hooks with SWR integration
 - `frontend/src/lib/types.ts` - Add shared TypeScript types
 
 ## Dependencies
@@ -305,23 +325,18 @@ Visit: `http://localhost:5173`
 - ✅ `@tabler/icons-react` - Icons
 - ✅ `react-router-dom@^7` - React Router v7 with lazy loading
 - ✅ `swr` - Lightweight server state management with automatic caching and revalidation (~15KB)
+- ✅ `ai` - Vercel AI SDK (for multi-turn chat streaming)
+- ✅ `@ai-sdk/react` - React hooks for Vercel AI SDK
+- ✅ `streamdown` - Markdown streaming with syntax highlighting
 - ✅ `nanoid` - Unique ID generation
 - ✅ `pretty-ms` - Human-readable time formatting
 - ✅ `prettier@^3` - Code formatter
 - ✅ `postcss-preset-mantine` - Mantine PostCSS preset
-
-**Frontend (To Add When Porting Recipes):**
-- `ai` - Vercel AI SDK (for multi-turn chat streaming)
-- `@ai-sdk/react` - React hooks for Vercel AI SDK
-- `streamdown` - Markdown streaming with syntax highlighting
-- Other dependencies as needed
+- ✅ `@mdx-js/rollup` - MDX support for README views
 
 **Backend (Installed):**
 - ✅ `python-dotenv` - Load .env.local for configuration
-- ✅ `openai` - OpenAI Python client for API proxying
-
-**Backend (To Add):**
-- Other dependencies based on recipe needs
+- ✅ `openai` - OpenAI Python client for API proxying and streaming
 
 ## Recipe Registry Architecture
 
@@ -337,7 +352,7 @@ export const recipes = {
       slug: 'multiturn-chat',
       title: 'Multi-Turn Chat',
       description: '...',
-      component: lazyComponentExport(() => import('./multiturn-chat/MultiturnChatPlaceholder'))
+      component: lazyComponentExport(() => import('./multiturn-chat/ui'))
     },
     { title: 'Batch Safety Classification' },  // placeholder
     {
@@ -407,10 +422,10 @@ frontend/src/
 │   ├── registry.ts             # SINGLE SOURCE OF TRUTH for all recipe metadata
 │   ├── multiturn-chat/         # Multi-turn chat recipe components
 │   │   ├── README.mdx          # Recipe documentation
-│   │   └── ...                 # Demo component
+│   │   └── ui.tsx              # Demo component (exports Component function)
 │   └── image-captioning/       # Image captioning recipe components
 │       ├── README.mdx          # Recipe documentation
-│       └── ...                 # Demo component
+│       └── ui.tsx              # Demo component (exports Component function)
 ├── routing/
 │   ├── AppProviders.tsx        # Providers wrapper (SWRConfig, Mantine, BrowserRouter)
 │   └── RecipeRoutes.tsx        # Utility functions for generating routes (getDynamicRecipeRoutes, getStaticRecipeRoutes)
@@ -435,7 +450,7 @@ frontend/src/
 ├── features/
 │   ├── CookbookShell.tsx       # AppShell layout wrapper
 │   ├── CookbookIndex.tsx       # Recipe cards grid
-│   ├── RecipeLayoutShell.tsx   # Nested layout for recipe pages
+│   ├── RecipeLayoutShell.tsx   # Nested layout for recipe pages (Toolbar + scrollable Outlet)
 │   ├── RecipeReadmeView.tsx    # README view (lazy loaded, renders MDX)
 │   └── RecipeCodeView.tsx      # Code view (lazy loaded)
 ├── mdx.d.ts                    # TypeScript declarations for .mdx files
