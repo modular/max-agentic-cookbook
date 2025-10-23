@@ -7,7 +7,7 @@ import { CookbookShell } from './features/CookbookShell'
 import { CookbookIndex } from './features/CookbookIndex'
 import { RecipeLayoutShell } from './features/RecipeLayout'
 import { AppProviders } from './routing/AppProviders'
-import { lazyLoadDemoRoutes, lazyLoadDetailRoutes } from './routing/RecipeRoutes'
+import { lazyLoadDemoRoutes, lazyLoadDetailRoutes } from './routing/routeUtils'
 import './App.css'
 
 function App() {

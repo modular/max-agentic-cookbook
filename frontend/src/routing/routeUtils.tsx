@@ -1,41 +1,19 @@
 /**
- * RecipeRoutes - Utility functions for rendering dynamic and static recipe routes
+ * routeUtils - Utility functions for rendering dynamic and static recipe routes
  */
 
-import { Suspense, type ComponentType } from 'react'
-import { Route, useLocation } from 'react-router-dom'
+import { Suspense } from 'react'
+import { Route } from 'react-router-dom'
 import { Text } from '@mantine/core'
 import { getAllRecipesWithComponents, lazyComponentExport } from '../recipes/registry'
-import { useEndpointFromQuery, useModelFromQuery } from '../lib/hooks'
-import type { RecipeProps } from '../lib/types'
+import { RecipeWithProps } from './RecipeWithProps'
+import { Loading } from './Loading'
 
 // Lazy load feature components
 const RecipeReadmeView = lazyComponentExport(
     () => import('../features/RecipeReadmeView')
 )
 const RecipeCodeView = lazyComponentExport(() => import('../features/RecipeCodeView'))
-
-// Loading fallback component
-const Loading = () => <div>Loading...</div>
-
-// Wrapper component that provides endpoint, model, and pathname props to recipes
-function RecipeWithProps({
-    Component: RecipeComponent,
-}: {
-    Component: ComponentType<RecipeProps>
-}) {
-    const location = useLocation()
-    const { selectedEndpoint } = useEndpointFromQuery()
-    const { selectedModel } = useModelFromQuery(selectedEndpoint?.id || null)
-
-    return (
-        <RecipeComponent
-            endpoint={selectedEndpoint}
-            model={selectedModel}
-            pathname={location.pathname}
-        />
-    )
-}
 
 // Utility function for rendering all dynamic recipe routes
 export function lazyLoadDemoRoutes() {

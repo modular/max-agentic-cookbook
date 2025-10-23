@@ -57,7 +57,7 @@ max-recipes/
 - **Structure:**
   - `src/recipes/` - Recipe components (lazy loaded)
   - `src/components/` - Shared UI (Header, Navbar, Toolbar, SelectEndpoint, SelectModel, CodeToggle)
-  - `src/routing/` - Routing infrastructure (AppProviders, RecipeRoutes utility functions)
+  - `src/routing/` - Routing infrastructure (AppProviders, Loading, RecipeWithProps, routeUtils)
   - `src/lib/` - Custom hooks with SWR (useEndpointFromQuery, useModelFromQuery), API fetchers, types, theme, config
   - `src/App.tsx` - Simplified entry point using routing utilities
 
@@ -155,7 +155,7 @@ const { data: endpoints, isLoading, error } = useSWR('/api/endpoints', fetchEndp
 - Helper functions: `isImplemented()`, `getRecipeBySlug()`, `buildNavigation()`, `getAllImplementedRecipes()`, `getAllRecipesWithComponents()`, `isRecipeImplemented()`
 - Recipe components registered directly in registry with optional `component` property
 - Routes auto-generated in App.tsx from registry using routing utilities
-- Routing utilities extracted to `routing/` folder: `AppProviders.tsx`, `RecipeRoutes.tsx`
+- Routing utilities extracted to `routing/` folder: `AppProviders.tsx`, `Loading.tsx`, `RecipeWithProps.tsx`, `routeUtils.tsx`
 - `chapters.ts` now auto-derived from `registry.ts` (single source of truth)
 - Backend `/api/recipes` programmatically discovers available routes (returns array of slugs)
 - Individual recipe routers: `multiturn_chat.py` (✅ implemented) and `image_captioning.py` (✅ implemented)
@@ -311,7 +311,7 @@ Visit: `http://localhost:5173`
 - `backend/src/main.py` - Include recipe routers, programmatic route discovery
 - `frontend/src/App.tsx` - Auto-generates routes from registry (no manual edits needed per recipe)
 - `frontend/src/routing/AppProviders.tsx` - SWR config, Mantine provider, Router wrapper
-- `frontend/src/routing/RecipeRoutes.tsx` - Route generation utilities
+- `frontend/src/routing/routeUtils.tsx` - Route generation utilities (lazyLoadDemoRoutes, lazyLoadDetailRoutes)
 - `frontend/src/lib/api.ts` - Add new API client functions
 - `frontend/src/lib/hooks.ts` - Custom hooks with SWR integration
 - `frontend/src/lib/types.ts` - Add shared TypeScript types
@@ -428,7 +428,9 @@ frontend/src/
 │       └── ui.tsx              # Demo component (exports Component function)
 ├── routing/
 │   ├── AppProviders.tsx        # Providers wrapper (SWRConfig, Mantine, BrowserRouter)
-│   └── RecipeRoutes.tsx        # Utility functions for generating routes (getDynamicRecipeRoutes, getStaticRecipeRoutes)
+│   ├── Loading.tsx             # Loading fallback component for Suspense boundaries
+│   ├── RecipeWithProps.tsx     # Wrapper component that provides endpoint, model, pathname props
+│   └── routeUtils.tsx          # Route generation utilities (lazyLoadDemoRoutes, lazyLoadDetailRoutes)
 ├── lib/
 │   ├── chapters.ts             # Auto-derived from registry
 │   ├── theme.ts                # Custom Mantine theme (70px header, nebula/twilight colors)
