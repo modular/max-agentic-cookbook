@@ -11,6 +11,7 @@ from openai import AsyncOpenAI
 from pydantic import BaseModel
 
 from .endpoints import get_cached_endpoint
+from ..core.code_reader import read_source_file
 
 router = APIRouter(prefix="/api/recipes", tags=["recipes"])
 
@@ -129,3 +130,21 @@ async def image_captioning(request: ImageCaptionRequest):
         generate_ndjson(),
         media_type="application/x-ndjson"
     )
+
+
+@router.get("/image-captioning/code")
+async def get_image_captioning_code():
+    """
+    Get the source code for the image captioning recipe.
+
+    Returns the Python source code of this file as JSON.
+    """
+    try:
+        # Use __file__ to get the path to this source file
+        code_data = read_source_file(__file__)
+        return code_data
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error reading source code: {str(e)}"
+        )
