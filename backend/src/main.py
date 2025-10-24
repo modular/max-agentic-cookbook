@@ -6,7 +6,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.recipes import endpoints, image_captioning, models, multiturn_chat
+from src.core import endpoints, models
+from src.recipes import image_captioning, multiturn_chat
 
 # Load environment variables from .env.local
 env_path = Path(__file__).parent.parent / ".env.local"

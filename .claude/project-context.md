@@ -31,25 +31,25 @@ max-recipes/
 - **Env:** `.env.local` with COOKBOOK_ENDPOINTS JSON array
 - **Structure:**
   - `src/main.py` - Entry point, loads .env.local, includes recipe routers
-  - `src/recipes/endpoints.py` - Endpoint management with caching
-  - `src/recipes/models.py` - Models listing (proxies /v1/models)
+  - `src/core/` - Config and utilities
+  - `src/core/endpoints.py` - Endpoint management with caching
+  - `src/core/models.py` - Models listing (proxies /v1/models)
+  - `src/core/code_reader.py` - Source code reading utility for /code endpoints
   - `src/recipes/multiturn_chat.py` - Multi-turn chat recipe router (✅ implemented)
   - `src/recipes/image_captioning.py` - Image captioning with NDJSON streaming (✅ implemented)
-  - `src/core/` - Config and utilities
-  - `src/core/code_reader.py` - Source code reading utility for /code endpoints
 - **Endpoints:**
   - `GET /api/health` - Health check
   - `GET /api/recipes` - List available recipe slugs (programmatically discovers registered routes)
   - `GET /api/endpoints` - List configured LLM endpoints (from .env.local)
   - `GET /api/models?endpointId=xxx` - List models for endpoint (proxies OpenAI-compatible /v1/models)
   - `POST /api/recipes/multiturn-chat` - Multi-turn chat endpoint (✅ implemented)
-  - `GET /api/recipes/multiturn-chat/code` - Get multiturn-chat backend source as JSON
+  - `GET /api/recipes/multiturn-chat/code` - Get multiturn-chat backend source as plain text
   - `POST /api/recipes/image-captioning` - Image captioning with NDJSON streaming, parallel processing, performance metrics (✅ implemented)
-  - `GET /api/recipes/image-captioning/code` - Get image-captioning backend source as JSON
+  - `GET /api/recipes/image-captioning/code` - Get image-captioning backend source as plain text
   - Frontend source: Static files at `/code/{recipe-name}/ui.tsx` (copied by build script)
 
 ### Frontend (Vite + React)
-- **Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, SWR, Prettier
+- **Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, SWR, highlight.js, Prettier
 - **Port:** 5173
 - **Routing:** Auto-generated routes from registry using utility functions in `routing/`
 - **API:** Vite proxy to backend (no CORS issues)
@@ -175,7 +175,7 @@ This section documents the detailed migration strategy for porting recipes from 
 - Support batch processing: parallel requests for multiple images
 - Track performance metrics: TTFT (time to first token) and duration per image
 - Route: `POST /api/recipes/image-captioning`
-- Code endpoint: `GET /api/recipes/image-captioning/code` (returns source as JSON)
+- Code endpoint: `GET /api/recipes/image-captioning/code` (returns source as plain text)
 
 **Frontend Implementation:**
 - Custom `useNDJSON<T>` hook for progressive NDJSON streaming (framework-agnostic, reusable)
@@ -220,7 +220,7 @@ This section documents the detailed migration strategy for porting recipes from 
   - `{"type": "text-delta", "id": "...", "delta": "..."}` (streaming text)
   - `{"type": "finish"}` and `[DONE]` (completion)
 - Route: `POST /api/recipes/multiturn-chat`
-- Code endpoint: `GET /api/recipes/multiturn-chat/code` (returns source as JSON)
+- Code endpoint: `GET /api/recipes/multiturn-chat/code` (returns source as plain text)
 
 **Frontend Implementation:**
 - Vercel AI SDK's `useChat` hook with `DefaultChatTransport`
@@ -275,8 +275,9 @@ This section documents the detailed migration strategy for porting recipes from 
 2. Create `backend/src/recipes/[recipe_name].py` with APIRouter
 3. Add recipe route(s) and code endpoint:
    - Import `code_reader`: `from ..core.code_reader import read_source_file`
+   - Import Response: `from fastapi.responses import Response`
    - Add main recipe route (e.g., `POST /recipe-name`)
-   - Add code route: `GET /recipe-name/code` (use `__file__` with `read_source_file()`)
+   - Add code route: `GET /recipe-name/code` that returns `Response(content=read_source_file(__file__), media_type="text/plain")`
 4. Include router in `backend/src/main.py`
 5. Add UI component to `frontend/src/recipes/[recipe-name]/`
 6. Add `README.mdx` to `frontend/src/recipes/[recipe-name]/` for documentation
@@ -333,6 +334,7 @@ Visit: `http://localhost:5173`
 - ✅ `nanoid` - Unique ID generation
 - ✅ `pretty-ms` - Human-readable time formatting
 - ✅ `prettier@^3` - Code formatter
+- ✅ `highlight.js` - Syntax highlighting for code blocks (with theme switching based on Mantine color scheme)
 - ✅ `chokidar` - File watching for copy script
 - ✅ `concurrently` - Run multiple npm scripts in parallel
 - ✅ `postcss-preset-mantine` - Mantine PostCSS preset
@@ -431,7 +433,7 @@ frontend/src/
 │       ├── README.mdx          # Recipe documentation
 │       └── ui.tsx              # Demo component (exports Component function)
 ├── routing/
-│   ├── AppProviders.tsx        # Providers wrapper (Mantine, BrowserRouter)
+│   ├── AppProviders.tsx        # Providers wrapper (Mantine, BrowserRouter, HighlightJsThemeLoader)
 │   ├── Loading.tsx             # Loading fallback component for Suspense boundaries
 │   ├── RecipeWithProps.tsx     # Wrapper component that provides endpoint, model, pathname props
 │   └── routeUtils.tsx          # Route generation utilities (lazyLoadDemoRoutes, lazyLoadDetailRoutes)
@@ -458,7 +460,7 @@ frontend/src/
 │   ├── CookbookIndex.tsx       # Recipe cards grid
 │   ├── RecipeLayoutShell.tsx   # Nested layout for recipe pages (Toolbar + scrollable Outlet)
 │   ├── RecipeReadmeView.tsx    # README view (lazy loaded, renders MDX)
-│   └── RecipeCodeView.tsx      # Code view (lazy loaded)
+│   └── RecipeCodeView.tsx      # Code view with tabs (Backend/Frontend) and syntax highlighting (lazy loaded)
 ├── scripts/
 │   └── copy-recipe-code.js     # Copies recipe source to public/code/ (watch mode in dev)
 ├── mdx.d.ts                    # TypeScript declarations for .mdx files
@@ -526,8 +528,9 @@ Each recipe has three views accessible via the ViewSelector segmented control:
 - Handles navigation between the three views using React Router
 
 ### Code Availability
-- **Backend code**: API endpoint `GET /api/recipes/{slug}/code` returns Python source as JSON
+- **Backend code**: API endpoint `GET /api/recipes/{slug}/code` returns Python source as plain text
 - **Frontend code**: Static files at `/code/{slug}/ui.tsx` (copied by `scripts/copy-recipe-code.js`)
+- **Syntax highlighting**: Implemented with highlight.js, theme switches based on Mantine color scheme (dark/light)
 
 ### RecipeLayoutShell Scrollable Layout Pattern
 

@@ -9,7 +9,7 @@ from fastapi.responses import StreamingResponse, Response
 from openai import AsyncOpenAI
 from pydantic import BaseModel
 
-from .endpoints import get_cached_endpoint
+from ..core.endpoints import get_cached_endpoint
 from ..core.code_reader import read_source_file
 
 router = APIRouter(prefix="/api/recipes", tags=["recipes"])
