@@ -43,9 +43,10 @@ max-recipes/
   - `GET /api/endpoints` - List configured LLM endpoints (from .env.local)
   - `GET /api/models?endpointId=xxx` - List models for endpoint (proxies OpenAI-compatible /v1/models)
   - `POST /api/recipes/multiturn-chat` - Multi-turn chat endpoint (✅ implemented)
-  - `GET /api/recipes/multiturn-chat/code` - Get multiturn-chat source code as JSON
+  - `GET /api/recipes/multiturn-chat/code` - Get multiturn-chat backend source as JSON
   - `POST /api/recipes/image-captioning` - Image captioning with NDJSON streaming, parallel processing, performance metrics (✅ implemented)
-  - `GET /api/recipes/image-captioning/code` - Get image-captioning source code as JSON
+  - `GET /api/recipes/image-captioning/code` - Get image-captioning backend source as JSON
+  - Frontend source: Static files at `/code/{recipe-name}/ui.tsx` (copied by build script)
 
 ### Frontend (Vite + React)
 - **Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, SWR, Prettier
@@ -300,7 +301,7 @@ uv run uvicorn src.main:app --reload --port 8000
 **Terminal 2 (Frontend):**
 ```bash
 cd frontend
-npm run dev
+npm run dev  # Runs vite + copy:code:watch (watches recipe source files)
 ```
 
 Visit: `http://localhost:5173`
@@ -332,6 +333,8 @@ Visit: `http://localhost:5173`
 - ✅ `nanoid` - Unique ID generation
 - ✅ `pretty-ms` - Human-readable time formatting
 - ✅ `prettier@^3` - Code formatter
+- ✅ `chokidar` - File watching for copy script
+- ✅ `concurrently` - Run multiple npm scripts in parallel
 - ✅ `postcss-preset-mantine` - Mantine PostCSS preset
 - ✅ `@mdx-js/rollup` - MDX support for README views
 
@@ -456,6 +459,8 @@ frontend/src/
 │   ├── RecipeLayoutShell.tsx   # Nested layout for recipe pages (Toolbar + scrollable Outlet)
 │   ├── RecipeReadmeView.tsx    # README view (lazy loaded, renders MDX)
 │   └── RecipeCodeView.tsx      # Code view (lazy loaded)
+├── scripts/
+│   └── copy-recipe-code.js     # Copies recipe source to public/code/ (watch mode in dev)
 ├── mdx.d.ts                    # TypeScript declarations for .mdx files
 └── App.tsx                     # Simplified routing entry point (uses routing/ utilities)
 ```
@@ -519,6 +524,10 @@ Each recipe has three views accessible via the ViewSelector segmented control:
 - Uses Mantine's `SegmentedControl` with three options
 - Lives in Toolbar, always visible on recipe pages
 - Handles navigation between the three views using React Router
+
+### Code Availability
+- **Backend code**: API endpoint `GET /api/recipes/{slug}/code` returns Python source as JSON
+- **Frontend code**: Static files at `/code/{slug}/ui.tsx` (copied by `scripts/copy-recipe-code.js`)
 
 ### RecipeLayoutShell Scrollable Layout Pattern
 

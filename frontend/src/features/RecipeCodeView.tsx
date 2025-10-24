@@ -1,13 +1,15 @@
 /**
  * RecipeCodeView - Display recipe source code
  *
- * This component shows the source code for a recipe.
- * Currently a placeholder that will be enhanced to show actual code.
+ * This component fetches and displays the source code for a recipe.
+ * Currently shows frontend code, with structure ready for backend code.
  */
 
-import { Container, Title, Text, Paper, Code } from '@mantine/core'
+import { Container, Title, Text, Paper, Stack, Alert } from '@mantine/core'
 import { useLocation } from 'react-router-dom'
+import useSWR from 'swr'
 import { recipeMetadata } from '../recipes/registry'
+import { fetchFrontendCode } from '../lib/api'
 
 export function Component() {
     const location = useLocation()
@@ -20,24 +22,56 @@ export function Component() {
     const recipe = recipeMetadata[slug]
     const title = recipe?.title ?? 'Recipe'
 
-    return (
-        <Container size="lg" py="xl">
-            <Paper p="xl" withBorder>
-                <Title order={2} mb="md">
-                    {title} - Source Code
-                </Title>
-                <Text c="dimmed" mb="md">
-                    This is a placeholder for the recipe source code view.
-                </Text>
-                <Code block>
-                    {`// Recipe: ${slug}
-// TODO: Display actual source code here
+    // Fetch frontend code
+    const {
+        data: frontendCode,
+        error,
+        isLoading,
+    } = useSWR(`/code/${slug}/frontend`, () => fetchFrontendCode(slug))
 
-export function Component() {
-  return <div>Recipe implementation</div>
-}`}
-                </Code>
-            </Paper>
+    return (
+        <Container size="xl" py="xl">
+            <Stack gap="xl">
+                {/* Frontend Code Section */}
+                <Paper p="xl" withBorder>
+                    <Title order={3} mb="md">
+                        Frontend (ui.tsx)
+                    </Title>
+
+                    {isLoading && (
+                        <Text c="dimmed">Loading code...</Text>
+                    )}
+
+                    {error && (
+                        <Alert color="red" title="Error loading code">
+                            {error.message}
+                        </Alert>
+                    )}
+
+                    {frontendCode && (
+                        <pre
+                            style={{
+                                overflow: 'auto',
+                                padding: '1rem',
+                                backgroundColor: 'var(--mantine-color-gray-0)',
+                                borderRadius: 'var(--mantine-radius-sm)',
+                                fontSize: '0.875rem',
+                                lineHeight: '1.5',
+                            }}
+                        >
+                            <code>{frontendCode}</code>
+                        </pre>
+                    )}
+                </Paper>
+
+                {/* Backend Code Section - Placeholder for future */}
+                {/* <Paper p="xl" withBorder>
+                    <Title order={3} mb="md">
+                        Backend (Python)
+                    </Title>
+                    <Text c="dimmed">Coming soon...</Text>
+                </Paper> */}
+            </Stack>
         </Container>
     )
 }

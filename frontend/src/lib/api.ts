@@ -44,3 +44,14 @@ export async function fetchRecipes() {
     }
     return response.json()
 }
+
+/**
+ * Fetch frontend source code for a recipe
+ */
+export async function fetchFrontendCode(slug: string): Promise<string> {
+    const response = await fetch(`/code/${slug}/ui.tsx`)
+    if (!response.ok) {
+        throw new Error(`Failed to fetch frontend code: ${response.statusText}`)
+    }
+    return response.text()
+}
