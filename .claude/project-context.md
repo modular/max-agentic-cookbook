@@ -4,11 +4,13 @@
 
 MAX Recipes is a fullstack cookbook application for AI recipes, demonstrating integrations with Modular MAX and other AI services. The project was recently migrated from a Next.js monorepo to a simpler FastAPI + React SPA architecture.
 
-## Why the Migration?
+## Architecture Evolution
 
-**Previous architecture:** Next.js monorepo with `apps/cookbook/` and `packages/recipes/`
+**Previous architecture:** Next.js monorepo with `apps/cookbook/` and `packages/recipes/` (now removed)
 
-**Reasons for change:**
+**Current architecture:** FastAPI backend + React SPA with separate projects
+
+**Reasons for migration:**
 - Don't need SSR/SEO features of Next.js
 - Want Python backend for better AI ecosystem integration (MAX, transformers, etc.)
 - Simpler architecture without monorepo complexity
@@ -20,10 +22,10 @@ MAX Recipes is a fullstack cookbook application for AI recipes, demonstrating in
 max-recipes/
 ├── backend/              # FastAPI + uv (Python 3.11+)
 ├── frontend/             # Vite + React + TypeScript SPA
+├── docs/                 # Architecture, contributing, Docker guides
 ├── Dockerfile            # Demo server (MAX + backend + frontend)
 ├── ecosystem.config.js   # PM2 config for running all services
 ├── .dockerignore         # Docker build exclusions
-├── monorepo/             # OLD: Archived Next.js monorepo
 └── archive/              # Legacy standalone recipes
 ```
 

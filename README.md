@@ -1,84 +1,114 @@
-# MAX Recipes
+# MAX Agentic Cookbook
 
-A modern fullstack cookbook application for AI recipes using FastAPI (Python) and React (TypeScript).
+A modern fullstack cookbook app showcasing AI recipes with Modular MAX and other AI services. Built with FastAPI (Python) and React (TypeScript) for maximum flexibility and performance.
 
 ## Architecture
 
-This project uses a clean separation between frontend and backend:
+FastAPI backend + React SPA with separate projects for clean separation:
 
 ```
 max-recipes/
-├── backend/          # FastAPI Python API
-├── frontend/         # Vite React TypeScript SPA
-├── monorepo/         # Previous Next.js monorepo (archived)
+├── backend/          # FastAPI Python API (port 8000 local, 8001 Docker)
+├── frontend/         # Vite React TypeScript SPA (port 5173 local, 3000 Docker)
+├── docs/             # Architecture, contributing, Docker guides
 └── archive/          # Legacy standalone recipes
 ```
 
+**Why this architecture?**
+
+-   **Python-first backend** - Direct access to AI ecosystem (MAX, transformers, etc.)
+-   **No SSR needed** - Just plain React, copy-paste into any project
+-   **Separate projects** - Independent scaling and deployment
+-   **Type safety** - TypeScript frontend + Python type hints backend
+
 ## Requirements
 
-- **Python** 3.11 or higher
-- **Node.js** 22.x or higher
-- **uv** - Fast Python package installer ([install here](https://github.com/astral-sh/uv))
+-   **Python** 3.11 or higher
+-   **Node.js** 22.x or higher
+-   **uv** - Fast Python package installer ([install here](https://github.com/astral-sh/uv))
 
 ## Quick Start
 
-### Backend Setup
+### Local Development
 
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-
-2. Install dependencies:
-   ```bash
-   uv sync
-   ```
-
-3. Start the development server:
-   ```bash
-   uv run uvicorn src.main:app --reload --port 8000
-   ```
-
-The API will be available at `http://localhost:8000`
-
-API documentation:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-The app will be available at `http://localhost:5173`
-
-### Running Both Servers
-
-Open two terminal windows:
+Run backend and frontend separately in two terminals, or run + debug with VS Code.
 
 **Terminal 1 (Backend):**
+
 ```bash
-cd backend && uv run uvicorn src.main:app --reload --port 8000
+cd backend
+uv sync                                            # Install dependencies
+uv run uvicorn src.main:app --reload --port 8000   # Start backend
 ```
 
 **Terminal 2 (Frontend):**
+
 ```bash
-cd frontend && npm run dev
+cd frontend
+npm install      # Install dependencies
+npm run dev      # Start frontend with hot reload
 ```
 
-The frontend automatically proxies API requests to the backend during development.
+Visit `http://localhost:5173` to see the app.
+
+### Docker with MAX (All-in-One)
+
+Run the complete stack with MAX model serving + backend + frontend:
+
+```bash
+# Build
+docker build -t max-recipes .
+
+# Run (NVIDIA GPU)
+docker run --gpus all \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -e "HF_TOKEN=your-huggingface-token" \
+    -e "MAX_MODEL=mistral-community/pixtral-12b" \
+    -p 8000:8000 -p 8001:8001 -p 3000:3000 \
+    max-recipes
+
+# Run (AMD GPU)
+docker run \
+    --group-add keep-groups \
+    --device /dev/kfd --device /dev/dri \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -e "HF_TOKEN=your-huggingface-token" \
+    -e "MAX_MODEL=mistral-community/pixtral-12b" \
+    -p 8000:8000 -p 8001:8001 -p 3000:3000 \
+    max-recipes
+```
+
+Visit `http://localhost:3000` to see the app.
+
+**Services:**
+
+-   **Port 8000**: MAX LLM serving (OpenAI-compatible /v1 endpoints)
+-   **Port 8001**: FastAPI backend (/api endpoints)
+-   **Port 3000**: React frontend (proxies to backend)
+
+PM2 orchestrates startup: MAX → backend → frontend with automatic health checks and restarts.
+
+## Configuration
+
+### Backend Configuration (.env.local)
+
+Create `backend/.env.local` to configure LLM endpoints:
+
+```env
+COOKBOOK_ENDPOINTS='[
+  {
+    "id": "max-local",
+    "baseUrl": "http://localhost:8000/v1",
+    "apiKey": "EMPTY"
+  }
+]'
+```
+
+See `backend/.sample.env` for template.
+
+### Frontend Configuration
+
+No config needed! Frontend auto-detects endpoints via backend API.
 
 ## Development
 
@@ -87,10 +117,15 @@ The frontend automatically proxies API requests to the backend during developmen
 ```
 backend/
 ├── src/
-│   ├── main.py           # FastAPI app entry point
-│   ├── recipes/          # Recipe route modules
-│   └── core/             # Config and utilities
-└── pyproject.toml        # Python dependencies
+│   ├── main.py                 # FastAPI entry point
+│   ├── core/                   # Config, utilities
+│   │   ├── endpoints.py        # Endpoint management
+│   │   ├── models.py           # Model listing
+│   │   └── code_reader.py      # Source code reader
+│   └── recipes/                # Recipe routers
+│       ├── multiturn_chat.py   # Multi-turn chat
+│       └── image_captioning.py # Image captioning
+└── pyproject.toml              # Python dependencies
 ```
 
 ### Frontend Structure
@@ -98,36 +133,80 @@ backend/
 ```
 frontend/
 ├── src/
-│   ├── features/         # Recipe feature components
-│   ├── components/       # Shared UI components
-│   ├── lib/              # Utils, types, API client
-│   ├── App.tsx           # Root component with routes
-│   └── main.tsx          # Entry point
-└── vite.config.ts        # Vite configuration
+│   ├── recipes/                # Recipe components + registry.ts
+│   │   ├── registry.ts         # Recipe metadata
+│   │   ├── multiturn-chat/     # Multi-turn chat UI
+│   │   └── image-captioning/   # Image captioning UI
+│   ├── components/             # Shared UI (Header, Navbar, etc.)
+│   ├── routing/                # Routing infrastructure
+│   ├── lib/                    # Custom hooks, API, types
+│   └── App.tsx                 # Entry point
+└── package.json                # Frontend dependencies
 ```
+
+### Adding a Recipe
+
+1. Add entry to `frontend/src/recipes/registry.ts` with slug, title, description, and component
+2. Create `backend/src/recipes/[recipe_name].py` with FastAPI router
+3. Include router in `backend/src/main.py`
+4. Add UI component to `frontend/src/recipes/[recipe-name]/ui.tsx`
+5. Add `README.mdx` to `frontend/src/recipes/[recipe-name]/`
+6. Routes auto-generate from registry
+
+See [Contributing Guide](docs/contributing.md) for detailed instructions.
 
 ## API Endpoints
 
-- `GET /api/health` - Health check
-- `GET /api/recipes` - List available recipes
+**Backend routes (port 8000 local, 8001 Docker):**
+
+-   `GET /api/health` - Health check
+-   `GET /api/recipes` - List available recipe slugs
+-   `GET /api/endpoints` - List configured LLM endpoints
+-   `GET /api/models?endpointId=xxx` - List models for endpoint
+-   `POST /api/recipes/multiturn-chat` - Multi-turn chat endpoint
+-   `POST /api/recipes/image-captioning` - Image captioning endpoint
+-   `GET /api/recipes/{slug}/code` - Get recipe backend source code
+
+**Frontend routes (port 5173 local, 3000 Docker):**
+
+-   `/` - Recipe cards grid
+-   `/:slug` - Recipe demo (interactive UI)
+-   `/:slug/readme` - Recipe documentation
+-   `/:slug/code` - Recipe source code view
 
 ## Technologies
 
 **Backend:**
-- FastAPI - Modern Python web framework
-- uvicorn - ASGI server
-- uv - Fast Python package manager
+
+-   FastAPI - Modern Python web framework
+-   uvicorn - ASGI server
+-   uv - Fast Python package manager
+-   openai - OpenAI Python client for LLM proxying
 
 **Frontend:**
-- React 18 - UI library
-- TypeScript - Type safety
-- Vite - Build tool and dev server
-- React Router - Client-side routing
 
-## Contributing
+-   React 18 - UI library
+-   TypeScript - Type safety
+-   Vite - Build tool and dev server
+-   React Router v7 - Client-side routing
+-   Mantine v7 - UI component library
+-   SWR - Lightweight data fetching with caching
+-   Vercel AI SDK - Streaming chat UI (multi-turn chat recipe)
 
-See the individual README files in `backend/` and `frontend/` for more details.
+**Docker:**
+
+-   PM2 - Process manager for orchestrating services
+-   MAX - High-performance model serving with GPU support
+
+## Documentation
+
+-   [Architecture Guide](docs/architecture.md) - Design decisions, patterns, technology choices
+-   [Contributing Guide](docs/contributing.md) - How to add recipes and contribute
+-   [Docker Deployment Guide](docs/docker.md) - Container deployment with MAX
+-   [Project Context](.claude/project-context.md) - Comprehensive architecture reference for LLMs
 
 ## License
 
 Apache-2.0 WITH LLVM-exception
+
+See [LICENSE](LICENSE) for details.
