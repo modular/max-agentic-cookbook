@@ -1,21 +1,17 @@
 """Utility for reading source code files."""
 
 import os
-from typing import Dict
 
 
-def read_source_file(file_path: str) -> Dict[str, str]:
+def read_source_file(file_path: str) -> str:
     """
-    Read a source code file and return its contents with metadata.
+    Read a source code file and return its contents.
 
     Args:
         file_path: Absolute path to the source file to read
 
     Returns:
-        Dictionary with:
-        - content: The file contents as a string
-        - language: The programming language (derived from extension)
-        - filename: The basename of the file
+        The file contents as a string
 
     Raises:
         FileNotFoundError: If the file doesn't exist

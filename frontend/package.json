@@ -21,6 +21,7 @@
     "@mdx-js/rollup": "^3.1.1",
     "@tabler/icons-react": "^3.35.0",
     "ai": "^5.0.76",
+    "highlight.js": "^11.11.1",
     "nanoid": "^5.1.6",
     "pretty-ms": "^9.3.0",
     "react": "^19.1.1",

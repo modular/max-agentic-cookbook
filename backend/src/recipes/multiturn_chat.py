@@ -5,7 +5,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, Response
 from openai import AsyncOpenAI
 from pydantic import BaseModel
 
@@ -147,12 +147,12 @@ async def get_multiturn_chat_code():
     """
     Get the source code for the multiturn-chat recipe.
 
-    Returns the Python source code of this file as JSON.
+    Returns the Python source code of this file as plain text.
     """
     try:
         # Use __file__ to get the path to this source file
         code_data = read_source_file(__file__)
-        return code_data
+        return Response(content=code_data, media_type="text/plain")
     except Exception as e:
         raise HTTPException(
             status_code=500,

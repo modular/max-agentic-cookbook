@@ -55,3 +55,14 @@ export async function fetchFrontendCode(slug: string): Promise<string> {
     }
     return response.text()
 }
+
+/**
+ * Fetch backend source code for a recipe
+ */
+export async function fetchBackendCode(slug: string): Promise<string> {
+    const response = await fetch(`${API_BASE_URL}/recipes/${slug}/code`)
+    if (!response.ok) {
+        throw new Error(`Failed to fetch backend code: ${response.statusText}`)
+    }
+    return response.text()
+}
