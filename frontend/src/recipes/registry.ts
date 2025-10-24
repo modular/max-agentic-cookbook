@@ -8,7 +8,7 @@ interface RecipePlaceholder {
     title: string
 }
 
-interface RecipeImplemented {
+export interface RecipeImplemented {
     title: string
     slug: string
     description: string
@@ -37,14 +37,14 @@ export const recipes: RecipeMetadata = {
             slug: 'image-captioning',
             title: 'Streaming Image Captions',
             description:
-                "Generate captions for multiple images with progressive NDJSON streaming. Upload images, customize the prompt, and watch captions appear instantly as they're generated. Includes a custom useNDJSON hook for streaming, parallel processing for speed, and performance metrics (TTFT and duration) for each image. Works with Modular MAX or any OpenAI-compatible endpoint.",
+                'Generate captions for multiple images with progressive NDJSON streaming. Upload images, customize the prompt, and watch captions appear instantly. Includes parallel processing and performance metrics (TTFT and duration).',
             component: lazyComponentExport(() => import('./image-captioning/ui')),
         },
         {
             slug: 'multiturn-chat',
             title: 'Multi-Turn Chat',
             description:
-                'Streaming chat interface with multi-turn conversation support. Messages stream token-by-token for fluid responses, with automatic scroll-follow. Uses Streamdown for markdown rendering with syntax highlighting. Seamlessly compatible with Modular MAX and other OpenAI-compatible endpoints.',
+                'Streaming chat interface with multi-turn conversation support. Messages stream token-by-token with automatic scroll-follow and markdown rendering with syntax highlighting.',
             component: lazyComponentExport(() => import('./multiturn-chat/ui')),
         },
     ],

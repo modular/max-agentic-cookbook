@@ -2,21 +2,15 @@
 
 ## Overview
 
-MAX Recipes is a fullstack cookbook application for AI recipes, demonstrating integrations with Modular MAX and other AI services. The project was recently migrated from a Next.js monorepo to a simpler FastAPI + React SPA architecture.
+MAX Recipes is a fullstack cookbook application for AI recipes, demonstrating integrations with Modular MAX and other AI services. Built with FastAPI (Python) backend + React (TypeScript) SPA frontend for maximum flexibility and performance.
 
-## Architecture Evolution
+**Key benefits:**
+- **Python-first backend** - Direct access to AI ecosystem (MAX, transformers, etc.)
+- **Type safety** - End-to-end TypeScript frontend, Python type hints backend
+- **Clean separation** - Independent frontend/backend projects (not a monorepo)
+- **Modern tooling** - React Router v7, SWR, Mantine v7, FastAPI, uv
 
-**Previous architecture:** Next.js monorepo with `apps/cookbook/` and `packages/recipes/` (now removed)
-
-**Current architecture:** FastAPI backend + React SPA with separate projects
-
-**Reasons for migration:**
-- Don't need SSR/SEO features of Next.js
-- Want Python backend for better AI ecosystem integration (MAX, transformers, etc.)
-- Simpler architecture without monorepo complexity
-- Prefer React patterns with targeted best-in-class libraries over opinionated framework abstractions
-
-## Current Architecture
+## Architecture
 
 ```
 max-recipes/
@@ -30,45 +24,105 @@ max-recipes/
 ```
 
 ### Backend (FastAPI + uv)
-- **Tech:** FastAPI, uvicorn, uv for dependency management, python-dotenv
-- **Port:** 8000 (local dev), 8001 (Docker)
-- **CORS:** Configured for localhost:5173
-- **Env:** `.env.local` with COOKBOOK_ENDPOINTS JSON array
-- **Structure:**
-  - `src/main.py` - Entry point, loads .env.local, includes recipe routers
-  - `src/core/` - Config and utilities
-  - `src/core/endpoints.py` - Endpoint management with caching
-  - `src/core/models.py` - Models listing (proxies /v1/models)
-  - `src/core/code_reader.py` - Source code reading utility for /code endpoints
-  - `src/recipes/multiturn_chat.py` - Multi-turn chat recipe router (✅ implemented)
-  - `src/recipes/image_captioning.py` - Image captioning with NDJSON streaming (✅ implemented)
-- **Endpoints:**
-  - `GET /api/health` - Health check
-  - `GET /api/recipes` - List available recipe slugs (programmatically discovers registered routes)
-  - `GET /api/endpoints` - List configured LLM endpoints (from .env.local)
-  - `GET /api/models?endpointId=xxx` - List models for endpoint (proxies OpenAI-compatible /v1/models)
-  - `POST /api/recipes/multiturn-chat` - Multi-turn chat endpoint (✅ implemented)
-  - `GET /api/recipes/multiturn-chat/code` - Get multiturn-chat backend source as plain text
-  - `POST /api/recipes/image-captioning` - Image captioning with NDJSON streaming, parallel processing, performance metrics (✅ implemented)
-  - `GET /api/recipes/image-captioning/code` - Get image-captioning backend source as plain text
-  - Frontend source: Static files at `/code/{recipe-name}/ui.tsx` (copied by build script)
+
+**Tech:** FastAPI, uvicorn, uv for dependency management, python-dotenv, openai
+
+**Ports:**
+- Local dev: 8000
+- Docker: 8001
+
+**Configuration:**
+- `.env.local` with `COOKBOOK_ENDPOINTS` JSON array
+- CORS configured for localhost:5173
+
+**Structure:**
+```
+backend/
+├── src/
+│   ├── main.py                 # Entry point, loads .env.local, includes recipe routers
+│   ├── core/                   # Config and utilities
+│   │   ├── endpoints.py        # Endpoint management with caching
+│   │   ├── models.py           # Models listing (proxies /v1/models)
+│   │   └── code_reader.py      # Source code reading utility for /code endpoints
+│   └── recipes/                # Recipe routers
+│       ├── multiturn_chat.py   # Multi-turn chat recipe (SSE streaming)
+│       └── image_captioning.py # Image captioning (NDJSON streaming)
+└── pyproject.toml              # Python dependencies (uv)
+```
+
+**API Endpoints:**
+- `GET /api/health` - Health check
+- `GET /api/recipes` - List available recipe slugs (programmatically discovers registered routes)
+- `GET /api/endpoints` - List configured LLM endpoints (from .env.local)
+- `GET /api/models?endpointId=xxx` - List models for endpoint (proxies OpenAI-compatible /v1/models)
+- `POST /api/recipes/multiturn-chat` - Multi-turn chat endpoint (SSE streaming)
+- `GET /api/recipes/multiturn-chat/code` - Get multiturn-chat backend source as plain text
+- `POST /api/recipes/image-captioning` - Image captioning with NDJSON streaming
+- `GET /api/recipes/image-captioning/code` - Get image-captioning backend source as plain text
+- Frontend source: Static files at `/code/{recipe-name}/ui.tsx` (copied by build script)
 
 ### Frontend (Vite + React)
-- **Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, SWR, highlight.js, Prettier
-- **Port:** 5173 (local dev), 3000 (Docker)
-- **Routing:** Auto-generated routes from registry using utility functions in `routing/`
-- **API:** Vite proxy to backend (no CORS issues in dev), serve proxy (Docker)
-- **UI:** Mantine v7 with custom theme (nebula/twilight colors), 70px header height
-- **Layout:** AppShell with collapsible sidebar, responsive Header (endpoint/model selectors in header on desktop, in navbar drawer on mobile)
-- **State Management:**
-  - Server State: SWR (API data fetching, caching, automatic revalidation)
-  - Client State: URL query params (`?e=endpoint-id&m=model-name`) via custom hooks
-- **Structure:**
-  - `src/recipes/` - Recipe components (lazy loaded)
-  - `src/components/` - Shared UI (Header, Navbar, Toolbar, SelectEndpoint, SelectModel, CodeToggle)
-  - `src/routing/` - Routing infrastructure (AppProviders, Loading, RecipeWithProps, routeUtils)
-  - `src/lib/` - Custom hooks with SWR (useEndpointFromQuery, useModelFromQuery), API fetchers, types, theme, config
-  - `src/App.tsx` - Simplified entry point using routing utilities
+
+**Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, SWR, highlight.js, Prettier
+
+**Ports:**
+- Local dev: 5173
+- Docker: 3000
+
+**Key Features:**
+- Auto-generated routes from registry using utility functions in `routing/`
+- Vite proxy to backend (no CORS issues in dev), serve proxy (Docker)
+- Mantine v7 with custom theme (nebula/twilight colors), 70px header height
+- AppShell with collapsible sidebar, responsive Header
+
+**State Management:**
+- **Server State:** SWR (API data fetching, caching, automatic revalidation)
+- **Client State:** URL query params (`?e=endpoint-id&m=model-name`) via custom hooks
+
+**Structure:**
+```
+frontend/
+├── src/
+│   ├── recipes/                # Recipe components + registry.ts
+│   │   ├── registry.ts         # SINGLE SOURCE OF TRUTH for all recipe metadata
+│   │   ├── multiturn-chat/     # Multi-turn chat recipe
+│   │   │   ├── README.mdx      # Recipe documentation
+│   │   │   └── ui.tsx          # Demo component (exports Component function)
+│   │   └── image-captioning/   # Image captioning recipe
+│   │       ├── README.mdx      # Recipe documentation
+│   │       └── ui.tsx          # Demo component (exports Component function)
+│   ├── routing/                # Routing infrastructure
+│   │   ├── AppProviders.tsx    # Providers wrapper (Mantine, Router, HighlightJsThemeLoader)
+│   │   ├── Loading.tsx         # Loading fallback for Suspense
+│   │   ├── RecipeWithProps.tsx # Wrapper providing endpoint, model, pathname props
+│   │   └── routeUtils.tsx      # Route generation utilities
+│   ├── components/             # Shared UI components
+│   │   ├── Header.tsx          # 70px header with responsive selectors
+│   │   ├── Navbar.tsx          # Sidebar with accordion navigation
+│   │   ├── Toolbar.tsx         # Recipe page toolbar (title + ViewSelector)
+│   │   ├── SelectEndpoint.tsx  # Endpoint selector dropdown
+│   │   ├── SelectModel.tsx     # Model selector dropdown
+│   │   ├── ViewSelector.tsx    # SegmentedControl for Readme | Demo | Code
+│   │   └── ThemeToggle.tsx     # Light/dark mode toggle
+│   ├── features/               # Feature components
+│   │   ├── CookbookShell.tsx       # AppShell layout wrapper
+│   │   ├── CookbookIndex.tsx       # Recipe cards grid
+│   │   ├── RecipeLayoutShell.tsx   # Nested layout for recipe pages
+│   │   ├── RecipeReadmeView.tsx    # README view (MDX rendering)
+│   │   └── RecipeCodeView.tsx      # Code view with syntax highlighting
+│   ├── lib/                    # Custom hooks, API, types, theme
+│   │   ├── chapters.ts         # Auto-derived from registry
+│   │   ├── theme.ts            # Custom Mantine theme
+│   │   ├── types.ts            # Shared TypeScript types
+│   │   ├── hooks.ts            # useSWR-based hooks
+│   │   ├── api.ts              # API fetch functions for SWR
+│   │   └── utils.ts            # Shared utilities
+│   ├── scripts/                # Build scripts
+│   │   └── copy-recipe-code.js # Copies recipe source to public/code/
+│   ├── mdx.d.ts                # TypeScript declarations for .mdx files
+│   └── App.tsx                 # Routing entry point (uses routing/ utilities)
+└── package.json                # Frontend dependencies
+```
 
 **Routes:**
 - `/` - Recipe cards grid (dynamically generated from registry)
@@ -78,20 +132,21 @@ max-recipes/
 
 ## Key Architectural Decisions
 
-1. ✅ **Separate projects** not monorepo (frontend/ and backend/ at root)
-2. ✅ **uv** for Python dependency management (fast, modern)
-3. ✅ **React Router v7 with auto-generated routes** (routes generated from registry, no manual route definitions per recipe)
-4. ✅ **Separate dev servers** (backend :8000, frontend :5173 with proxy)
-5. ✅ **SWR for server state** (Lightweight API data fetching with automatic caching and revalidation)
-6. ✅ **URL query params for client state** (no React Context - endpoint/model selection via ?e= and ?m=)
-7. ✅ **Lazy loading with React Router v7** (exports `Component` function, generic `lazyComponentExport` helper)
-8. ✅ **Single source of truth for recipes** (registry in recipes/ folder, backend advertises availability)
+1. **Separate projects** not monorepo (frontend/ and backend/ at root)
+2. **uv** for Python dependency management (fast, modern)
+3. **React Router v7 with auto-generated routes** (routes generated from registry, no manual route definitions per recipe)
+4. **Separate dev servers** (backend :8000, frontend :5173 with proxy)
+5. **SWR for server state** (Lightweight API data fetching with automatic caching and revalidation)
+6. **URL query params for client state** (no React Context - endpoint/model selection via ?e= and ?m=)
+7. **Lazy loading with React Router v7** (exports `Component` function, generic `lazyComponentExport` helper)
+8. **Single source of truth for recipes** (registry in recipes/ folder, backend advertises availability)
 
 ## Data Fetching Strategy
 
 The frontend uses a **hybrid state management approach**:
 
 ### Server State (SWR)
+
 - All API calls use SWR's `useSWR()` hook
 - **Automatic caching** - API responses cached and deduplicated (default 2 second deduplication interval)
 - **Request deduplication** - Multiple components requesting same data share one request
@@ -108,6 +163,7 @@ const { data: endpoints, isLoading, error } = useSWR('/api/endpoints', fetchEndp
 ```
 
 ### Client State (URL Query Params)
+
 - User selections (endpoint, model) stored in URL query params (`?e=endpoint-id&m=model-name`)
 - Enables shareable URLs and browser back/forward
 - Custom hooks (`useEndpointFromQuery`, `useModelFromQuery`) combine SWR with URL param syncing
@@ -120,106 +176,74 @@ const { data: endpoints, isLoading, error } = useSWR('/api/endpoints', fetchEndp
 - Clean separation of concerns with minimal boilerplate
 - Replaced TanStack Query for simplicity (simpler API, smaller bundle)
 
-## Current Status
+## Recipe System
 
-### ✅ Completed (Phase 1: Infrastructure)
-- FastAPI backend scaffolded and running (uv, FastAPI, uvicorn)
-- React SPA scaffolded and running (Vite, React 18, TypeScript)
-- CORS and API proxy configured
-- Example endpoints: `/api/health`, `/api/recipes`
+### Recipe Registry (`registry.ts`)
 
-### ✅ Completed (Phase 2: UI Shell & Responsive Header)
-- Mantine v7 with custom theme (nebula/twilight colors)
-- AppShell layout with collapsible sidebar (mobile + desktop)
-- Header component (70px height, responsive layout):
-  - Left: burger menu (mobile), sidebar toggle, title
-  - Right: endpoint/model selectors (desktop only), theme toggle
-- Navbar component with accordion sections + endpoint/model selectors at top (mobile only)
-- Recipe metadata for 2 recipes (multiturn-chat, image-captioning)
-- Placeholder recipe pages
-- Routes consolidated to root level (no `/cookbook` prefix)
+**Single source of truth** for all recipe metadata in `frontend/src/recipes/registry.ts`:
 
-### ✅ Completed (Phase 3: Query Params & Routing)
-- URL query params for endpoint/model selection via custom hooks
-- Backend routes: `/api/endpoints` and `/api/models` (proxies OpenAI-compatible endpoints)
-- SWR for server state management (lightweight caching and automatic revalidation)
-- RecipeLayoutShell with nested routing
-- Toolbar component with ViewSelector (Readme | Demo | Code)
-- React Router v7 lazy loading with `Component` export pattern
-- Dynamic routes: `:slug` (demo), `:slug/readme`, `:slug/code`
-- MDX support for README files with `@mdx-js/rollup`
+```ts
+export const recipes = {
+  "Foundations": [
+    { title: 'Introduction' },  // placeholder (no slug)
+    {
+      slug: 'multiturn-chat',
+      title: 'Multi-Turn Chat',
+      description: '...',
+      component: lazyComponentExport(() => import('./multiturn-chat/ui'))
+    },
+    { title: 'Batch Safety Classification' },  // placeholder
+    {
+      slug: 'image-captioning',
+      title: 'Streaming Image Captions',
+      description: '...',
+      component: lazyComponentExport(() => import('./image-captioning/ui'))
+    }
+  ],
+  "Data, Tools & Reasoning": [...],
+  // ... more sections
+}
+```
 
-### ✅ Completed (Phase 4: Recipe Registry & Auto-Generated Routes)
-- Restructured recipe metadata into `registry.ts` (in recipes/ folder, co-located with recipe components)
-- Auto-numbering based on array position (1, 2, 3...)
-- Display titles auto-generated ("1: Introduction", "2: Multi-Turn Chat", etc.)
-- Helper functions: `isImplemented()`, `getRecipeBySlug()`, `buildNavigation()`, `getAllImplementedRecipes()`, `getAllRecipesWithComponents()`, `isRecipeImplemented()`
-- Recipe components registered directly in registry with optional `component` property
-- Routes auto-generated in App.tsx from registry using routing utilities
-- Routing utilities extracted to `routing/` folder: `AppProviders.tsx`, `Loading.tsx`, `RecipeWithProps.tsx`, `routeUtils.tsx`
-- `chapters.ts` now auto-derived from `registry.ts` (single source of truth)
-- Backend `/api/recipes` programmatically discovers available routes (returns array of slugs)
-- Individual recipe routers: `multiturn_chat.py` (✅ implemented) and `image_captioning.py` (✅ implemented)
-- CookbookIndex shows dynamic grid of recipe cards
-- Navbar uses shared `isRecipeImplemented()` helper
-- No duplication between frontend and backend metadata
+**Key features:**
+- Nested `section → recipes[]` structure
+- Placeholders have only `title` (dimmed in nav)
+- Implemented recipes have `slug` + `description` (clickable in nav + shown as cards)
+- Optional `component` property for interactive recipe UI (routes auto-generated)
+- Numbers auto-derived from array position (just reorder to renumber)
+- Display format auto-generated ("1: Introduction", "2: Multi-Turn Chat")
 
-## Recipe Migration Plans
+**Helper functions:**
+- `isImplemented(recipe)` - Type guard for checking if recipe has slug
+- `getRecipeBySlug(slug)` - Lookup recipe by slug
+- `buildNavigation()` - Generate nav with auto-numbering
+- `getAllImplementedRecipes()` - Get all recipes with slugs
+- `getAllRecipesWithComponents()` - Get recipes with interactive UI components
+- `isRecipeImplemented(slug)` - Check if slug is implemented
+- `lazyComponentExport()` - Helper for lazy loading components that export `Component`
 
-This section documents the detailed migration strategy for porting recipes from the Next.js monorepo to the FastAPI + React SPA architecture. Each recipe uses a targeted approach based on its complexity and requirements.
+**Frontend usage:**
+- `App.tsx` uses `getAllRecipesWithComponents()` to auto-generate routes
+- `CookbookIndex.tsx` uses `getAllImplementedRecipes()` for card grid
+- `Navbar.tsx` uses `isRecipeImplemented()` to check if clickable
+- `chapters.ts` auto-derives navigation from `buildNavigation()`
 
-### Image Captioning Recipe ✅ Completed
+**Backend usage:**
+- Backend `/api/recipes` programmatically discovers routes
+- Returns array of slugs like `["multiturn-chat", "image-captioning"]`
+- Frontend already has the metadata (title, description)
+- No duplication needed
 
-**Architecture Decision:** Python OpenAI Client + FastAPI Streaming + Custom useNDJSON Hook
+### Implemented Recipes
 
-**Implementation Status:** Fully implemented and tested with NDJSON streaming, parallel processing, and performance metrics.
+#### Multi-turn Chat Recipe
 
-**Backend Implementation:**
-- Use Python `openai` client (already installed) with FastAPI streaming response
-- Implement NDJSON (newline-delimited JSON) streaming for progressive updates
-- Support batch processing: parallel requests for multiple images
-- Track performance metrics: TTFT (time to first token) and duration per image
-- Route: `POST /api/recipes/image-captioning`
-- Code endpoint: `GET /api/recipes/image-captioning/code` (returns source as plain text)
-
-**Frontend Implementation:**
-- Custom `useNDJSON<T>` hook for progressive NDJSON streaming (framework-agnostic, reusable)
-- File upload with `@mantine/dropzone` component
-- Image gallery with loading overlays and real-time caption updates
-- Performance metrics display: TTFT and duration formatted with `pretty-ms`
-- Component exports `Component` function for lazy loading via registry
-- README.mdx with documentation
-
-**Key Features to Preserve:**
-- Batch image captioning with parallel processing
-- Progressive streaming (results appear as they complete)
-- Performance metrics (TTFT and duration timing)
-- NDJSON streaming format for progressive updates
-
-**Dependencies:**
-- Backend: `openai` (✅ installed), FastAPI streaming
-- Frontend: `nanoid` (✅ installed), `pretty-ms` (✅ installed), custom hooks
-- No Vercel AI SDK needed - clean Python approach
-
-**Why This Approach:**
-- Frontend already has framework-agnostic NDJSON streaming (useNDJSON hook)
-- Python OpenAI client handles streaming naturally with `for chunk in stream`
-- Custom hooks provide mutation state management (loading/error states)
-- Fits our Python-first backend architecture
-- Simple, clean, no unnecessary dependencies
-
----
-
-### Multi-turn Chat Recipe ✅ Completed
-
-**Architecture Decision:** Python SSE Streaming + Vercel AI SDK Frontend
-
-**Implementation Status:** Fully implemented and tested with Python SSE streaming, token-by-token streaming, multi-turn conversation context, and auto-focus UX.
+**Architecture:** Python SSE Streaming + Vercel AI SDK Frontend
 
 **Backend Implementation:**
 - Python SSE (Server-Sent Events) streaming with FastAPI `StreamingResponse`
 - Custom UIMessage → OpenAI format conversion
-- AsyncOpenAI client for token streaming (already installed)
+- AsyncOpenAI client for token streaming
 - Vercel AI SDK protocol compliance with correct event types:
   - `{"type": "start", "messageId": "..."}` (message start)
   - `{"type": "text-delta", "id": "...", "delta": "..."}` (streaming text)
@@ -236,7 +260,7 @@ This section documents the detailed migration strategy for porting recipes from 
 - Component exports `Component` function for lazy loading via registry
 - README.mdx with documentation
 
-**Key Features Implemented:**
+**Key Features:**
 - Token-by-token streaming for real-time response
 - Multi-turn conversation with full message history maintained
 - Auto-scroll behavior with smart manual scroll detection
@@ -244,37 +268,55 @@ This section documents the detailed migration strategy for porting recipes from 
 - Auto-focus input field on load and after sending
 
 **Dependencies:**
-- Backend: `openai` (AsyncOpenAI - ✅ already installed), FastAPI streaming
-- Frontend: `ai` (✅ installed), `@ai-sdk/react` (✅ installed), `streamdown` (✅ installed)
+- Backend: `openai` (AsyncOpenAI), FastAPI streaming
+- Frontend: `ai`, `@ai-sdk/react`, `streamdown`
 
 **Why This Approach:**
-- Successfully demonstrates Python SSE can work seamlessly with Vercel AI SDK frontend
+- Demonstrates Python SSE can work seamlessly with Vercel AI SDK frontend
 - Clean separation: Python-first backend, React frontend with proven AI SDK
 - `useChat` hook handles complex state: streaming, message history, error recovery
 - No Node.js dependency needed - pure Python backend
-- Streamdown handles markdown rendering with streaming updates
 - SSE-based streaming is production-ready and standardized
 
----
+#### Image Captioning Recipe
 
-### Migration Dependency Summary
+**Architecture:** Python OpenAI Client + FastAPI Streaming + Custom useNDJSON Hook
 
-**Frontend packages installed:**
-- ✅ `ai` - Vercel AI SDK core (for multi-turn chat)
-- ✅ `@ai-sdk/react` - React hooks (`useChat`) for Vercel AI SDK
-- ✅ `streamdown` - Markdown streaming with syntax highlighting
-- ✅ `nanoid` - Unique ID generation (used in image captioning)
-- ✅ `pretty-ms` - Human-readable time formatting (used for performance metrics)
+**Backend Implementation:**
+- Use Python `openai` client with FastAPI streaming response
+- Implement NDJSON (newline-delimited JSON) streaming for progressive updates
+- Support batch processing: parallel requests for multiple images
+- Track performance metrics: TTFT (time to first token) and duration per image
+- Route: `POST /api/recipes/image-captioning`
+- Code endpoint: `GET /api/recipes/image-captioning/code` (returns source as plain text)
 
-**Backend implementation:**
-- ✅ Image captioning: Pure Python with `openai` client and NDJSON streaming
-- ✅ Multi-turn chat: Pure Python SSE streaming compatible with Vercel AI SDK frontend
+**Frontend Implementation:**
+- Custom `useNDJSON<T>` hook for progressive NDJSON streaming (framework-agnostic, reusable)
+- File upload with `@mantine/dropzone` component
+- Image gallery with loading overlays and real-time caption updates
+- Performance metrics display: TTFT and duration formatted with `pretty-ms`
+- Component exports `Component` function for lazy loading via registry
+- README.mdx with documentation
 
-**Migration completed:**
-1. ✅ **Image Captioning** (91a39bc) - Pure Python with NDJSON streaming, parallel processing, performance metrics
-2. ✅ **Multi-turn Chat** (343f5d9) - Python SSE streaming with Vercel AI SDK frontend, token streaming, multi-turn context
+**Key Features:**
+- Batch image captioning with parallel processing
+- Progressive streaming (results appear as they complete)
+- Performance metrics (TTFT and duration timing)
+- NDJSON streaming format for progressive updates
 
-### Adding a New Recipe
+**Dependencies:**
+- Backend: `openai`, FastAPI streaming
+- Frontend: `nanoid`, `pretty-ms`, custom hooks
+- No Vercel AI SDK needed - clean Python approach
+
+**Why This Approach:**
+- Frontend has framework-agnostic NDJSON streaming (useNDJSON hook)
+- Python OpenAI client handles streaming naturally with `for chunk in stream`
+- Custom hooks provide mutation state management (loading/error states)
+- Fits our Python-first backend architecture
+- Simple, clean, no unnecessary dependencies
+
+## Adding a New Recipe
 
 1. Add entry to `frontend/src/recipes/registry.ts` (include `component` property for interactive UI)
 2. Create `backend/src/recipes/[recipe_name].py` with APIRouter
@@ -296,7 +338,7 @@ This section documents the detailed migration strategy for porting recipes from 
 
 ## Development Workflow
 
-### Local Development (two servers):
+### Local Development (two servers)
 
 **Terminal 1 (Backend):**
 ```bash
@@ -312,7 +354,7 @@ npm run dev  # Runs vite + copy:code:watch (watches recipe source files)
 
 Visit: `http://localhost:5173`
 
-### Docker Demo Server (MAX + backend + frontend):
+### Docker Demo Server (MAX + backend + frontend)
 
 The Docker container runs all three services together using PM2:
 - **Port 8000**: MAX LLM serving (/v1 endpoints)
@@ -382,72 +424,36 @@ Visit: `http://localhost:3000`
 - ✅ `python-dotenv` - Load .env.local for configuration
 - ✅ `openai` - OpenAI Python client for API proxying and streaming
 
-## Recipe Registry Architecture
-
-### Single Source of Truth (`registry.ts`)
-
-All recipe metadata lives in `frontend/src/recipes/registry.ts`:
-
-```ts
-export const recipes = {
-  "Foundations": [
-    { title: 'Introduction' },  // placeholder (no slug)
-    {
-      slug: 'multiturn-chat',
-      title: 'Multi-Turn Chat',
-      description: '...',
-      component: lazyComponentExport(() => import('./multiturn-chat/ui'))
-    },
-    { title: 'Batch Safety Classification' },  // placeholder
-    {
-      slug: 'image-captioning',
-      title: 'Streaming Image Captions',
-      description: '...',
-      component: lazyComponentExport(() => import('./image-captioning/ui'))
-    }
-  ],
-  "Data, Tools & Reasoning": [...],
-  // ... more sections
-}
-```
-
-**Key features:**
-- Nested `section → recipes[]` structure
-- Placeholders have only `title` (dimmed in nav)
-- Implemented recipes have `slug` + `description` (clickable in nav + shown as cards)
-- Optional `component` property for interactive recipe UI (routes auto-generated)
-- Numbers auto-derived from array position (just reorder to renumber)
-- Display format auto-generated ("1: Introduction", "2: Multi-Turn Chat")
-
-**Helper functions:**
-- `isImplemented(recipe)` - Type guard for checking if recipe has slug
-- `getRecipeBySlug(slug)` - Lookup recipe by slug
-- `buildNavigation()` - Generate nav with auto-numbering
-- `getAllImplementedRecipes()` - Get all recipes with slugs
-- `getAllRecipesWithComponents()` - Get recipes with interactive UI components
-- `isRecipeImplemented(slug)` - Check if slug is implemented
-- `lazyComponentExport()` - Helper for lazy loading components that export `Component`
-
-**Frontend usage:**
-- `App.tsx` uses `getAllRecipesWithComponents()` to auto-generate routes
-- `CookbookIndex.tsx` uses `getAllImplementedRecipes()` for card grid
-- `Navbar.tsx` uses `isRecipeImplemented()` to check if clickable
-- `chapters.ts` auto-derives navigation from `buildNavigation()`
-
-**Backend usage:**
-- Backend `/api/recipes` programmatically discovers routes
-- Returns array of slugs like `["multiturn-chat", "image-captioning"]`
-- Frontend already has the metadata (title, description)
-- No duplication needed
-
 ## Key Patterns
 
-- **Auto-generated routing** - routes generated from registry, no manual definitions per recipe
-- **Server state via SWR** - lightweight caching, automatic revalidation, request deduplication
-- **URL-based cache keys** - SWR uses API URLs directly as cache keys (simple and intuitive)
-- **Client state via URL params** - shareable URLs, browser back/forward support
-- **Backend routes** prefixed with `/api`
-- **Adding a recipe**: Update `registry.ts` with component property - routes update automatically
+### Auto-Generated Routing
+
+Routes are generated from registry - no manual route definitions per recipe:
+- Update `registry.ts` with component property
+- Routes update automatically
+- Backend `/api/recipes` programmatically discovers routes
+
+### Server State via SWR
+
+- Lightweight caching with automatic revalidation
+- Request deduplication
+- URL-based cache keys (API URLs directly as cache keys)
+
+### Client State via URL Params
+
+- Shareable URLs with endpoint/model selection
+- Browser back/forward support
+- Custom hooks combine SWR with URL param syncing
+
+### Backend Routes
+
+All backend routes prefixed with `/api`:
+- `/api/health` - Health check
+- `/api/recipes` - List recipes
+- `/api/endpoints` - List endpoints
+- `/api/models` - List models
+- `/api/recipes/{slug}` - Recipe execution
+- `/api/recipes/{slug}/code` - Recipe source code
 
 ### Responsive Layout Pattern
 
@@ -458,117 +464,24 @@ The endpoint/model selectors appear in different locations based on screen size:
 
 This ensures controls are always accessible while optimizing for each screen size.
 
-## Frontend Structure
-
-```
-frontend/src/
-├── recipes/
-│   ├── registry.ts             # SINGLE SOURCE OF TRUTH for all recipe metadata
-│   ├── multiturn-chat/         # Multi-turn chat recipe components
-│   │   ├── README.mdx          # Recipe documentation
-│   │   └── ui.tsx              # Demo component (exports Component function)
-│   └── image-captioning/       # Image captioning recipe components
-│       ├── README.mdx          # Recipe documentation
-│       └── ui.tsx              # Demo component (exports Component function)
-├── routing/
-│   ├── AppProviders.tsx        # Providers wrapper (Mantine, BrowserRouter, HighlightJsThemeLoader)
-│   ├── Loading.tsx             # Loading fallback component for Suspense boundaries
-│   ├── RecipeWithProps.tsx     # Wrapper component that provides endpoint, model, pathname props
-│   └── routeUtils.tsx          # Route generation utilities (lazyLoadDemoRoutes, lazyLoadDetailRoutes)
-├── lib/
-│   ├── chapters.ts             # Auto-derived from registry
-│   ├── theme.ts                # Custom Mantine theme (70px header, nebula/twilight colors)
-│   ├── types.ts                # Shared TypeScript types
-│   ├── hooks.ts                # useSWR-based hooks (useEndpointFromQuery, useModelFromQuery)
-│   ├── api.ts                  # API fetch functions for SWR
-│   └── utils.ts                # Shared utilities
-├── components/
-│   ├── Header.tsx              # 70px header with responsive endpoint/model selectors
-│   │                           # Desktop: selectors in header right side
-│   │                           # Mobile: only theme toggle (selectors in navbar)
-│   ├── Navbar.tsx              # Sidebar with accordion navigation
-│   │                           # Mobile: endpoint/model selectors at top
-│   ├── Toolbar.tsx             # Recipe page toolbar (title + ViewSelector)
-│   ├── SelectEndpoint.tsx      # Endpoint selector dropdown
-│   ├── SelectModel.tsx         # Model selector dropdown
-│   ├── ViewSelector.tsx        # SegmentedControl for Readme | Demo | Code views
-│   └── ThemeToggle.tsx         # Light/dark mode toggle
-├── features/
-│   ├── CookbookShell.tsx       # AppShell layout wrapper
-│   ├── CookbookIndex.tsx       # Recipe cards grid
-│   ├── RecipeLayoutShell.tsx   # Nested layout for recipe pages (Toolbar + scrollable Outlet)
-│   ├── RecipeReadmeView.tsx    # README view (lazy loaded, renders MDX)
-│   └── RecipeCodeView.tsx      # Code view with tabs (Backend/Frontend) and syntax highlighting (lazy loaded)
-├── scripts/
-│   └── copy-recipe-code.js     # Copies recipe source to public/code/ (watch mode in dev)
-├── mdx.d.ts                    # TypeScript declarations for .mdx files
-└── App.tsx                     # Simplified routing entry point (uses routing/ utilities)
-```
-
-## Important Implementation Notes
-
-- **Recipe Registry:** Single source of truth in `registry.ts` - edit to add/reorder recipes, routes auto-generate
-- **Lazy Loading:** Recipe components export `Component` function, use `lazyComponentExport()` helper
-- **Data Fetching:** SWR for all API calls - see `api.ts` for fetch functions
-- **State Management:** Server state (SWR) + Client state (URL query params)
-- **Query Params:** Endpoint/model state in URL (`?e=endpoint-id&m=model-name`) via custom hooks
-- **Responsive Layout:** Endpoint/model selectors in header (desktop) or navbar drawer (mobile)
-- **Formatting:** 4 spaces, no semis, single quotes (run `npm run format`)
-
-## TypeScript Coding Standards
-
-**Critical:** Never use the `any` type in TypeScript code. This project maintains strict type safety.
-
-**Type Safety Guidelines:**
-- ❌ **Never use `any`** - bypasses type checking and defeats the purpose of TypeScript
-- ✅ **Use `unknown`** - for truly dynamic data that will be validated at runtime (e.g., `body: unknown` in fetch calls)
-- ✅ **Use proper interfaces** - define explicit interfaces like `RecipeProps` for component props
-- ✅ **Use generic types** - e.g., `ComponentType<RecipeProps>` instead of `ComponentType<any>`
-- ✅ **Use type guards** - `isImplemented(recipe)` for runtime type narrowing
-
-**Examples:**
-```typescript
-// ❌ BAD - bypasses type checking
-function process(data: any) { ... }
-const Component: ComponentType<any> = ...
-
-// ✅ GOOD - maintains type safety
-function process(data: unknown) { ... }  // Will validate before use
-const Component: ComponentType<RecipeProps> = ...
-interface RecipeProps {
-  endpoint: Endpoint | null
-  model: Model | null
-  pathname: string
-}
-```
-
-**Why This Matters:**
-- Catches bugs at compile time instead of runtime
-- Enables IDE autocomplete and refactoring
-- Documents expected data shapes
-- Makes code more maintainable
-
-**Shared Types:**
-All shared types live in `frontend/src/lib/types.ts` for consistency across the codebase.
-
-## Recipe Page Views (Readme | Demo | Code)
+### Recipe Page Views (Readme | Demo | Code)
 
 Each recipe has three views accessible via the ViewSelector segmented control:
 
-### View Types
-- **Readme** (`/:slug/readme`) - MDX documentation rendered by `RecipeReadmeView.tsx`
+**View Types:**
+- **Readme** (`/:slug/readme`) - MDX documentation rendered by `RecipeReadmeView.tsx` (displays recipe description, then README content)
 - **Demo** (`/:slug`) - Interactive recipe UI component
 - **Code** (`/:slug/code`) - Source code view rendered by `RecipeCodeView.tsx`
 
-### ViewSelector Component
+**ViewSelector Component:**
 - Uses Mantine's `SegmentedControl` with three options
 - Lives in Toolbar, always visible on recipe pages
 - Handles navigation between the three views using React Router
 
-### Code Availability
+**Code Availability:**
 - **Backend code**: API endpoint `GET /api/recipes/{slug}/code` returns Python source as plain text
 - **Frontend code**: Static files at `/code/{slug}/ui.tsx` (copied by `scripts/copy-recipe-code.js`)
-- **Syntax highlighting**: Implemented with highlight.js, theme switches based on Mantine color scheme (dark/light)
+- **Syntax highlighting**: Implemented with highlight.js for both Code view and README MDX code blocks, theme switches based on Mantine color scheme (dark/light)
 
 ### RecipeLayoutShell Scrollable Layout Pattern
 
@@ -614,3 +527,100 @@ declare module '*.mdx' {
 1. Create `README.mdx` in recipe folder (e.g., `recipes/my-recipe/README.mdx`)
 2. Add to `readmeComponents` in `registry.ts`
 3. README will automatically be available at `/my-recipe/readme`
+4. Code blocks in MDX are automatically syntax-highlighted with highlight.js (supports TypeScript, Python, JavaScript, JSON)
+
+## TypeScript Coding Standards
+
+**Critical:** Never use the `any` type in TypeScript code. This project maintains strict type safety.
+
+**Type Safety Guidelines:**
+- ❌ **Never use `any`** - bypasses type checking and defeats the purpose of TypeScript
+- ✅ **Use `unknown`** - for truly dynamic data that will be validated at runtime (e.g., `body: unknown` in fetch calls)
+- ✅ **Use proper interfaces** - define explicit interfaces like `RecipeProps` for component props
+- ✅ **Use generic types** - e.g., `ComponentType<RecipeProps>` instead of `ComponentType<any>`
+- ✅ **Use type guards** - `isImplemented(recipe)` for runtime type narrowing
+
+**Examples:**
+```typescript
+// ❌ BAD - bypasses type checking
+function process(data: any) { ... }
+const Component: ComponentType<any> = ...
+
+// ✅ GOOD - maintains type safety
+function process(data: unknown) { ... }  // Will validate before use
+const Component: ComponentType<RecipeProps> = ...
+interface RecipeProps {
+  endpoint: Endpoint | null
+  model: Model | null
+  pathname: string
+}
+```
+
+**Why This Matters:**
+- Catches bugs at compile time instead of runtime
+- Enables IDE autocomplete and refactoring
+- Documents expected data shapes
+- Makes code more maintainable
+
+**Shared Types:**
+All shared types live in `frontend/src/lib/types.ts` for consistency across the codebase.
+
+## Security Model
+
+### API Key Protection
+
+**Server-side storage:**
+- API keys in `.env.local` (gitignored)
+- Loaded by `backend/src/core/endpoints.py`
+- Never serialized or sent to client
+
+**Request flow:**
+1. Client sends endpoint ID (not credentials)
+2. Backend validates endpoint ID exists
+3. Backend looks up credentials from cache
+4. Backend makes authenticated request to LLM
+5. API key never leaves server
+
+**Configuration Flow:**
+1. Backend loads `COOKBOOK_ENDPOINTS` from `.env.local` on startup
+2. Frontend fetches available endpoints via `GET /api/endpoints` (without API keys)
+3. User selects endpoint/model (stored in URL query params)
+4. Recipe sends request with endpoint ID
+5. Backend looks up credentials and proxies request
+
+## Performance
+
+### Code Splitting
+
+- Recipe UI components lazy-loaded via React Router
+- Vite automatic code splitting
+- Shared dependencies bundled once
+
+### Caching
+
+- Server-side: Endpoint configurations cached in memory
+- Client-side: SWR automatic caching with revalidation
+- Build-time: Vite pre-compresses static assets
+
+### Streaming
+
+- **SSE (Server-Sent Events)**: Token streaming for multi-turn chat
+- **NDJSON**: Batch operations with progressive updates for image captioning
+- See `backend/src/recipes/multiturn_chat.py` and `backend/src/recipes/image_captioning.py`
+
+## Important Implementation Notes
+
+- **Recipe Registry:** Single source of truth in `registry.ts` - edit to add/reorder recipes, routes auto-generate
+- **Lazy Loading:** Recipe components export `Component` function, use `lazyComponentExport()` helper
+- **Data Fetching:** SWR for all API calls - see `api.ts` for fetch functions
+- **State Management:** Server state (SWR) + Client state (URL query params)
+- **Query Params:** Endpoint/model state in URL (`?e=endpoint-id&m=model-name`) via custom hooks
+- **Responsive Layout:** Endpoint/model selectors in header (desktop) or navbar drawer (mobile)
+- **Formatting:** 4 spaces, no semis, single quotes (run `npm run format`)
+
+## Related Documentation
+
+- [README.md](../README.md) - Quick start, setup instructions
+- [Architecture Guide](../docs/architecture.md) - Design decisions, patterns, technology choices
+- [Contributing Guide](../docs/contributing.md) - How to add recipes and contribute
+- [Docker Deployment Guide](../docs/docker.md) - Container deployment with MAX

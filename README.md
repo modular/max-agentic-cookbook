@@ -16,10 +16,8 @@ max-recipes/
 
 **Why this architecture?**
 
--   **Python-first backend** - Direct access to AI ecosystem (MAX, transformers, etc.)
+-   **Separate projects** - First-class ecosystems for AI and UI development
 -   **No SSR needed** - Just plain React, copy-paste into any project
--   **Separate projects** - Independent scaling and deployment
--   **Type safety** - TypeScript frontend + Python type hints backend
 
 ## Requirements
 
