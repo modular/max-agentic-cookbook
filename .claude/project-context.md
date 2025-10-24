@@ -20,13 +20,16 @@ MAX Recipes is a fullstack cookbook application for AI recipes, demonstrating in
 max-recipes/
 ├── backend/              # FastAPI + uv (Python 3.11+)
 ├── frontend/             # Vite + React + TypeScript SPA
+├── Dockerfile            # Demo server (MAX + backend + frontend)
+├── ecosystem.config.js   # PM2 config for running all services
+├── .dockerignore         # Docker build exclusions
 ├── monorepo/             # OLD: Archived Next.js monorepo
 └── archive/              # Legacy standalone recipes
 ```
 
 ### Backend (FastAPI + uv)
 - **Tech:** FastAPI, uvicorn, uv for dependency management, python-dotenv
-- **Port:** 8000
+- **Port:** 8000 (local dev), 8001 (Docker)
 - **CORS:** Configured for localhost:5173
 - **Env:** `.env.local` with COOKBOOK_ENDPOINTS JSON array
 - **Structure:**
@@ -50,9 +53,9 @@ max-recipes/
 
 ### Frontend (Vite + React)
 - **Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, SWR, highlight.js, Prettier
-- **Port:** 5173
+- **Port:** 5173 (local dev), 3000 (Docker)
 - **Routing:** Auto-generated routes from registry using utility functions in `routing/`
-- **API:** Vite proxy to backend (no CORS issues)
+- **API:** Vite proxy to backend (no CORS issues in dev), serve proxy (Docker)
 - **UI:** Mantine v7 with custom theme (nebula/twilight colors), 70px header height
 - **Layout:** AppShell with collapsible sidebar, responsive Header (endpoint/model selectors in header on desktop, in navbar drawer on mobile)
 - **State Management:**
@@ -291,7 +294,7 @@ This section documents the detailed migration strategy for porting recipes from 
 
 ## Development Workflow
 
-### Start both servers:
+### Local Development (two servers):
 
 **Terminal 1 (Backend):**
 ```bash
@@ -307,6 +310,36 @@ npm run dev  # Runs vite + copy:code:watch (watches recipe source files)
 
 Visit: `http://localhost:5173`
 
+### Docker Demo Server (MAX + backend + frontend):
+
+The Docker container runs all three services together using PM2:
+- **Port 8000**: MAX LLM serving (/v1 endpoints)
+- **Port 8001**: FastAPI backend (/api endpoints)
+- **Port 3000**: Frontend (static files with proxy to backend)
+
+**Build:**
+```bash
+docker build -t max-recipes .
+# Or with specific GPU support:
+docker build --build-arg MAX_GPU=nvidia -t max-recipes .
+```
+
+**Run:**
+```bash
+docker run -p 8000:8000 -p 8001:8001 -p 3000:3000 max-recipes
+# Or with custom model:
+docker run -p 8000:8000 -p 8001:8001 -p 3000:3000 \
+  -e MAX_MODEL=google/gemma-3-27b-it \
+  max-recipes
+```
+
+Visit: `http://localhost:3000`
+
+**Service startup order (via ecosystem.config.js):**
+1. MAX LLM serving starts on port 8000
+2. Backend waits for MAX health check, then starts on port 8001
+3. Frontend waits for backend health check, then serves on port 3000
+
 ### Key Files to Know
 
 - `frontend/src/recipes/registry.ts` - **SINGLE SOURCE OF TRUTH** for all recipe metadata
@@ -318,6 +351,9 @@ Visit: `http://localhost:5173`
 - `frontend/src/lib/api.ts` - Add new API client functions
 - `frontend/src/lib/hooks.ts` - Custom hooks with SWR integration
 - `frontend/src/lib/types.ts` - Add shared TypeScript types
+- `Dockerfile` - Demo server image (MAX + backend + frontend)
+- `ecosystem.config.js` - PM2 process manager config for all services
+- `.dockerignore` - Docker build exclusions
 
 ## Dependencies
 
