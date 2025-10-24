@@ -143,9 +143,9 @@ async def multiturn_chat(request: ChatRequest):
     )
 
 @router.get("/multiturn-chat/code")
-async def get_image_captioning_code():
+async def get_multiturn_chat_code():
     """
-    Get the source code for the image captioning recipe.
+    Get the source code for the multiturn-chat recipe.
 
     Returns the Python source code of this file as JSON.
     """

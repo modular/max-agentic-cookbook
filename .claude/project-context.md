@@ -33,16 +33,19 @@ max-recipes/
   - `src/main.py` - Entry point, loads .env.local, includes recipe routers
   - `src/recipes/endpoints.py` - Endpoint management with caching
   - `src/recipes/models.py` - Models listing (proxies /v1/models)
-  - `src/recipes/multiturn_chat.py` - Multi-turn chat recipe router (stubbed)
+  - `src/recipes/multiturn_chat.py` - Multi-turn chat recipe router (✅ implemented)
   - `src/recipes/image_captioning.py` - Image captioning with NDJSON streaming (✅ implemented)
   - `src/core/` - Config and utilities
+  - `src/core/code_reader.py` - Source code reading utility for /code endpoints
 - **Endpoints:**
   - `GET /api/health` - Health check
   - `GET /api/recipes` - List available recipe slugs (programmatically discovers registered routes)
   - `GET /api/endpoints` - List configured LLM endpoints (from .env.local)
   - `GET /api/models?endpointId=xxx` - List models for endpoint (proxies OpenAI-compatible /v1/models)
-  - `POST /api/recipes/multiturn-chat` - Multi-turn chat endpoint (stubbed)
+  - `POST /api/recipes/multiturn-chat` - Multi-turn chat endpoint (✅ implemented)
+  - `GET /api/recipes/multiturn-chat/code` - Get multiturn-chat source code as JSON
   - `POST /api/recipes/image-captioning` - Image captioning with NDJSON streaming, parallel processing, performance metrics (✅ implemented)
+  - `GET /api/recipes/image-captioning/code` - Get image-captioning source code as JSON
 
 ### Frontend (Vite + React)
 - **Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, SWR, Prettier
@@ -171,6 +174,7 @@ This section documents the detailed migration strategy for porting recipes from 
 - Support batch processing: parallel requests for multiple images
 - Track performance metrics: TTFT (time to first token) and duration per image
 - Route: `POST /api/recipes/image-captioning`
+- Code endpoint: `GET /api/recipes/image-captioning/code` (returns source as JSON)
 
 **Frontend Implementation:**
 - Custom `useNDJSON<T>` hook for progressive NDJSON streaming (framework-agnostic, reusable)
@@ -215,6 +219,7 @@ This section documents the detailed migration strategy for porting recipes from 
   - `{"type": "text-delta", "id": "...", "delta": "..."}` (streaming text)
   - `{"type": "finish"}` and `[DONE]` (completion)
 - Route: `POST /api/recipes/multiturn-chat`
+- Code endpoint: `GET /api/recipes/multiturn-chat/code` (returns source as JSON)
 
 **Frontend Implementation:**
 - Vercel AI SDK's `useChat` hook with `DefaultChatTransport`
@@ -267,11 +272,15 @@ This section documents the detailed migration strategy for porting recipes from 
 
 1. Add entry to `frontend/src/recipes/registry.ts` (include `component` property for interactive UI)
 2. Create `backend/src/recipes/[recipe_name].py` with APIRouter
-3. Include router in `backend/src/main.py`
-4. Add UI component to `frontend/src/recipes/[recipe-name]/`
-5. Add `README.mdx` to `frontend/src/recipes/[recipe-name]/` for documentation
-6. Add recipe slug to `readmeComponents` in `registry.ts`
-7. Routes, index page, and navigation update automatically
+3. Add recipe route(s) and code endpoint:
+   - Import `code_reader`: `from ..core.code_reader import read_source_file`
+   - Add main recipe route (e.g., `POST /recipe-name`)
+   - Add code route: `GET /recipe-name/code` (use `__file__` with `read_source_file()`)
+4. Include router in `backend/src/main.py`
+5. Add UI component to `frontend/src/recipes/[recipe-name]/`
+6. Add `README.mdx` to `frontend/src/recipes/[recipe-name]/` for documentation
+7. Add recipe slug to `readmeComponents` in `registry.ts`
+8. Routes, index page, and navigation update automatically
 
 **Routes created:**
 - `/:slug` - Demo view (interactive UI, auto-generated if `component` in registry)
