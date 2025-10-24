@@ -39,25 +39,4 @@ def read_source_file(file_path: str) -> Dict[str, str]:
     except Exception as e:
         raise Exception(f"Error reading file: {str(e)}")
 
-    # Determine language from extension
-    _, ext = os.path.splitext(file_path)
-    language_map = {
-        '.py': 'python',
-        '.js': 'javascript',
-        '.ts': 'typescript',
-        '.tsx': 'tsx',
-        '.jsx': 'jsx',
-        '.json': 'json',
-        '.md': 'markdown',
-        '.mdx': 'mdx',
-    }
-    language = language_map.get(ext.lower(), 'text')
-
-    # Get filename
-    filename = os.path.basename(file_path)
-
-    return {
-        'content': content,
-        'language': language,
-        'filename': filename
-    }
+    return content
