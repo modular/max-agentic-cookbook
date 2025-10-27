@@ -1,6 +1,0 @@
-cleanup: pkill -f "max serve" || true && pkill -f "docker run -p 6333:6333 -p 6334:6334 -v $(pwd)/qdrant_storage:/qdrant/storage:z qdrant/qdrant" || true
-gpu-cleanup: command -v nvidia-smi >/dev/null && nvidia-smi pmon -c 1 | grep python | awk '{print $2}' | xargs -r kill -9 2>/dev/null || true
-port-cleanup: lsof -ti:8010,6333,6334,7860 | xargs -r kill -9 2>/dev/null || true
-qdrat-cleanup: rm -r qdrant_storage 2>/dev/null || true
-gradio-cleanup: rm -r .gradio 2>/dev/null || true
-temp-cleanup: rm -r temp_images 2>/dev/null || true

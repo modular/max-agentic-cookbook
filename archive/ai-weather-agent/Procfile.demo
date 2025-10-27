@@ -1,2 +1,0 @@
-backend: cd backend && pixi run backend
-frontend: cd frontend && pixi run frontend

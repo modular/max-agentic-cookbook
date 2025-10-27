@@ -1,0 +1,82 @@
+## Architecture
+
+**Frontend** (`ui.tsx`): Vercel AI SDK's `useChat` hook with `DefaultChatTransport`
+
+- Manages message state, streaming, and conversation history
+- Auto-scroll behavior with manual scroll detection
+- Streamdown for markdown rendering with syntax highlighting
+
+**Backend** (`multiturn_chat.py`): FastAPI with Server-Sent Events (SSE)
+
+- Converts UIMessage format (from Vercel AI SDK) to OpenAI format
+- Streams responses using AsyncOpenAI client
+- Returns SSE stream compatible with Vercel AI SDK protocol
+
+## Protocol Flow
+
+1. Frontend sends `POST /api/recipes/multiturn-chat` with:
+
+    ```json
+    {
+        "endpointId": "max-local",
+        "modelName": "llama-3.1-8b",
+        "messages": [
+            {
+                "id": "...",
+                "role": "user",
+                "parts": [{ "type": "text", "text": "..." }]
+            }
+        ]
+    }
+    ```
+
+2. Backend converts UIMessage → OpenAI format:
+
+    ```python
+    { "role": "user", "content": "..." }
+    ```
+
+3. Backend streams SSE events:
+
+    ```
+    data: {"type": "start", "messageId": "msg-abc123"}
+    data: {"type": "text-delta", "id": "text-xyz", "delta": "Hello"}
+    data: {"type": "text-delta", "id": "text-xyz", "delta": " world"}
+    data: {"type": "finish"}
+    data: [DONE]
+    ```
+
+4. Frontend consumes SSE stream via `useChat` hook, updating UI token-by-token
+
+## Key Implementation Details
+
+**Message Conversion** (`multiturn_chat.py:38-57`):
+
+- Extracts text from `parts` array (filters `type === "text"`)
+- Joins multiple text parts with spaces
+- Maintains conversation history across turns
+
+**SSE Protocol** (`multiturn_chat.py:89-143`):
+
+- Header: `X-Vercel-AI-UI-Message-Stream: v1`
+- Event types: `start`, `text-start`, `text-delta`, `text-end`, `finish`, `[DONE]`
+- Compatible with Vercel AI SDK's `DefaultChatTransport`
+
+**Auto-Scroll Logic** (`ui.tsx:77-90`):
+
+- Tracks `isAutoScrolling` flag to distinguish programmatic vs. manual scroll
+- Disables auto-follow when user scrolls up >50px from bottom
+- Re-enables when user scrolls within 20px of bottom
+
+## Why This Approach
+
+- **Python backend**: Direct access to AI ecosystem (MAX, transformers, etc.)
+- **SSE streaming**: Standard protocol, production-ready, works with firewalls/proxies
+- **Vercel AI SDK**: Handles complex streaming state management out of the box
+- **No Node.js**: Pure Python backend, no server-side JS runtime required
+
+## File References
+
+- Frontend: `frontend/src/recipes/multiturn-chat/ui.tsx`
+- Backend: `backend/src/recipes/multiturn_chat.py`
+- Vercel AI SDK protocol: SSE with text-delta events

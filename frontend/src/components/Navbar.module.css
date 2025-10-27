@@ -1,0 +1,18 @@
+.chevron[data-rotate] {
+    transform: rotate(45deg);
+}
+
+ol {
+    padding-left: var(--mantine-spacing-lg);
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+ol li {
+    padding-bottom: var(--mantine-font-size-xs);
+}
+
+ol li::marker {
+    font-size: var(--mantine-font-size-sm);
+    color: var(--mantine-color-dimmed);
+}

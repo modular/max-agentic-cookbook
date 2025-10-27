@@ -1,26 +1,39 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "dev",
-      "type": "shell",
-      "command": "pnpm",
-      "args": ["dev"],
-      "options": {
-        "cwd": "${workspaceFolder}/apps/cookbook"
-      },
-      "problemMatcher": [],
-      "isBackground": true
-    },
-    {
-      "label": "build",
-      "type": "shell",
-      "command": "pnpm",
-      "args": ["build"],
-      "options": {
-        "cwd": "${workspaceFolder}/apps/cookbook"
-      },
-      "problemMatcher": []
-    }
-  ]
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Frontend Dev Server",
+            "type": "shell",
+            // Assumes your frontend start script is "npm run dev"
+            "command": "npm run dev",
+            "group": "build",
+            "options": {
+                "cwd": "${workspaceFolder}/frontend"
+            },
+            // This is from your advice. It's essential for a long-running server task.
+            "isBackground": true,
+            "presentation": {
+                // This is also from your advice.
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            // This is crucial. It tells VS Code when the server is ready.
+            // This matcher is configured for Vite (which uses port 5173)
+            "problemMatcher": {
+                "owner": "vite",
+                "pattern": {
+                    // This regex looks for "VITE vX.X.X  ready in XXX ms"
+                    "regexp": "\\s*VITE v.* ready in (\\d+)ms"
+                },
+                "background": {
+                    "activeOnStart": true,
+                    // Tells VS Code the task has started
+                    "beginsPattern": "VITE v",
+                    // Tells VS Code the preLaunchTask is "finished"
+                    // when Vite prints the Local URL (most reliable indicator it's ready)
+                    "endsPattern": "Local:.*http"
+                }
+            }
+        }
+    ]
 }

@@ -16,6 +16,7 @@ out/
 # production
 build/
 dist/
+backend/static/
 
 # misc
 .DS_Store
@@ -42,7 +43,24 @@ next-env.d.ts
 .pnpm-store/
 
 # claude
-**/.claude/
+**/.claude/settings.local.json
 
 # pixi
 **/.pixi
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+.uv/
+*.egg-info/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/

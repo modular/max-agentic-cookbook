@@ -1,36 +1,40 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Next.js: debug server-side",
-      "type": "node-terminal",
-      "request": "launch",
-      "command": "pnpm dev",
-      "cwd": "${workspaceFolder}/apps/cookbook",
-      "serverReadyAction": {
-        "pattern": "- Local:.+(https?://.+)",
-        "uriFormat": "%s",
-        "action": "debugWithChrome"
-      }
-    },
-    {
-      "name": "Next.js: debug client-side",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/apps/cookbook"
-    },
-    {
-      "name": "Next.js: debug full stack",
-      "type": "node-terminal",
-      "request": "launch",
-      "command": "pnpm dev",
-      "cwd": "${workspaceFolder}/apps/cookbook",
-      "serverReadyAction": {
-        "pattern": "- Local:.+(https?://.+)",
-        "uriFormat": "%s",
-        "action": "debugWithChrome"
-      }
-    }
-  ]
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Backend",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": ["src.main:app", "--reload", "--port", "8010"],
+            "cwd": "${workspaceFolder}/backend",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/backend"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "React Frontend",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}/frontend",
+            "sourceMaps": true,
+            "preLaunchTask": "Start Frontend Dev Server",
+            "port": 9222 // specify Chrome DevTools port for MCP server
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Full-Stack Debug",
+            "configurations": ["Python Backend", "React Frontend"],
+            "presentation": {
+                "hidden": false,
+                "group": "Full-Stack",
+                "order": 1
+            },
+            "stopAll": true
+        }
+    ]
 }

@@ -1,5 +1,0 @@
-.chevron {
-  &[data-rotate] {
-    transform: rotate(45deg);
-  }
-}

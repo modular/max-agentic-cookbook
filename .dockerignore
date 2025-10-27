@@ -2,7 +2,21 @@
 .git
 .gitignore
 
-# Dependencies (will be installed during build)
+# Python
+**/__pycache__
+**/*.py[cod]
+**/*$py.class
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.venv
+**/venv
+**/*.egg-info
+
+# uv
+.uv
+
+# Node.js dependencies (will be installed during build)
 **/node_modules
 
 # Build artifacts
@@ -12,9 +26,10 @@
 **/build
 **/*.tsbuildinfo
 
-# Environment files (except .sample.env)
+# Environment files
 .env*.local
 **/.env*.local
+.env
 
 # Logs
 *.log
@@ -32,17 +47,24 @@ Thumbs.db
 .idea
 *.swp
 *.swo
+.claude
 
 # Testing
 **/coverage
 **/.cache
 
-# Package manager
+# Package managers
 .pnpm-store
 package-lock.json
 yarn.lock
 
-# Misc
-README.md
+# Archived/legacy code
+monorepo/
+archive/
+
+# Documentation (except essential README)
 *.md
-!apps/cookbook/README.md
+!README.md
+
+# Frontend public copied code (regenerated during build)
+frontend/public/code/

@@ -1,170 +1,210 @@
-# Modular Agentic Cookbook
+# MAX Agentic Cookbook
 
-A collection of recipes demonstrating how to build modern fullstack web apps using Modular MAX, Next.js, and the Vercel AI SDK. Each recipe demonstrates an end-to-end workflow with both frontend and backend implementations, including detailed code comments.
+A modern fullstack cookbook app showcasing AI recipes with Modular MAX and other AI services. Built with FastAPI (Python) and React (TypeScript) for maximum flexibility and performance.
 
 > **📦 Looking for legacy recipes?** Older standalone recipes have been moved to the [`archive`](https://github.com/modular/max-agentic-cookbook/tree/archive) branch. These are provided as-is for historical reference only and are no longer maintained.
 
-<figure>
-  <img src="docs/images/cookbook-screenshot.png" alt="Screenshot of the Modular Agentic Cookbook interface showing the Multi-turn Chat recipe" />
-  <figcaption style='display: none'>
-    Example conversation: User asks for a joke about Mojo, the smiling fireball who makes GPUs go brrr. The assistant responds: "Why did Mojo the smiling fireball get a job optimizing GPUs? Because he said, 'I'm here to bring the heat! Watch these GPUs go brrr... with a smile, of course! Hope you enjoyed it!'"
-  </figcaption>
-</figure>
+## Architecture
+
+FastAPI backend + React SPA with separate projects for clean separation:
+
+```
+max-recipes/
+├── backend/          # FastAPI Python API (port 8010)
+├── frontend/         # Vite React TypeScript SPA (port 5173 local)
+└── docs/             # Architecture, contributing, Docker guides
+```
+
+**Why this architecture?**
+
+-   **Separate projects** - First-class ecosystems for AI and UI development
+-   **No SSR needed** - Just plain React, copy-paste into any project
 
 ## Requirements
 
-- **Node.js** 22.x or higher
-- **pnpm** package manager
-- **MAX** server running locally or remotely—see the [MAX quickstart](https://docs.modular.com/max/get-started/)
+-   **Python** 3.11 or higher
+-   **Node.js** 22.x or higher
+-   **uv** - Fast Python package installer ([install here](https://github.com/astral-sh/uv))
 
 ## Quick Start
 
-1. **Clone and install**
+### Local Development
 
-    ```bash
-    git clone https://github.com/modular/max-agentic-cookbook.git
-    cd max-agentic-cookbook
-    pnpm install
-    ```
+Run backend and frontend separately in two terminals, or run + debug with VS Code.
 
-2. **Configure endpoints**
-
-    ```bash
-    cp .sample.env .env.local
-    ```
-
-    Edit `.env.local` to add your MAX endpoint (or any OpenAI-compatible server):
-
-    ```env
-    COOKBOOK_ENDPOINTS='[
-      {
-        "id": "max-local",
-        "baseUrl": "http://127.0.0.1:8000/v1",
-        "apiKey": "EMPTY"
-      }
-    ]'
-    ```
-
-3. **Start developing**
-
-    ```bash
-    pnpm dev
-    ```
-
-    Open [http://localhost:3000](http://localhost:3000) in your browser
-
-## Featured Recipes
-
-### 1. **Multi-turn Chat**
-
-Build a streaming chat interface that maintains conversation context across multiple exchanges. This recipe demonstrates:
-
-- Real-time token streaming using the Vercel AI SDK
-- Markdown rendering with syntax-highlighted code blocks using Streamdown
-- Auto-scrolling message display with smart scroll detection
-- Seamless compatibility with Modular MAX and OpenAI-compatible endpoints
-
-### 2. **Image Captioning**
-
-Create an intelligent image captioning system that generates natural language descriptions for uploaded images with progressive streaming and performance tracking. Features include:
-
-- **NDJSON streaming**: Custom useNDJSON hook for progressive results—captions appear as they're generated
-- **Parallel processing**: Multiple images processed simultaneously for maximum speed
-- **Performance metrics**: TTFT (time to first token) and duration tracking
-- Drag-and-drop image upload with Mantine Dropzone
-- Customizable prompt for caption generation
-- Gallery view with loading states and real-time updates
-
-## Architecture
-
-The cookbook is organized as a pnpm workspace monorepo with a clean separation between the Next.js app and shared recipe implementations:
-
-```plaintext
-├── apps/cookbook/           # Next.js 14 App
-│   ├── app/                 # App Router pages & API routes
-│   ├── components/          # UI components
-│   └── context/             # React context
-│
-└── packages/recipes/        # Shared recipe implementations
-    └── src/
-        ├── multiturn-chat/  # Each recipe has:
-        │   ├── api.ts       # - Backend API logic
-        │   └── ui.tsx       # - Frontend UI component
-        └── image-captioning/
-```
-
-For a deep dive into the architecture, see the [Architecture Guide](./docs/architecture.md).
-
-## Adding New Recipes
-
-Create a directory under `packages/recipes/src/your-recipe-name/` with:
-
-- **`ui.tsx`** - Frontend React component with inline documentation
-- **`api.ts`** - Backend API handler using Vercel AI SDK
-
-Each recipe follows consistent patterns: React hooks for state management, Mantine UI components, and detailed inline comments explaining architecture decisions and data flow.
-
-For detailed instructions, see the [Contributing Guide](./docs/contributing.md).
-
-## Using with MAX
-
-Start MAX model serving ([see quickstart](https://docs.modular.com/max/get-started/)):
+**Terminal 1 (Backend):**
 
 ```bash
-max serve --model google/gemma-3-27b-it
+cd backend
+uv sync        # Install dependencies
+uv run dev     # Start backend on port 8010
 ```
 
-Configure the endpoint in `.env.local` and select it in the cookbook UI. The cookbook works with MAX or any OpenAI-compatible API.
-
-## Docker Deployment
-
-The cookbook can run entirely in Docker with MAX model serving included. Build with:
+**Terminal 2 (Frontend):**
 
 ```bash
-docker build --ulimit nofile=65535:65535 -t max-cookbook:latest .
+cd frontend
+npm install      # Install dependencies
+npm run dev      # Start frontend with hot reload
 ```
 
-Run with GPU support (NVIDIA example):
+Visit `http://localhost:5173` to see the app.
+
+### Docker with MAX (All-in-One)
+
+Run the complete stack with MAX model serving + backend + frontend:
 
 ```bash
+# Build
+docker build -t max-cookbook .
+
+# Run (NVIDIA GPU)
 docker run --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
-    -e "HF_TOKEN=your-token" \
+    -e "HF_TOKEN=your-huggingface-token" \
     -e "MAX_MODEL=mistral-community/pixtral-12b" \
-    -p 8000:8000 -p 3000:3000 \
-    max-cookbook:latest
+    -p 8000:8000 -p 8010:8010 \
+    max-cookbook
+
+# Run (AMD GPU)
+docker run \
+    --group-add keep-groups \
+    --device /dev/kfd --device /dev/dri \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -e "HF_TOKEN=your-huggingface-token" \
+    -e "MAX_MODEL=mistral-community/pixtral-12b" \
+    -p 8000:8000 -p 8010:8010 \
+    max-cookbook
 ```
 
-The container supports both NVIDIA and AMD GPUs. For detailed instructions including AMD setup, build arguments, and troubleshooting, see the [Docker Guide](./docs/docker.md).
+Visit `http://localhost:8010` to see the app.
 
-## Available Scripts
+**Services:**
 
-- `pnpm dev` - Start development server with hot reloading (uses Turbopack)
-- `pnpm build` - Build production-optimized bundle
-- `pnpm start` - Run production server
-- `pnpm lint` - Run ESLint checks
-- `pnpm format` - Format code with Prettier
-- `pnpm format:check` - Check code formatting
+-   **Port 8000**: MAX LLM serving (OpenAI-compatible /v1 endpoints)
+-   **Port 8010**: Web app (FastAPI backend + React frontend)
 
-## Learning Resources
+PM2 orchestrates startup: MAX → web app with automatic health checks and restarts.
 
-The best way to learn is by running the cookbook and exploring the recipes. Toggle "Show Code" in the UI to see implementations alongside demos. Each recipe contains extensive inline documentation explaining architecture decisions and integration patterns.
+## Configuration
 
-**Documentation:**
+### Backend Configuration (.env.local)
 
-- [Modular MAX](https://docs.modular.com/)
-- [Vercel AI SDK](https://sdk.vercel.ai/docs)
-- [Next.js](https://nextjs.org/docs)
-- [Mantine UI](https://mantine.dev/)
+Create `backend/.env.local` to configure LLM endpoints:
 
-## Contributing
+```env
+COOKBOOK_ENDPOINTS='[
+  {
+    "id": "max-local",
+    "baseUrl": "http://localhost:8000/v1",
+    "apiKey": "EMPTY"
+  }
+]'
+```
 
-Contributions welcome! Fork the repo, create a feature branch, follow established patterns, and submit a pull request. Ensure proper TypeScript types and comprehensive inline documentation.
+See `backend/.sample.env` for template.
 
-See the [Contributing Guide](./docs/contributing.md) for detailed instructions on adding recipes, code standards, and the PR process.
+### Frontend Configuration
 
-## Support
+No config needed! Frontend auto-detects endpoints via backend API.
 
-- **Issues**: [GitHub Issues](https://github.com/modular/max-recipes/issues)
-- **Discussions**: [Modular Forum](https://forum.modular.com/)
-- **Community**: [Discord](https://discord.gg/modular)
+## Development
+
+### Backend Structure
+
+```
+backend/
+├── src/
+│   ├── main.py                 # FastAPI entry point
+│   ├── core/                   # Config, utilities
+│   │   ├── endpoints.py        # Endpoint management
+│   │   ├── models.py           # Model listing
+│   │   └── code_reader.py      # Source code reader
+│   └── recipes/                # Recipe routers
+│       ├── multiturn_chat.py   # Multi-turn chat
+│       └── image_captioning.py # Image captioning
+└── pyproject.toml              # Python dependencies
+```
+
+### Frontend Structure
+
+```
+frontend/
+├── src/
+│   ├── recipes/                # Recipe components + registry.ts
+│   │   ├── registry.ts         # Recipe metadata
+│   │   ├── multiturn-chat/     # Multi-turn chat UI
+│   │   └── image-captioning/   # Image captioning UI
+│   ├── components/             # Shared UI (Header, Navbar, etc.)
+│   ├── routing/                # Routing infrastructure
+│   ├── lib/                    # Custom hooks, API, types
+│   └── App.tsx                 # Entry point
+└── package.json                # Frontend dependencies
+```
+
+### Adding a Recipe
+
+1. Add entry to `frontend/src/recipes/registry.ts` with slug, title, description, and component
+2. Create `backend/src/recipes/[recipe_name].py` with FastAPI router
+3. Include router in `backend/src/main.py`
+4. Add UI component to `frontend/src/recipes/[recipe-name]/ui.tsx`
+5. Add `README.mdx` to `frontend/src/recipes/[recipe-name]/`
+6. Routes auto-generate from registry
+
+See [Contributing Guide](docs/contributing.md) for detailed instructions.
+
+## API Endpoints
+
+**Backend routes (port 8010):**
+
+-   `GET /api/health` - Health check
+-   `GET /api/recipes` - List available recipe slugs
+-   `GET /api/endpoints` - List configured LLM endpoints
+-   `GET /api/models?endpointId=xxx` - List models for endpoint
+-   `POST /api/recipes/multiturn-chat` - Multi-turn chat endpoint
+-   `POST /api/recipes/image-captioning` - Image captioning endpoint
+-   `GET /api/recipes/{slug}/code` - Get recipe backend source code
+
+**Frontend routes (port 5173 local, 8010 Docker):**
+
+-   `/` - Recipe cards grid
+-   `/:slug` - Recipe demo (interactive UI)
+-   `/:slug/readme` - Recipe documentation
+-   `/:slug/code` - Recipe source code view
+
+## Technologies
+
+**Backend:**
+
+-   FastAPI - Modern Python web framework
+-   uvicorn - ASGI server
+-   uv - Fast Python package manager
+-   openai - OpenAI Python client for LLM proxying
+
+**Frontend:**
+
+-   React 18 - UI library
+-   TypeScript - Type safety
+-   Vite - Build tool and dev server
+-   React Router v7 - Client-side routing
+-   Mantine v7 - UI component library
+-   SWR - Lightweight data fetching with caching
+-   Vercel AI SDK - Streaming chat UI (multi-turn chat recipe)
+
+**Docker:**
+
+-   PM2 - Process manager for orchestrating services
+-   MAX - High-performance model serving with GPU support
+
+## Documentation
+
+-   [Architecture Guide](docs/architecture.md) - Design decisions, patterns, technology choices
+-   [Contributing Guide](docs/contributing.md) - How to add recipes and contribute
+-   [Docker Deployment Guide](docs/docker.md) - Container deployment with MAX
+-   [Project Context](.claude/project-context.md) - Comprehensive architecture reference for LLMs
+
+## License
+
+Apache-2.0 WITH LLVM-exception
+
+See [LICENSE](LICENSE) for details.
