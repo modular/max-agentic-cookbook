@@ -11,7 +11,9 @@ const chapters = {
     sections: navigation.map((section) => ({
         title: section.title,
         items: section.items.map((item) => ({
-            title: item.displayTitle, // "1: Introduction", "2: Multi-Turn Chat"
+            number: item.number,
+            title: item.title,
+            tags: item.tags,
             slug: item.slug,
         })),
     })),

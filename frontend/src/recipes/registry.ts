@@ -11,6 +11,7 @@ interface RecipePlaceholder {
 export interface RecipeImplemented {
     title: string
     slug: string
+    tags: string[]
     description: string
     component?: LazyExoticComponent<ComponentType<RecipeProps>>
 }
@@ -36,6 +37,7 @@ export const recipes: RecipeMetadata = {
         {
             slug: 'image-captioning',
             title: 'Streaming Image Captions',
+            tags: ['NDJSON', 'Vision'],
             description:
                 'Generate captions for multiple images with progressive NDJSON streaming. Upload images, customize the prompt, and watch captions appear instantly. Includes parallel processing and performance metrics (TTFT and duration).',
             component: lazyComponentExport(() => import('./image-captioning/ui')),
@@ -43,6 +45,7 @@ export const recipes: RecipeMetadata = {
         {
             slug: 'multiturn-chat',
             title: 'Multi-Turn Chat',
+            tags: ['Vercel AI SDK', 'SSE'],
             description:
                 'Streaming chat interface with multi-turn conversation support. Messages stream token-by-token with automatic scroll-follow and markdown rendering with syntax highlighting.',
             component: lazyComponentExport(() => import('./multiturn-chat/ui')),
@@ -58,25 +61,20 @@ export const recipes: RecipeMetadata = {
         { title: 'State & Memory Management' },
         { title: 'Planning & Self-Correction' },
         { title: 'Multi-Tool Agents' },
-        { title: 'Human-in-the-Loop Systems' },
+        { title: 'Human-in-the-Loop' },
     ],
     'Context Engineering': [
         { title: 'Augmented Generation (RAG)' },
-        { title: 'Dynamic Context Construction' },
-        { title: 'Context Optimization Patterns' },
+        { title: 'Coming Soon' },
+        { title: 'Coming Soon' },
     ],
     'Advanced Applications': [
-        { title: 'Generative UI' },
-        { title: 'GitHub Repo Agent' },
-        { title: 'Morning News Summary' },
-        { title: 'Multi-Agent Orchestration' },
+        { title: 'Coming Soon' },
+        { title: 'Coming Soon' },
+        { title: 'Coming Soon' },
+        { title: 'Coming Soon' },
     ],
-    Appendix: [
-        { title: 'Observability & Debugging' },
-        { title: 'Agentic Frameworks' },
-        { title: 'Token Optimization' },
-        { title: 'Deployment Considerations' },
-    ],
+    Appendix: [{ title: 'Observability & Debugging' }, { title: 'Agentic Frameworks' }],
 }
 
 // Helper: Check if a recipe is implemented (has a slug)
@@ -100,7 +98,7 @@ export function getRecipeBySlug(slug: string): RecipeImplemented | null {
 export interface NavItem {
     number: number
     title: string
-    displayTitle: string // "1: Introduction"
+    tags?: string[]
     slug?: string
 }
 
@@ -116,12 +114,11 @@ export function buildNavigation(): NavSection[] {
     for (const [sectionName, sectionRecipes] of Object.entries(recipes)) {
         const items: NavItem[] = sectionRecipes.map((recipe) => {
             const number = currentNumber++
-            const displayTitle = `${number}: ${recipe.title}`
 
             return {
                 number,
                 title: recipe.title,
-                displayTitle,
+                tags: isImplemented(recipe) ? recipe.tags : undefined,
                 slug: isImplemented(recipe) ? recipe.slug : undefined,
             }
         })
