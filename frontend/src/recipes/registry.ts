@@ -32,12 +32,11 @@ export function lazyComponentExport<T = unknown>(
 // Single source of truth for all recipes
 export const recipes: RecipeMetadata = {
     Foundations: [
-        { title: 'Introduction' },
         { title: 'Batch Text Classification' },
         {
             slug: 'image-captioning',
             title: 'Streaming Image Captions',
-            tags: ['NDJSON', 'Vision'],
+            tags: ['NDJSON', 'Async Coroutines'],
             description:
                 'Generate captions for multiple images with progressive NDJSON streaming. Upload images, customize the prompt, and watch captions appear instantly. Includes parallel processing and performance metrics (TTFT and duration).',
             component: lazyComponentExport(() => import('./image-captioning/ui')),
