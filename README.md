@@ -2,7 +2,7 @@
 
 A collection of recipes demonstrating how to build modern fullstack web apps using Modular MAX, Next.js, and the Vercel AI SDK. Each recipe demonstrates an end-to-end workflow with both frontend and backend implementations, including detailed code comments.
 
-> **📦 Looking for legacy recipes?** Older standalone recipes have been moved to the [`archive/`](./archive/) folder. These are provided as-is for historical reference only and are no longer maintained.
+> **📦 Looking for legacy recipes?** Older standalone recipes have been moved to the [`archive`](https://github.com/modular/max-agentic-cookbook/tree/archive) branch. These are provided as-is for historical reference only and are no longer maintained.
 
 <figure>
   <img src="docs/images/cookbook-screenshot.png" alt="Screenshot of the Modular Agentic Cookbook interface showing the Multi-turn Chat recipe" />
