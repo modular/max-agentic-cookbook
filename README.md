@@ -1,170 +1,105 @@
-# Modular Agentic Cookbook
+# Archive - Legacy MAX Recipes
 
-A collection of recipes demonstrating how to build modern fullstack web apps using Modular MAX, Next.js, and the Vercel AI SDK. Each recipe demonstrates an end-to-end workflow with both frontend and backend implementations, including detailed code comments.
+> **⚠️ This branch contains legacy content that is no longer actively maintained.**
+>
+> These recipes are provided "as-is" for historical reference only and may not work with current versions of MAX or its dependencies.
 
-> **📦 Looking for legacy recipes?** Older standalone recipes have been moved to the [`archive/`](./archive/) folder. These are provided as-is for historical reference only and are no longer maintained.
+## About This Archive
 
-<figure>
-  <img src="docs/images/cookbook-screenshot.png" alt="Screenshot of the Modular Agentic Cookbook interface showing the Multi-turn Chat recipe" />
-  <figcaption style='display: none'>
-    Example conversation: User asks for a joke about Mojo, the smiling fireball who makes GPUs go brrr. The assistant responds: "Why did Mojo the smiling fireball get a job optimizing GPUs? Because he said, 'I'm here to bring the heat! Watch these GPUs go brrr... with a smile, of course! Hope you enjoyed it!'"
-  </figcaption>
-</figure>
+This archive contains standalone MAX recipes that were part of the original `max-recipes` repository structure. As of October 2025, the repository has been restructured to focus on the **[Modular Agentic Cookbook](../README.md)**, a unified collection of modern fullstack web applications built to work with MAX or any other serving solution with an OpenAI-compatible API.
 
-## Requirements
+The recipes in this archive represent earlier explorations and examples that have been superseded by the comprehensive, well-documented cookbook approach.
 
-- **Node.js** 22.x or higher
-- **pnpm** package manager
-- **MAX** server running locally or remotely—see the [MAX quickstart](https://docs.modular.com/max/get-started/)
+## Archived Content
 
-## Quick Start
+### AI Agents
 
-1. **Clone and install**
+- **[ai-weather-agent](./ai-weather-agent/)** - Intelligent weather agent with multi-stage LLM pipeline, semantic caching, and real-time updates
+- **[autodoc-repo-chat-agent](./autodoc-repo-chat-agent/)** - AI-powered documentation generator with repository understanding
+- **[code-execution-sandbox-agent-with-e2b](./code-execution-sandbox-agent-with-e2b/)** - Secure code execution agent with sandboxed environment and safety checks
+- **[deepseek-qwen-autogen-agent](./deepseek-qwen-autogen-agent/)** - Multi-agent system using DeepSeek and Qwen models with AutoGen
+- **[max-mcp-agent](./max-mcp-agent/)** - Model Context Protocol (MCP) integration agent
 
-    ```bash
-    git clone https://github.com/modular/max-agentic-cookbook.git
-    cd max-agentic-cookbook
-    pnpm install
-    ```
+### MAX Serve Integrations
 
-2. **Configure endpoints**
+- **[max-serve-anythingllm](./max-serve-anythingllm/)** - Integration with AnythingLLM platform
+- **[max-serve-continuous-chat](./max-serve-continuous-chat/)** - Continuous conversation interface with MAX Serve
+- **[max-serve-multimodal-structured-output](./max-serve-multimodal-structured-output/)** - Structured output generation from multimodal inputs
+- **[max-serve-open-webui](./max-serve-open-webui/)** - Open WebUI integration with MAX Serve
+- **[max-serve-openai-embeddings](./max-serve-openai-embeddings/)** - OpenAI-compatible embeddings endpoint
+- **[max-serve-openai-function-calling](./max-serve-openai-function-calling/)** - OpenAI-compatible function calling
 
-    ```bash
-    cp .sample.env .env.local
-    ```
+### RAG & Multimodal
 
-    Edit `.env.local` to add your MAX endpoint (or any OpenAI-compatible server):
+- **[multimodal-rag-with-colpali-llamavision-reranker](./multimodal-rag-with-colpali-llamavision-reranker/)** - Advanced RAG system with ColPali embedding, Llama3.2-Vision, Qdrant, and reranker
 
-    ```env
-    COOKBOOK_ENDPOINTS='[
-      {
-        "id": "max-local",
-        "baseUrl": "http://127.0.0.1:8000/v1",
-        "apiKey": "EMPTY"
-      }
-    ]'
-    ```
+### Mojo & Custom Operations
 
-3. **Start developing**
+- **[custom-ops-ai-applications](./custom-ops-ai-applications/)** - Top-K token sampler and Flash Attention as fused custom ops on GPU
+- **[custom-ops-introduction](./custom-ops-introduction/)** - Introduction to building custom operations
+- **[custom-ops-matrix-multiplication](./custom-ops-matrix-multiplication/)** - Matrix multiplication custom operation example
+- **[gpu-functions-mojo](./gpu-functions-mojo/)** - Writing thread-parallel GPU functions using MAX Driver API
+- **[mojo-operation-template](./mojo-operation-template/)** - Template for creating Mojo operations
 
-    ```bash
-    pnpm dev
-    ```
+### Infrastructure
 
-    Open [http://localhost:3000](http://localhost:3000) in your browser
+- **[max-offline-inference](./max-offline-inference/)** - Offline inference setup examples
 
-## Featured Recipes
+### Development Tools
 
-### 1. **Multi-turn Chat**
+- **[scripts](./scripts/)** - Legacy validation and testing scripts
+  - `run_tests.py` - Test runner for multiple recipe directories
+  - `validate_metadata.py` - Metadata validation for recipe manifests
 
-Build a streaming chat interface that maintains conversation context across multiple exchanges. This recipe demonstrates:
+## Why These Were Archived
 
-- Real-time token streaming using the Vercel AI SDK
-- Markdown rendering with syntax-highlighted code blocks using Streamdown
-- Auto-scrolling message display with smart scroll detection
-- Seamless compatibility with Modular MAX and OpenAI-compatible endpoints
+1. **Inconsistent structure** - Each recipe had its own setup, dependencies, and patterns
+2. **Maintenance burden** - Keeping numerous standalone projects up-to-date with MAX releases
+3. **User experience** - Difficult to compare approaches or reuse code across recipes
 
-### 2. **Image Captioning**
+## What to Use Instead
 
-Create an intelligent image captioning system that generates natural language descriptions for uploaded images with progressive streaming and performance tracking. Features include:
+For modern, actively maintained examples and recipes, please see:
 
-- **NDJSON streaming**: Custom useNDJSON hook for progressive results—captions appear as they're generated
-- **Parallel processing**: Multiple images processed simultaneously for maximum speed
-- **Performance metrics**: TTFT (time to first token) and duration tracking
-- Drag-and-drop image upload with Mantine Dropzone
-- Customizable prompt for caption generation
-- Gallery view with loading states and real-time updates
+- **[Modular Agentic Cookbook](../README.md)** - The main repository documentation
+- **[Cookbook Recipes](../packages/recipes/)** - Current recipe implementations
+- **[MAX Documentation](https://docs.modular.com/max/)** - Official Modular Platform documentation
+- **[MAX Builds](https://builds.modular.com/)** - GenAI models optimized for use with MAX
 
-## Architecture
+## Compatibility Notes
 
-The cookbook is organized as a pnpm workspace monorepo with a clean separation between the Next.js app and shared recipe implementations:
+⚠️ **Important:** These archived recipes may have compatibility issues:
 
-```plaintext
-├── apps/cookbook/           # Next.js 14 App
-│   ├── app/                 # App Router pages & API routes
-│   ├── components/          # UI components
-│   └── context/             # React context
-│
-└── packages/recipes/        # Shared recipe implementations
-    └── src/
-        ├── multiturn-chat/  # Each recipe has:
-        │   ├── api.ts       # - Backend API logic
-        │   └── ui.tsx       # - Frontend UI component
-        └── image-captioning/
-```
+- Dependencies may be outdated or deprecated
+- API signatures may have changed in newer MAX versions
+- Python package versions may conflict with current requirements
+- GPU drivers and runtime requirements may differ
+- Some integrations may no longer be supported
 
-For a deep dive into the architecture, see the [Architecture Guide](./docs/architecture.md).
+## Using Archived Content
 
-## Adding New Recipes
+If you choose to explore or use content from this archive:
 
-Create a directory under `packages/recipes/src/your-recipe-name/` with:
-
-- **`ui.tsx`** - Frontend React component with inline documentation
-- **`api.ts`** - Backend API handler using Vercel AI SDK
-
-Each recipe follows consistent patterns: React hooks for state management, Mantine UI components, and detailed inline comments explaining architecture decisions and data flow.
-
-For detailed instructions, see the [Contributing Guide](./docs/contributing.md).
-
-## Using with MAX
-
-Start MAX model serving ([see quickstart](https://docs.modular.com/max/get-started/)):
-
-```bash
-max serve --model google/gemma-3-27b-it
-```
-
-Configure the endpoint in `.env.local` and select it in the cookbook UI. The cookbook works with MAX or any OpenAI-compatible API.
-
-## Docker Deployment
-
-The cookbook can run entirely in Docker with MAX model serving included. Build with:
-
-```bash
-docker build --ulimit nofile=65535:65535 -t max-cookbook:latest .
-```
-
-Run with GPU support (NVIDIA example):
-
-```bash
-docker run --gpus all \
-    -v ~/.cache/huggingface:/root/.cache/huggingface \
-    -e "HF_TOKEN=your-token" \
-    -e "MAX_MODEL=mistral-community/pixtral-12b" \
-    -p 8000:8000 -p 3000:3000 \
-    max-cookbook:latest
-```
-
-The container supports both NVIDIA and AMD GPUs. For detailed instructions including AMD setup, build arguments, and troubleshooting, see the [Docker Guide](./docs/docker.md).
-
-## Available Scripts
-
-- `pnpm dev` - Start development server with hot reloading (uses Turbopack)
-- `pnpm build` - Build production-optimized bundle
-- `pnpm start` - Run production server
-- `pnpm lint` - Run ESLint checks
-- `pnpm format` - Format code with Prettier
-- `pnpm format:check` - Check code formatting
-
-## Learning Resources
-
-The best way to learn is by running the cookbook and exploring the recipes. Toggle "Show Code" in the UI to see implementations alongside demos. Each recipe contains extensive inline documentation explaining architecture decisions and integration patterns.
-
-**Documentation:**
-
-- [Modular MAX](https://docs.modular.com/)
-- [Vercel AI SDK](https://sdk.vercel.ai/docs)
-- [Next.js](https://nextjs.org/docs)
-- [Mantine UI](https://mantine.dev/)
+1. Check the specific recipe's README for its original requirements
+2. Be prepared to update dependencies and fix compatibility issues
+3. Refer to the [MAX documentation](https://docs.modular.com/max/) for current API usage
+4. Consider adapting the concepts to the modern Agentic Cookbook structure instead
 
 ## Contributing
 
-Contributions welcome! Fork the repo, create a feature branch, follow established patterns, and submit a pull request. Ensure proper TypeScript types and comprehensive inline documentation.
+We are no longer accepting contributions or updates to archived recipes. If you have improvements or new ideas:
 
-See the [Contributing Guide](./docs/contributing.md) for detailed instructions on adding recipes, code standards, and the PR process.
+- **For new recipes**: Consider contributing to the [Agentic Cookbook](../packages/recipes/)
+- **For issues**: Check if the functionality exists in the current cookbook
+- **For questions**: Visit the [Modular Forum](https://forum.modular.com/) or [Discord](https://discord.gg/modular)
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/modular/max-recipes/issues)
-- **Discussions**: [Modular Forum](https://forum.modular.com/)
-- **Community**: [Discord](https://discord.gg/modular)
+Since these recipes are no longer maintained:
+
+- ❌ No bug fixes or updates will be provided
+- ❌ No compatibility testing with new MAX releases
+- ❌ No technical support available
+- ✅ Historical reference and educational purposes only
+
+For supported examples and active development, please use the [Modular Agentic Cookbook](../README.md).

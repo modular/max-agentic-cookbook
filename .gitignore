@@ -46,3 +46,13 @@ next-env.d.ts
 
 # pixi
 **/.pixi
+
+
+__pycache__
+.DS_Store
+.env
+.magic
+magic.lock
+.pixi
+pixi.lock
+*.log
