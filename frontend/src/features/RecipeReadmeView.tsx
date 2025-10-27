@@ -35,16 +35,27 @@ function RecipeDescription({ recipe }: { recipe: RecipeImplemented | null }) {
     )
 }
 
+/**
+ * HighlightedMdxWrapper - Wraps MDX content and triggers syntax highlighting after render
+ *
+ * This ensures hljs.highlightAll() runs AFTER the MDX content is actually in the DOM,
+ * not just when the lazy component reference loads. This fixes the initial page load issue
+ * where code blocks weren't being highlighted until after a refresh.
+ */
+function HighlightedMdxWrapper({ Component }: { Component: React.ComponentType }) {
+    useEffect(() => {
+        // Trigger highlighting after this component (and its MDX children) render
+        hljs.highlightAll()
+    }, [])
+
+    return <Component />
+}
+
 export function Component() {
     const { slug } = useParams<{ slug: string }>()
 
     const recipe = slug ? getRecipeBySlug(slug) : null
     const ReadmeComponent = slug ? getReadmeComponent(slug) : null
-
-    // Highlight code blocks after MDX content loads
-    useEffect(() => {
-        hljs.highlightAll()
-    }, [ReadmeComponent])
 
     if (!ReadmeComponent) {
         return (
@@ -62,7 +73,7 @@ export function Component() {
             <RecipeDescription recipe={recipe} />
             <Paper>
                 <Suspense fallback={<div>Loading...</div>}>
-                    <ReadmeComponent />
+                    <HighlightedMdxWrapper Component={ReadmeComponent} />
                 </Suspense>
             </Paper>
         </Container>
