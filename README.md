@@ -2,6 +2,8 @@
 
 A modern fullstack cookbook app showcasing AI recipes with Modular MAX and other AI services. Built with FastAPI (Python) and React (TypeScript) for maximum flexibility and performance.
 
+<img src="./docs/screenshot.png" alt="Screenshot of the MAX Agentic Cookbook web application showing the multi-turn chat recipe demo.">
+
 > **📦 Looking for legacy recipes?** Older standalone recipes have been moved to the [`archive`](https://github.com/modular/max-agentic-cookbook/tree/archive) branch. These are provided as-is for historical reference only and are no longer maintained.
 
 ## Requirements
@@ -46,14 +48,14 @@ cd frontend && npm install
 
 Run the backend and frontend separately in two terminals.
 
-**Terminal 1 (Backend):**
+Terminal 1 (Backend):
 
 ```bash
 cd backend
 uv run dev
 ```
 
-**Terminal 2 (Frontend):**
+Terminal 2 (Frontend):
 
 ```bash
 cd frontend
