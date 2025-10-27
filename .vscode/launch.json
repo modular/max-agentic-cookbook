@@ -6,7 +6,7 @@
             "type": "debugpy",
             "request": "launch",
             "module": "uvicorn",
-            "args": ["src.main:app", "--reload", "--port", "8000"],
+            "args": ["src.main:app", "--reload", "--port", "8010"],
             "cwd": "${workspaceFolder}/backend",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}/backend"

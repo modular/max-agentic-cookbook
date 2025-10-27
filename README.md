@@ -10,8 +10,8 @@ FastAPI backend + React SPA with separate projects for clean separation:
 
 ```
 max-recipes/
-├── backend/          # FastAPI Python API (port 8000 local, 8001 Docker)
-├── frontend/         # Vite React TypeScript SPA (port 5173 local, 3000 Docker)
+├── backend/          # FastAPI Python API (port 8010)
+├── frontend/         # Vite React TypeScript SPA (port 5173 local)
 └── docs/             # Architecture, contributing, Docker guides
 ```
 
@@ -36,8 +36,8 @@ Run backend and frontend separately in two terminals, or run + debug with VS Cod
 
 ```bash
 cd backend
-uv sync                                            # Install dependencies
-uv run uvicorn src.main:app --reload --port 8000   # Start backend
+uv sync        # Install dependencies
+uv run dev     # Start backend on port 8010
 ```
 
 **Terminal 2 (Frontend):**
@@ -56,15 +56,15 @@ Run the complete stack with MAX model serving + backend + frontend:
 
 ```bash
 # Build
-docker build -t max-recipes .
+docker build -t max-cookbook .
 
 # Run (NVIDIA GPU)
 docker run --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     -e "HF_TOKEN=your-huggingface-token" \
     -e "MAX_MODEL=mistral-community/pixtral-12b" \
-    -p 8000:8000 -p 8001:8001 -p 3000:3000 \
-    max-recipes
+    -p 8000:8000 -p 8010:8010 \
+    max-cookbook
 
 # Run (AMD GPU)
 docker run \
@@ -73,19 +73,18 @@ docker run \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     -e "HF_TOKEN=your-huggingface-token" \
     -e "MAX_MODEL=mistral-community/pixtral-12b" \
-    -p 8000:8000 -p 8001:8001 -p 3000:3000 \
-    max-recipes
+    -p 8000:8000 -p 8010:8010 \
+    max-cookbook
 ```
 
-Visit `http://localhost:3000` to see the app.
+Visit `http://localhost:8010` to see the app.
 
 **Services:**
 
 -   **Port 8000**: MAX LLM serving (OpenAI-compatible /v1 endpoints)
--   **Port 8001**: FastAPI backend (/api endpoints)
--   **Port 3000**: React frontend (proxies to backend)
+-   **Port 8010**: Web app (FastAPI backend + React frontend)
 
-PM2 orchestrates startup: MAX → backend → frontend with automatic health checks and restarts.
+PM2 orchestrates startup: MAX → web app with automatic health checks and restarts.
 
 ## Configuration
 
@@ -156,7 +155,7 @@ See [Contributing Guide](docs/contributing.md) for detailed instructions.
 
 ## API Endpoints
 
-**Backend routes (port 8000 local, 8001 Docker):**
+**Backend routes (port 8010):**
 
 -   `GET /api/health` - Health check
 -   `GET /api/recipes` - List available recipe slugs
@@ -166,7 +165,7 @@ See [Contributing Guide](docs/contributing.md) for detailed instructions.
 -   `POST /api/recipes/image-captioning` - Image captioning endpoint
 -   `GET /api/recipes/{slug}/code` - Get recipe backend source code
 
-**Frontend routes (port 5173 local, 3000 Docker):**
+**Frontend routes (port 5173 local, 8010 Docker):**
 
 -   `/` - Recipe cards grid
 -   `/:slug` - Recipe demo (interactive UI)

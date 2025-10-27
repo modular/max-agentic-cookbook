@@ -4,11 +4,10 @@ This guide provides instructions for running the MAX Recipes cookbook in Docker 
 
 ## Overview
 
-The Docker container bundles three services orchestrated by PM2:
+The Docker container bundles two services orchestrated by PM2:
 
 -   **MAX model serving** - Serves models via OpenAI-compatible API on port 8000
--   **FastAPI backend** - Python backend API on port 8001
--   **React frontend** - Vite-built SPA served on port 3000
+-   **Web app** - FastAPI backend + React frontend on port 8010
 -   **GPU support** - Works with both NVIDIA and AMD GPUs
 
 See [`Dockerfile`](../Dockerfile) and [`ecosystem.config.js`](../ecosystem.config.js) for implementation details.
@@ -71,8 +70,7 @@ docker run --gpus all \
     -e "HF_TOKEN=your-huggingface-token" \
     -e "MAX_MODEL=mistral-community/pixtral-12b" \
     -p 8000:8000 \
-    -p 8001:8001 \
-    -p 3000:3000 \
+    -p 8010:8010 \
     max-recipes
 ```
 
@@ -88,8 +86,7 @@ docker run \
     -e "HF_TOKEN=your-huggingface-token" \
     -e "MAX_MODEL=mistral-community/pixtral-12b" \
     -p 8000:8000 \
-    -p 8001:8001 \
-    -p 3000:3000 \
+    -p 8010:8010 \
     max-recipes
 ```
 
@@ -107,11 +104,10 @@ docker run \
 
 ### Port Mapping
 
-| Port   | Service   | Description                        |
-| ------ | --------- | ---------------------------------- |
-| `8000` | MAX Serve | OpenAI-compatible LLM API endpoint |
-| `8001` | Backend   | FastAPI backend (/api routes)      |
-| `3000` | Frontend  | React SPA (proxies to backend)     |
+| Port   | Service   | Description                                 |
+| ------ | --------- | ------------------------------------------- |
+| `8000` | MAX Serve | OpenAI-compatible LLM API endpoint          |
+| `8010` | Web App   | FastAPI backend + React frontend            |
 
 ### Volume Mounts
 
@@ -128,8 +124,7 @@ Caches downloaded models between container restarts, significantly speeding up s
 PM2 manages service startup order (see [`ecosystem.config.js`](../ecosystem.config.js)):
 
 1. **MAX serving** starts on port 8000
-2. **Backend** waits for MAX health check, then starts on port 8001
-3. **Frontend** waits for backend health check, then serves on port 3000
+2. **Web app** waits for MAX health check, then starts on port 8010
 
 All services restart automatically if they crash.
 
@@ -155,8 +150,8 @@ See [MAX Builds](https://builds.modular.com/?category=models) for the full list 
 
 Once the container is running:
 
-1. **Wait for startup** - Watch logs for all three services to start (MAX → backend → frontend)
-2. **Open the cookbook** - Navigate to [http://localhost:3000](http://localhost:3000)
+1. **Wait for startup** - Watch logs for both services to start (MAX → web app)
+2. **Open the cookbook** - Navigate to [http://localhost:8010](http://localhost:8010)
 3. **Select endpoint** - The cookbook auto-detects `http://localhost:8000` as available
 4. **Choose model** - Select from models detected at the MAX endpoint
 
@@ -172,7 +167,7 @@ docker run --gpus all \
     -e "HF_TOKEN=your-token" \
     -e "MAX_MODEL=mistral-community/pixtral-12b" \
     -e "MAX_ARGS=--max-batch-size 32 --max-cache-size 8192" \
-    -p 8000:8000 -p 8001:8001 -p 3000:3000 \
+    -p 8000:8000 -p 8010:8010 \
     max-recipes
 ```
 
@@ -187,7 +182,7 @@ docker run -d \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     -e "HF_TOKEN=your-token" \
     -e "MAX_MODEL=mistral-community/pixtral-12b" \
-    -p 8000:8000 -p 8001:8001 -p 3000:3000 \
+    -p 8000:8000 -p 8010:8010 \
     max-recipes
 ```
 
@@ -276,8 +271,7 @@ docker logs max-recipes
 
 ```bash
 # Verify ports are not in use
-lsof -i :3000
-lsof -i :8001
+lsof -i :8010
 lsof -i :8000
 ```
 

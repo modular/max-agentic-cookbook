@@ -27,12 +27,13 @@ max-recipes/
 **Tech:** FastAPI, uvicorn, uv for dependency management, python-dotenv, openai
 
 **Ports:**
-- Local dev: 8000
-- Docker: 8001
+- Local dev: 8010
+- Docker: 8010
 
 **Configuration:**
 - `.env.local` with `COOKBOOK_ENDPOINTS` JSON array
-- CORS configured for localhost:5173
+- CORS configured for localhost:5173 (dev only)
+- Serves frontend static files from `backend/static/` directory
 
 **Structure:**
 ```
@@ -65,12 +66,13 @@ backend/
 **Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, SWR, highlight.js, Prettier
 
 **Ports:**
-- Local dev: 5173
-- Docker: 3000
+- Local dev: 5173 (Vite dev server with proxy to backend)
+- Docker: 8010 (served as static files by FastAPI backend)
 
 **Key Features:**
 - Auto-generated routes from registry using utility functions in `routing/`
-- Vite proxy to backend (no CORS issues in dev), serve proxy (Docker)
+- Build output: `backend/static/` directory (served by FastAPI in production)
+- Vite proxy to backend port 8010 (no CORS issues in dev)
 - Mantine v7 with custom theme (nebula/twilight colors), 70px header height
 - AppShell with collapsible sidebar, responsive Header
 
@@ -348,7 +350,7 @@ export const recipes = {
 **Terminal 1 (Backend):**
 ```bash
 cd backend
-uv run uvicorn src.main:app --reload --port 8000
+uv run uvicorn src.main:app --reload --port 8010
 ```
 
 **Terminal 2 (Frontend):**
@@ -357,14 +359,13 @@ cd frontend
 npm run dev  # Runs vite + copy:code:watch (watches recipe source files)
 ```
 
-Visit: `http://localhost:5173`
+Visit: `http://localhost:5173` (Vite dev server proxies /api requests to port 8010)
 
-### Docker Demo Server (MAX + backend + frontend)
+### Docker Demo Server (MAX + web app)
 
-The Docker container runs all three services together using PM2:
+The Docker container runs two services together using PM2:
 - **Port 8000**: MAX LLM serving (/v1 endpoints)
-- **Port 8001**: FastAPI backend (/api endpoints)
-- **Port 3000**: Frontend (static files with proxy to backend)
+- **Port 8010**: FastAPI web app (serves /api endpoints + frontend static files)
 
 **Build:**
 ```bash
@@ -375,19 +376,18 @@ docker build --build-arg MAX_GPU=nvidia -t max-recipes .
 
 **Run:**
 ```bash
-docker run -p 8000:8000 -p 8001:8001 -p 3000:3000 max-recipes
+docker run -p 8000:8000 -p 8010:8010 max-recipes
 # Or with custom model:
-docker run -p 8000:8000 -p 8001:8001 -p 3000:3000 \
+docker run -p 8000:8000 -p 8010:8010 \
   -e MAX_MODEL=google/gemma-3-27b-it \
   max-recipes
 ```
 
-Visit: `http://localhost:3000`
+Visit: `http://localhost:8010`
 
 **Service startup order (via ecosystem.config.js):**
 1. MAX LLM serving starts on port 8000
-2. Backend waits for MAX health check, then starts on port 8001
-3. Frontend waits for backend health check, then serves on port 3000
+2. Web app waits for MAX health check, then starts on port 8010 (serves API + frontend)
 
 ### Key Files to Know
 

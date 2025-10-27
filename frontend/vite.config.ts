@@ -8,10 +8,14 @@ export default defineConfig({
     { enforce: 'pre', ...mdx() },
     react({ include: /\.(jsx|js|mdx|md|tsx|ts)$/ }),
   ],
+  build: {
+    outDir: '../backend/static',
+    emptyOutDir: true,
+  },
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8010',
         changeOrigin: true,
       },
     },

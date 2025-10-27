@@ -71,16 +71,16 @@ backend/
 Start the server with hot-reload:
 
 ```bash
-uv run uvicorn src.main:app --reload --port 8000
+uv run dev
 ```
 
-The API will be available at `http://localhost:8000`
+The API will be available at `http://localhost:8010`
 
 ### API Documentation
 
 Once running, explore the interactive API docs:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+- **Swagger UI**: http://localhost:8010/docs
+- **ReDoc**: http://localhost:8010/redoc
 
 ## API Endpoints
 
@@ -289,13 +289,13 @@ Test your recipe endpoints:
 
 ```bash
 # Health check
-curl http://localhost:8000/api/health
+curl http://localhost:8010/api/health
 
 # List recipes
-curl http://localhost:8000/api/recipes
+curl http://localhost:8010/api/recipes
 
 # Get recipe code
-curl http://localhost:8000/api/recipes/multiturn-chat/code
+curl http://localhost:8010/api/recipes/multiturn-chat/code
 ```
 
 ## Deployment

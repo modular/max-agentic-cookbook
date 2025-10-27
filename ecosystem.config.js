@@ -17,11 +17,11 @@ module.exports = {
             },
         },
         {
-            name: 'backend',
+            name: 'web-app',
             script: '/bin/bash',
             args: [
                 '-c',
-                'wait-on http-get://0.0.0.0:8000/v1/health -t 600000 -i 2000 && cd backend && uv run uvicorn src.main:app --host 0.0.0.0 --port 8001',
+                'wait-on http-get://0.0.0.0:8000/v1/health -t 600000 -i 2000 && cd backend && uv run uvicorn src.main:app --host 0.0.0.0 --port 8010',
             ],
             interpreter: 'none',
             autorestart: true,
@@ -36,18 +36,6 @@ module.exports = {
                     },
                 ]),
             },
-        },
-        {
-            name: 'frontend',
-            script: '/bin/bash',
-            args: [
-                '-c',
-                'wait-on http-get://0.0.0.0:8001/api/health -t 600000 -i 2000 && serve -s frontend/dist -l 3000 -p http://localhost:8001',
-            ],
-            interpreter: 'none',
-            autorestart: true,
-            watch: false,
-            max_memory_restart: '512M',
         },
     ],
 }

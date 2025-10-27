@@ -1,6 +1,6 @@
 # //////////////////////////////////////////////////////////////////////
 # MAX RECIPES DEMO SERVER DOCKERFILE
-# Runs MAX LLM serving + FastAPI backend + React SPA frontend
+# Runs MAX LLM serving + FastAPI web app (backend + frontend)
 # Use MAX_GPU build arg to select base image:
 #   - omitted/default → max-full:latest
 #   - MAX_GPU=amd → max-amd:latest
@@ -25,9 +25,9 @@ RUN wget -qO- https://deb.nodesource.com/setup_22.x | bash - \
     && rm -rf /var/lib/apt/lists/*
 
 # //////////////////////////////////////////////////////////////////////
-# INSTALL PM2, WAIT-ON, AND SERVE (for static frontend)
+# INSTALL PM2 AND WAIT-ON
 
-RUN npm install -g pm2 wait-on@7.2.0 serve
+RUN npm install -g pm2 wait-on@7.2.0
 
 # //////////////////////////////////////////////////////////////////////
 # INSTALL UV FOR PYTHON DEPENDENCY MANAGEMENT
@@ -44,7 +44,7 @@ WORKDIR /app/backend
 RUN uv sync --frozen
 
 # //////////////////////////////////////////////////////////////////////
-# BUILD FRONTEND
+# BUILD FRONTEND (outputs to backend/static)
 
 WORKDIR /app/frontend
 
@@ -63,10 +63,9 @@ COPY ecosystem.config.js ./
 # //////////////////////////////////////////////////////////////////////
 # EXPOSE PORTS
 # 8000 - MAX LLM serving
-# 8001 - FastAPI backend
-# 3000 - Frontend (static files)
+# 8010 - FastAPI web app (backend API + frontend static files)
 
-EXPOSE 8000 8001 3000
+EXPOSE 8000 8010
 
 # //////////////////////////////////////////////////////////////////////
 # START ALL SERVICES WITH PM2

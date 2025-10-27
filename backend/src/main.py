@@ -5,6 +5,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from src.core import endpoints, models
 from src.recipes import image_captioning, multiturn_chat
@@ -69,3 +71,18 @@ async def list_recipes():
                     recipe_slugs.append(slug)
 
     return recipe_slugs
+
+
+# Serve static files (frontend build output)
+static_dir = Path(__file__).parent.parent / "static"
+if static_dir.exists():
+    app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
+else:
+    # Development mode: static files not built yet
+    @app.get("/")
+    async def dev_root():
+        """Development mode placeholder."""
+        return {
+            "message": "Frontend not built. Run 'npm run build' in frontend directory.",
+            "static_dir": str(static_dir),
+        }
