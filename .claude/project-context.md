@@ -19,8 +19,7 @@ max-recipes/
 ├── docs/                 # Architecture, contributing, Docker guides
 ├── Dockerfile            # Demo server (MAX + backend + frontend)
 ├── ecosystem.config.js   # PM2 config for running all services
-├── .dockerignore         # Docker build exclusions
-└── archive/              # Legacy standalone recipes
+└── .dockerignore         # Docker build exclusions
 ```
 
 ### Backend (FastAPI + uv)
@@ -185,18 +184,19 @@ const { data: endpoints, isLoading, error } = useSWR('/api/endpoints', fetchEndp
 ```ts
 export const recipes = {
   "Foundations": [
-    { title: 'Introduction' },  // placeholder (no slug)
+    { title: 'Batch Text Classification' },  // placeholder (no slug)
     {
       slug: 'multiturn-chat',
       title: 'Multi-Turn Chat',
-      description: '...',
+      tags: ['Vercel AI SDK', 'SSE'],
+      description: 'Streaming chat interface with multi-turn conversation support...',
       component: lazyComponentExport(() => import('./multiturn-chat/ui'))
     },
-    { title: 'Batch Safety Classification' },  // placeholder
     {
       slug: 'image-captioning',
       title: 'Streaming Image Captions',
-      description: '...',
+      tags: ['NDJSON', 'Async Coroutines'],
+      description: 'Generate captions for multiple images with progressive NDJSON streaming...',
       component: lazyComponentExport(() => import('./image-captioning/ui'))
     }
   ],
@@ -208,10 +208,11 @@ export const recipes = {
 **Key features:**
 - Nested `section → recipes[]` structure
 - Placeholders have only `title` (dimmed in nav)
-- Implemented recipes have `slug` + `description` (clickable in nav + shown as cards)
+- Implemented recipes have `slug` + `tags` + `description` (clickable in nav + shown as cards)
+- `tags` array displays technology/pattern labels (e.g., 'SSE', 'NDJSON', 'Vercel AI SDK')
 - Optional `component` property for interactive recipe UI (routes auto-generated)
 - Numbers auto-derived from array position (just reorder to renumber)
-- Display format auto-generated ("1: Introduction", "2: Multi-Turn Chat")
+- Display format auto-generated ("1: Batch Text Classification", "2: Streaming Image Captions")
 
 **Helper functions:**
 - `isImplemented(recipe)` - Type guard for checking if recipe has slug
@@ -318,18 +319,22 @@ export const recipes = {
 
 ## Adding a New Recipe
 
-1. Add entry to `frontend/src/recipes/registry.ts` (include `component` property for interactive UI)
-2. Create `backend/src/recipes/[recipe_name].py` with APIRouter
-3. Add recipe route(s) and code endpoint:
+1. Add entry to `frontend/src/recipes/registry.ts`:
+   - Include `slug`, `title`, `tags`, `description` fields
+   - Add `component` property for interactive UI: `lazyComponentExport(() => import('./recipe-name/ui'))`
+   - Tags should identify key technologies/patterns (e.g., `['SSE', 'Streaming']`)
+2. Create `backend/src/recipes/[recipe_name].py` with APIRouter:
+   - Add comprehensive module docstring explaining the recipe's purpose, features, and architecture
    - Import `code_reader`: `from ..core.code_reader import read_source_file`
    - Import Response: `from fastapi.responses import Response`
    - Add main recipe route (e.g., `POST /recipe-name`)
    - Add code route: `GET /recipe-name/code` that returns `Response(content=read_source_file(__file__), media_type="text/plain")`
-4. Include router in `backend/src/main.py`
-5. Add UI component to `frontend/src/recipes/[recipe-name]/`
-6. Add `README.mdx` to `frontend/src/recipes/[recipe-name]/` for documentation
-7. Add recipe slug to `readmeComponents` in `registry.ts`
-8. Routes, index page, and navigation update automatically
+3. Include router in `backend/src/main.py`
+4. Add UI component to `frontend/src/recipes/[recipe-name]/ui.tsx`:
+   - Export `Component` function that accepts `RecipeProps`
+5. Add `README.mdx` to `frontend/src/recipes/[recipe-name]/` for documentation
+6. Add recipe slug to `readmeComponents` in `registry.ts`
+7. Routes, index page, and navigation update automatically
 
 **Routes created:**
 - `/:slug` - Demo view (interactive UI, auto-generated if `component` in registry)

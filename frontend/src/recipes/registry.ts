@@ -36,7 +36,7 @@ export const recipes: RecipeMetadata = {
         {
             slug: 'image-captioning',
             title: 'Streaming Image Captions',
-            tags: ['NDJSON', 'Async Coroutines'],
+            tags: ['NDJSON', 'Async'],
             description:
                 'Generate captions for multiple images with progressive NDJSON streaming. Upload images, customize the prompt, and watch captions appear instantly. Includes parallel processing and performance metrics (TTFT and duration).',
             component: lazyComponentExport(() => import('./image-captioning/ui')),

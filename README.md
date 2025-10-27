@@ -2,6 +2,8 @@
 
 A modern fullstack cookbook app showcasing AI recipes with Modular MAX and other AI services. Built with FastAPI (Python) and React (TypeScript) for maximum flexibility and performance.
 
+> **📦 Looking for legacy recipes?** Older standalone recipes have been moved to the [`archive`](https://github.com/modular/max-agentic-cookbook/tree/archive) branch. These are provided as-is for historical reference only and are no longer maintained.
+
 ## Architecture
 
 FastAPI backend + React SPA with separate projects for clean separation:
@@ -10,8 +12,7 @@ FastAPI backend + React SPA with separate projects for clean separation:
 max-recipes/
 ├── backend/          # FastAPI Python API (port 8000 local, 8001 Docker)
 ├── frontend/         # Vite React TypeScript SPA (port 5173 local, 3000 Docker)
-├── docs/             # Architecture, contributing, Docker guides
-└── archive/          # Legacy standalone recipes
+└── docs/             # Architecture, contributing, Docker guides
 ```
 
 **Why this architecture?**

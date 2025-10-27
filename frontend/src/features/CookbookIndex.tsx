@@ -24,7 +24,7 @@ export function CookbookIndex() {
                 <Box>
                     <Text size="lg">
                         Welcome to Modular Agentic Cookbook, a modern fullstack app
-                        built for learninging agentic AI patterns with Modular MAX!
+                        built for learning agentic AI patterns with Modular MAX!
                         Explore practical recipes built with FastAPI and React that
                         demonstrate streaming technologies like SSE (Server-Sent Events)
                         and NDJSON, popular libraries like Vercel AI SDK and SWR, and

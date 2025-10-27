@@ -33,8 +33,7 @@ max-recipes/
 │   │   └── App.tsx         # Entry point
 │   └── package.json        # Frontend dependencies
 │
-├── docs/                   # Documentation
-└── archive/                # Legacy standalone recipes
+└── docs/                   # Documentation
 ```
 
 See [`frontend/src/recipes/registry.ts`](../frontend/src/recipes/registry.ts) for recipe metadata and [`.claude/project-context.md`](../.claude/project-context.md) for detailed architecture docs.

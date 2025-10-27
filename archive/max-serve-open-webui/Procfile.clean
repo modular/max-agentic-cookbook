@@ -1,2 +1,0 @@
-cleanup: pkill -f "max serve" || true && pkill -f "open-webui serve" || true
-port-cleanup: lsof -ti:8000,7860 | xargs -r kill -9 2>/dev/null || true
