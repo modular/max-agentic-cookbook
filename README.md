@@ -4,15 +4,75 @@ A modern fullstack cookbook app showcasing AI recipes with Modular MAX and other
 
 > **📦 Looking for legacy recipes?** Older standalone recipes have been moved to the [`archive`](https://github.com/modular/max-agentic-cookbook/tree/archive) branch. These are provided as-is for historical reference only and are no longer maintained.
 
+## Requirements
+
+-   **Python** 3.11 or higher; we recommend [uv 0.7+](https://github.com/astral-sh/uv) for working with Python
+-   **Node.js** 22.x or higher; we recommend [pnpm 10.17+](https://pnpm.io/installation) for working with Node.js
+
+## Quick Start
+
+### Clone the repo
+
+```bash
+git clone https://github.com/modular/max-agentic-cookbook.git
+cd max-agentic-cookbook
+```
+
+### Set up your LLM endpoint
+
+```bash
+cp backend/.sample.env backend/.env.local
+```
+
+Open .env.local in your favorite text editor and supply a valid MAX or OpenAI-compatible endpoint.
+
+### Install dependencies
+
+```bash
+cd backend && uv sync
+cd ..
+cd frontend && npm install
+```
+
+### Run the app
+
+#### Run with VS Code
+
+1. Open the `max-agentic-cookbook` folder in VS Code
+2. Open the Run & Debug panel
+3. Choose _Full-Stack Debug_
+
+#### Run in terminal
+
+Run the backend and frontend separately in two terminals.
+
+**Terminal 1 (Backend):**
+
+```bash
+cd backend
+uv run dev
+```
+
+**Terminal 2 (Frontend):**
+
+```bash
+cd frontend
+npm run dev
+```
+
+Visit `http://localhost:5173` to see the app.
+
 ## Architecture
 
 FastAPI backend + React SPA with separate projects for clean separation:
 
 ```
+
 max-recipes/
-├── backend/          # FastAPI Python API (port 8010)
-├── frontend/         # Vite React TypeScript SPA (port 5173 local)
-└── docs/             # Architecture, contributing, Docker guides
+├── backend/ # FastAPI Python API (port 8010)
+├── frontend/ # Vite React TypeScript SPA (port 5173 local)
+└── docs/ # Architecture, contributing, Docker guides
+
 ```
 
 **Why this architecture?**
@@ -20,37 +80,7 @@ max-recipes/
 -   **Separate projects** - First-class ecosystems for AI and UI development
 -   **No SSR needed** - Just plain React, copy-paste into any project
 
-## Requirements
-
--   **Python** 3.11 or higher
--   **Node.js** 22.x or higher
--   **uv** - Fast Python package installer ([install here](https://github.com/astral-sh/uv))
-
-## Quick Start
-
-### Local Development
-
-Run backend and frontend separately in two terminals, or run + debug with VS Code.
-
-**Terminal 1 (Backend):**
-
-```bash
-cd backend
-uv sync        # Install dependencies
-uv run dev     # Start backend on port 8010
-```
-
-**Terminal 2 (Frontend):**
-
-```bash
-cd frontend
-npm install      # Install dependencies
-npm run dev      # Start frontend with hot reload
-```
-
-Visit `http://localhost:5173` to see the app.
-
-### Docker with MAX (All-in-One)
+## Docker
 
 Run the complete stack with MAX model serving + backend + frontend:
 
@@ -84,13 +114,13 @@ Visit `http://localhost:8010` to see the app.
 -   **Port 8000**: MAX LLM serving (OpenAI-compatible /v1 endpoints)
 -   **Port 8010**: Web app (FastAPI backend + React frontend)
 
-PM2 orchestrates startup: MAX → web app with automatic health checks and restarts.
+Behind the scenes, PM2 orchestrates startup: MAX → web app with automatic health checks and restarts.
 
 ## Configuration
 
 ### Backend Configuration (.env.local)
 
-Create `backend/.env.local` to configure LLM endpoints:
+The app uses `backend/.env.local` to configure LLM endpoints:
 
 ```env
 COOKBOOK_ENDPOINTS='[
@@ -102,11 +132,7 @@ COOKBOOK_ENDPOINTS='[
 ]'
 ```
 
-See `backend/.sample.env` for template.
-
-### Frontend Configuration
-
-No config needed! Frontend auto-detects endpoints via backend API.
+See `backend/.sample.env` for a template.
 
 ## Development
 
