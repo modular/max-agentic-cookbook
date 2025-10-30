@@ -1,6 +1,6 @@
 # Docker Deployment Guide
 
-This guide provides instructions for running the MAX Recipes cookbook in Docker with integrated MAX model serving.
+This guide provides instructions for running the MAX Agentic Cookbook in Docker with integrated MAX model serving.
 
 ## Overview
 
@@ -305,7 +305,7 @@ docker logs max-recipes
 
 ## Next Steps
 
--   [Architecture Guide](./architecture.md) - Understand the cookbook structure
+-   [API Reference](./api.md) - Complete endpoint specifications and request/response formats
 -   [Contributing Guide](./contributing.md) - Add your own recipes
 -   [MAX Documentation](https://docs.modular.com/max/) - Learn more about MAX
--   [Project Context](../.claude/project-context.md) - Comprehensive reference
+-   [Project Context](../AGENTS.md) - Comprehensive architecture reference
