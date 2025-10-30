@@ -1,8 +1,8 @@
-# MAX Recipes Project Context
+# MAX Agentic Cookbook - Project Context
 
 ## Overview
 
-MAX Recipes is a fullstack cookbook application for AI recipes, demonstrating integrations with Modular MAX and other AI services. Built with FastAPI (Python) backend + React (TypeScript) SPA frontend for maximum flexibility and performance.
+MAX Agentic Cookbook is a fullstack cookbook application showcasing the agentic AI capabilities of Modular MAX as a complete LLM serving solution. Built with FastAPI (Python) backend + React (TypeScript) SPA frontend for maximum flexibility and performance.
 
 **Key benefits:**
 
@@ -451,7 +451,7 @@ export const readmeComponents: Record<string, LazyExoticComponent<ComponentType>
 
 ```bash
 cd backend
-uv run uvicorn src.main:app --reload --port 8010
+uv run dev
 ```
 
 **Terminal 2 (Frontend):**
@@ -762,6 +762,8 @@ import { Header } from '~/components/Header'
 ## Related Documentation
 
 -   [README.md](../README.md) - Quick start, setup instructions
--   [Architecture Guide](../docs/architecture.md) - Design decisions, patterns, technology choices
--   [Contributing Guide](../docs/contributing.md) - How to add recipes and contribute
+-   [API Reference](../docs/api.md) - Complete endpoint specifications and request/response formats
+-   [Contributing Guide](../docs/contributing.md) - How to add recipes, code standards, and development patterns
+-   [Backend README](../backend/README.md) - Backend setup and development
+-   [Frontend README](../frontend/README.md) - Frontend setup and development
 -   [Docker Deployment Guide](../docs/docker.md) - Container deployment with MAX
