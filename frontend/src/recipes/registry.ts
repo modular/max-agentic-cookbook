@@ -9,7 +9,7 @@ import type {
     RecipeMetadata,
     NavItem,
     NavSection,
-} from '../lib/types'
+} from '~/lib/types'
 
 // Single source of truth for all recipe metadata
 export const recipes: RecipeMetadata = {

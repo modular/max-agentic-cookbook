@@ -10,14 +10,14 @@ import {
     Text,
 } from '@mantine/core'
 import { IconChevronRight, IconPlus } from '@tabler/icons-react'
-import { iconStroke } from '../lib/theme'
-import { isRecipeImplemented } from '../recipes/registry'
-import { useEndpointFromQuery } from '../lib/hooks'
+import { iconStroke } from '~/lib/theme'
+import { isRecipeImplemented } from '~/recipes/registry'
+import { useEndpointFromQuery } from '~/lib/hooks'
 import { SelectEndpoint } from './SelectEndpoint'
 import { SelectModel } from './SelectModel'
-import chapters from '../lib/chapters'
+import chapters from '~/lib/chapters'
 import classes from './Navbar.module.css'
-import type { NavItem } from '../lib/types'
+import type { NavItem } from '~/lib/types'
 
 interface NavItemProps {
     item: NavItem

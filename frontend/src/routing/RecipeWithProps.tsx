@@ -4,8 +4,8 @@
 
 import type { ComponentType } from 'react'
 import { useLocation } from 'react-router-dom'
-import { useEndpointFromQuery, useModelFromQuery } from '../lib/hooks'
-import type { RecipeProps } from '../lib/types'
+import { useEndpointFromQuery, useModelFromQuery } from '~/lib/hooks'
+import type { RecipeProps } from '~/lib/types'
 
 export function RecipeWithProps({
     Component: RecipeComponent,

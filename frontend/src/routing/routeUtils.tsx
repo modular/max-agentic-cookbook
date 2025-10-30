@@ -5,8 +5,8 @@
 import { Suspense } from 'react'
 import { Route } from 'react-router-dom'
 import { Text } from '@mantine/core'
-import { getAllImplementedRecipes } from '../recipes/registry'
-import { getRecipeComponent, lazyComponentExport } from '../recipes/components'
+import { getAllImplementedRecipes } from '~/recipes/registry'
+import { getRecipeComponent, lazyComponentExport } from '~/recipes/components'
 import { RecipeWithProps } from './RecipeWithProps'
 import { Loading } from './Loading'
 

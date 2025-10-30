@@ -14,8 +14,8 @@ import {
     Box,
     Divider,
 } from '@mantine/core'
-import { isRecipeImplemented, getRecipeBySlug } from '../recipes/registry'
-import chapters from '../lib/chapters'
+import { isRecipeImplemented, getRecipeBySlug } from '~/recipes/registry'
+import chapters from '~/lib/chapters'
 
 export function CookbookIndex() {
     return (

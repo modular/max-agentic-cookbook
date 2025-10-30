@@ -22,7 +22,7 @@ import { useEffect, useRef, useState } from 'react'
 import { DefaultChatTransport } from 'ai'
 import { useChat } from '@ai-sdk/react'
 import { Box, Flex, Paper, ScrollArea, Space, Stack, Text } from '@mantine/core'
-import type { Endpoint, Model } from '../../lib/types'
+import type { Endpoint, Model } from '~/lib/types'
 
 // ============================================================================
 // Types

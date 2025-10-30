@@ -5,7 +5,7 @@
 import { useEffect } from 'react'
 import { MantineProvider, useMantineColorScheme } from '@mantine/core'
 import { BrowserRouter } from 'react-router-dom'
-import { theme } from '../lib/theme'
+import { theme } from '~/lib/theme'
 
 function HighlightJsThemeLoader() {
     const { colorScheme } = useMantineColorScheme()

@@ -3,7 +3,7 @@
  */
 
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
-import type { RecipeProps } from '../lib/types'
+import type { RecipeProps } from '~/lib/types'
 
 /**
  * Helper: Create a lazy-loaded component that maps named 'Component' export to default

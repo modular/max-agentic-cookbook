@@ -2,11 +2,11 @@ import { Link } from 'react-router-dom'
 import { ActionIcon, Burger, Flex, Group, Title } from '@mantine/core'
 import { IconListTree } from '@tabler/icons-react'
 
-import { iconStroke } from '../lib/theme'
+import { iconStroke } from '~/lib/theme'
 import { ThemeToggle } from './ThemeToggle'
 import { SelectEndpoint } from './SelectEndpoint'
 import { SelectModel } from './SelectModel'
-import { useEndpointFromQuery } from '../lib/hooks'
+import { useEndpointFromQuery } from '~/lib/hooks'
 
 interface HeaderProps {
     mobileOpened: boolean

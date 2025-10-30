@@ -2,9 +2,9 @@ import { useEffect } from 'react'
 import { AppShell } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { Outlet, useLocation } from 'react-router-dom'
-import { headerHeight, navbarWidth } from '../lib/theme'
-import { Header } from '../components/Header'
-import { Navbar } from '../components/Navbar'
+import { headerHeight, navbarWidth } from '~/lib/theme'
+import { Header } from '~/components/Header'
+import { Navbar } from '~/components/Navbar'
 
 export function CookbookShell() {
     const [mobileOpened, { toggle: toggleMobile }] = useDisclosure()

@@ -6,7 +6,7 @@
  */
 
 import { Flex, Select } from '@mantine/core'
-import { useModelFromQuery } from '../lib/hooks'
+import { useModelFromQuery } from '~/lib/hooks'
 
 export interface SelectModelProps {
     label?: string

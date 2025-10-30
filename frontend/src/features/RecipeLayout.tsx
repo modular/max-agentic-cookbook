@@ -20,9 +20,9 @@
 
 import { Flex, Box } from '@mantine/core'
 import { Outlet, useLocation } from 'react-router-dom'
-import { Toolbar } from '../components/Toolbar'
-import { appShellContentHeight } from '../lib/theme'
-import { recipeMetadata } from '../recipes/registry'
+import { Toolbar } from '~/components/Toolbar'
+import { appShellContentHeight } from '~/lib/theme'
+import { recipeMetadata } from '~/recipes/registry'
 
 export function RecipeLayoutShell() {
     const location = useLocation()

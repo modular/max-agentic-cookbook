@@ -7,7 +7,7 @@
 
 import { Flex, Select } from '@mantine/core'
 import { useMemo } from 'react'
-import { useEndpointFromQuery } from '../lib/hooks'
+import { useEndpointFromQuery } from '~/lib/hooks'
 
 export interface SelectEndpointProps {
     label?: string

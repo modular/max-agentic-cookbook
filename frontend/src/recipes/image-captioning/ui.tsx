@@ -32,7 +32,7 @@ import {
     IconPhoto,
     IconX,
 } from '@tabler/icons-react'
-import type { Endpoint, Model } from '../../lib/types'
+import type { Endpoint, Model } from '~/lib/types'
 
 // ============================================================================
 // Shared types and data structures

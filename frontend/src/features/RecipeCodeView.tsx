@@ -11,7 +11,7 @@ import useSWR from 'swr'
 import hljs from 'highlight.js/lib/core'
 import typescript from 'highlight.js/lib/languages/typescript'
 import python from 'highlight.js/lib/languages/python'
-import { fetchFrontendCode, fetchBackendCode } from '../lib/api'
+import { fetchFrontendCode, fetchBackendCode } from '~/lib/api'
 
 // Register languages
 hljs.registerLanguage('typescript', typescript)

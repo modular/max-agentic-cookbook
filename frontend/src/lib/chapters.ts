@@ -1,7 +1,7 @@
 // Auto-generated navigation from recipe registry
 // This file is derived - edit registry.ts to change structure
 
-import { buildNavigation } from '../recipes/registry'
+import { buildNavigation } from '~/recipes/registry'
 
 // Build navigation with auto-numbering (1: Title, 2: Title, etc.)
 const navigation = buildNavigation()

@@ -16,6 +16,16 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* Path aliases */
+    "baseUrl": ".",
+    "paths": {
+      "~/lib/*": ["src/lib/*"],
+      "~/components/*": ["src/components/*"],
+      "~/features/*": ["src/features/*"],
+      "~/recipes/*": ["src/recipes/*"],
+      "~/routing/*": ["src/routing/*"]
+    },
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
