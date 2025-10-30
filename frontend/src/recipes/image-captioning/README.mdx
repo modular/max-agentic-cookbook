@@ -12,6 +12,53 @@
 - Tracks TTFT (time to first token) and duration for each image
 - Returns newline-delimited JSON stream
 
+## Key Implementation Details
+
+**NDJSON Parsing** (`ui.tsx:96-127`):
+
+- Accumulates chunks into buffer, splits on `\n`
+- Keeps last (potentially incomplete) line in buffer
+- Parses and delivers each complete line via callback
+
+**Parallel Processing** (`image_captioning.py:68-116`):
+
+- Each image gets its own async task
+- `asyncio.as_completed` yields results as they finish (not in order)
+- Streams results immediately, no waiting for full batch
+
+**Performance Tracking** (`image_captioning.py:71-97`):
+
+- `start_time`: Request start
+- `first_token_time`: When first chunk arrives (TTFT)
+- `duration`: Time from first token to completion
+- All timing in milliseconds
+
+**Abort Handling** (`ui.tsx:141-146`):
+
+- `AbortController` allows canceling in-flight requests
+- Cleanup on unmount prevents memory leaks
+
+### Why NDJSON
+
+- **Progressive updates**: Display results as they complete, not all-at-once
+- **Simple protocol**: No SSE complexity, just newline-delimited JSON
+- **Framework-agnostic**: Custom hook works with any React setup
+- **Parallel processing**: Out-of-order completion handled naturally
+
+### Performance Characteristics
+
+- **Parallelism**: All images processed concurrently on backend
+- **Streaming**: Results appear as soon as individual captions complete
+- **No batching latency**: First result streams immediately, don't wait for slowest image
+- **Metrics**: TTFT shows model latency, duration shows generation time
+
+### File References
+
+- Frontend: `frontend/src/recipes/image-captioning/ui.tsx`
+- Backend: `backend/src/recipes/image_captioning.py`
+- Custom hook: `useNDJSON` (lines 73-150 in ui.tsx)
+- Parallel processing: `asyncio.as_completed` (lines 118-122 in image_captioning.py)
+
 ## Protocol Flow
 
 1. Frontend sends `POST /api/recipes/image-captioning` with:
@@ -58,49 +105,43 @@
 
 4. Frontend parses stream line-by-line and updates UI progressively
 
-## Key Implementation Details
+## API Reference
 
-**NDJSON Parsing** (`ui.tsx:96-127`):
+**Endpoint:** `POST /api/recipes/image-captioning`
 
-- Accumulates chunks into buffer, splits on `\n`
-- Keeps last (potentially incomplete) line in buffer
-- Parses and delivers each complete line via callback
+**Content-Type:** `application/x-ndjson`
 
-**Parallel Processing** (`image_captioning.py:68-116`):
+**Request Body:**
 
-- Each image gets its own async task
-- `asyncio.as_completed` yields results as they finish (not in order)
-- Streams results immediately, no waiting for full batch
+```json
+{
+    "endpointId": "max-local",
+    "modelName": "pixtral-12b",
+    "batch": [
+        {
+            "imageId": "img-1",
+            "messages": [
+                { "role": "system", "content": "Describe this image in detail." },
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image_url",
+                            "image_url": { "url": "data:image/jpeg;base64,..." }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+```
 
-**Performance Tracking** (`image_captioning.py:71-97`):
+**Response:**
 
-- `start_time`: Request start
-- `first_token_time`: When first chunk arrives (TTFT)
-- `duration`: Time from first token to completion
-- All timing in milliseconds
+NDJSON (Newline-Delimited JSON) stream with progressive results:
 
-**Abort Handling** (`ui.tsx:141-146`):
-
-- `AbortController` allows canceling in-flight requests
-- Cleanup on unmount prevents memory leaks
-
-## Why NDJSON
-
-- **Progressive updates**: Display results as they complete, not all-at-once
-- **Simple protocol**: No SSE complexity, just newline-delimited JSON
-- **Framework-agnostic**: Custom hook works with any React setup
-- **Parallel processing**: Out-of-order completion handled naturally
-
-## Performance Characteristics
-
-- **Parallelism**: All images processed concurrently on backend
-- **Streaming**: Results appear as soon as individual captions complete
-- **No batching latency**: First result streams immediately, don't wait for slowest image
-- **Metrics**: TTFT shows model latency, duration shows generation time
-
-## File References
-
-- Frontend: `frontend/src/recipes/image-captioning/ui.tsx`
-- Backend: `backend/src/recipes/image_captioning.py`
-- Custom hook: `useNDJSON` (lines 73-150 in ui.tsx)
-- Parallel processing: `asyncio.as_completed` (lines 118-122 in image_captioning.py)
+```json
+{"imageId": "img-1", "text": "A scenic mountain landscape...", "ttft": 234, "duration": 567}
+{"imageId": "img-2", "text": "A city skyline at sunset...", "ttft": 189, "duration": 423}
+```

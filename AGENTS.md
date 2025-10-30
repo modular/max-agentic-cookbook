@@ -66,6 +66,44 @@ backend/
 -   `GET /api/recipes/image-captioning/code` - Get image-captioning backend source as plain text
 -   Frontend source: Static files at `/code/{recipe-name}/ui.tsx` (copied by build script)
 
+**Core Modules:**
+
+The backend provides reusable utilities in `src/core/` for recipe development:
+
+- **endpoints.py** - Endpoint configuration management with caching:
+  ```python
+  from ..core.endpoints import get_cached_endpoint
+
+  endpoint = get_cached_endpoint(endpoint_id)
+  if not endpoint:
+      raise HTTPException(status_code=404, detail="Endpoint not found")
+
+  client = AsyncOpenAI(
+      base_url=endpoint.base_url,
+      api_key=endpoint.api_key
+  )
+  ```
+  - Loads from `COOKBOOK_ENDPOINTS` environment variable
+  - In-memory caching for fast lookups
+  - Never exposes API keys to client
+
+- **models.py** - Proxies OpenAI-compatible `/v1/models` endpoint:
+  ```python
+  GET /api/models?endpointId={id}
+  ```
+  - Returns available models for the specified endpoint
+
+- **code_reader.py** - Utility for reading recipe source code:
+  ```python
+  from ..core.code_reader import read_source_file
+
+  source_code = read_source_file(__file__)
+  ```
+  - Returns Python source code as a string
+  - Enables the code viewer feature in the frontend
+
+See [API Reference](../docs/api.md) for complete endpoint documentation.
+
 ### Frontend (Vite + React)
 
 **Tech:** Vite, React 18, TypeScript, React Router v7, Mantine v7, SWR, highlight.js, Prettier
@@ -94,7 +132,8 @@ backend/
 frontend/
 ├── src/
 │   ├── recipes/                # Recipe components + registry.ts
-│   │   ├── registry.ts         # SINGLE SOURCE OF TRUTH for all recipe metadata
+│   │   ├── registry.ts         # Pure data - recipe metadata only
+│   │   ├── components.ts       # React component mapping (UI + README)
 │   │   ├── multiturn-chat/     # Multi-turn chat recipe
 │   │   │   ├── README.mdx      # Recipe documentation
 │   │   │   └── ui.tsx          # Demo component (exports Component function)
@@ -193,7 +232,7 @@ const { data: endpoints, isLoading, error } = useSWR('/api/endpoints', fetchEndp
 
 ### Recipe Registry (`registry.ts`)
 
-**Single source of truth** for all recipe metadata in `frontend/src/recipes/registry.ts`:
+**Pure data only** - no React dependencies in `frontend/src/recipes/registry.ts`:
 
 ```ts
 export const recipes = {
@@ -203,15 +242,13 @@ export const recipes = {
       slug: 'multiturn-chat',
       title: 'Multi-Turn Chat',
       tags: ['Vercel AI SDK', 'SSE'],
-      description: 'Streaming chat interface with multi-turn conversation support...',
-      component: lazyComponentExport(() => import('./multiturn-chat/ui'))
+      description: 'Streaming chat interface with multi-turn conversation support...'
     },
     {
       slug: 'image-captioning',
       title: 'Streaming Image Captions',
       tags: ['NDJSON', 'Async Coroutines'],
-      description: 'Generate captions for multiple images with progressive NDJSON streaming...',
-      component: lazyComponentExport(() => import('./image-captioning/ui'))
+      description: 'Generate captions for multiple images with progressive NDJSON streaming...'
     }
   ],
   "Data, Tools & Reasoning": [...],
@@ -221,13 +258,14 @@ export const recipes = {
 
 **Key features:**
 
+-   Pure data structure - no React imports or component references
 -   Nested `section → recipes[]` structure
 -   Placeholders have only `title` (dimmed in nav)
 -   Implemented recipes have `slug` + `tags` + `description` (clickable in nav + shown as cards)
 -   `tags` array displays technology/pattern labels (e.g., 'SSE', 'NDJSON', 'Vercel AI SDK')
--   Optional `component` property for interactive recipe UI (routes auto-generated)
 -   Numbers auto-derived from array position (just reorder to renumber)
 -   Display format auto-generated ("1: Batch Text Classification", "2: Streaming Image Captions")
+-   Component mapping is in separate `components.ts` file
 
 **Helper functions:**
 
@@ -235,13 +273,11 @@ export const recipes = {
 -   `getRecipeBySlug(slug)` - Lookup recipe by slug
 -   `buildNavigation()` - Generate nav with auto-numbering
 -   `getAllImplementedRecipes()` - Get all recipes with slugs
--   `getAllRecipesWithComponents()` - Get recipes with interactive UI components
 -   `isRecipeImplemented(slug)` - Check if slug is implemented
--   `lazyComponentExport()` - Helper for lazy loading components that export `Component`
 
 **Frontend usage:**
 
--   `App.tsx` uses `getAllRecipesWithComponents()` to auto-generate routes
+-   `App.tsx` combines data from registry with components from `components.ts`
 -   `CookbookIndex.tsx` uses `getAllImplementedRecipes()` for card grid
 -   `Navbar.tsx` uses `isRecipeImplemented()` to check if clickable
 -   `chapters.ts` auto-derives navigation from `buildNavigation()`
@@ -252,6 +288,41 @@ export const recipes = {
 -   Returns array of slugs like `["multiturn-chat", "image-captioning"]`
 -   Frontend already has the metadata (title, description)
 -   No duplication needed
+
+### Recipe Component Mapping (`components.ts`)
+
+**React component mapping** - separates components from pure data in `frontend/src/recipes/components.ts`:
+
+**Exports:**
+
+-   `recipeComponents` - Map of slug → lazy-loaded UI component
+-   `readmeComponents` - Map of slug → lazy-loaded README MDX component
+-   `getRecipeComponent(slug)` - Get UI component for a recipe
+-   `getReadmeComponent(slug)` - Get README component for a recipe
+-   `lazyComponentExport()` - Helper for lazy loading components that export `Component`
+
+**Example:**
+
+```ts
+export const recipeComponents: Record<
+    string,
+    LazyExoticComponent<ComponentType<RecipeProps>>
+> = {
+    'multiturn-chat': lazyComponentExport(() => import('./multiturn-chat/ui')),
+    'image-captioning': lazyComponentExport(() => import('./image-captioning/ui')),
+}
+
+export const readmeComponents: Record<string, LazyExoticComponent<ComponentType>> = {
+    'multiturn-chat': lazy(() => import('./multiturn-chat/README.mdx')),
+    'image-captioning': lazy(() => import('./image-captioning/README.mdx')),
+}
+```
+
+**Usage:**
+
+-   `routeUtils.tsx` imports component mapping and combines with registry data
+-   `RecipeReadmeView.tsx` uses `getReadmeComponent()` to load READMEs
+-   Keeps React concerns separate from pure data in registry
 
 ### Implemented Recipes
 
@@ -348,25 +419,27 @@ export const recipes = {
 ## Adding a New Recipe
 
 1. Add entry to `frontend/src/recipes/registry.ts`:
-    - Include `slug`, `title`, `tags`, `description` fields
-    - Add `component` property for interactive UI: `lazyComponentExport(() => import('./recipe-name/ui'))`
+    - Include `slug`, `title`, `tags`, `description` fields (pure data only)
     - Tags should identify key technologies/patterns (e.g., `['SSE', 'Streaming']`)
-2. Create `backend/src/recipes/[recipe_name].py` with APIRouter:
+    - Do NOT add `component` property (that goes in components.ts)
+2. Add component mapping to `frontend/src/recipes/components.ts`:
+    - Add UI component: `'recipe-slug': lazyComponentExport(() => import('./recipe-name/ui'))`
+    - Add README component: `'recipe-slug': lazy(() => import('./recipe-name/README.mdx'))`
+3. Create `backend/src/recipes/[recipe_name].py` with APIRouter:
     - Add comprehensive module docstring explaining the recipe's purpose, features, and architecture
     - Import `code_reader`: `from ..core.code_reader import read_source_file`
     - Import Response: `from fastapi.responses import Response`
     - Add main recipe route (e.g., `POST /recipe-name`)
     - Add code route: `GET /recipe-name/code` that returns `Response(content=read_source_file(__file__), media_type="text/plain")`
-3. Include router in `backend/src/main.py`
-4. Add UI component to `frontend/src/recipes/[recipe-name]/ui.tsx`:
+4. Include router in `backend/src/main.py`
+5. Add UI component to `frontend/src/recipes/[recipe-name]/ui.tsx`:
     - Export `Component` function that accepts `RecipeProps`
-5. Add `README.mdx` to `frontend/src/recipes/[recipe-name]/` for documentation
-6. Add recipe slug to `readmeComponents` in `registry.ts`
+6. Add `README.mdx` to `frontend/src/recipes/[recipe-name]/` for documentation
 7. Routes, index page, and navigation update automatically
 
 **Routes created:**
 
--   `/:slug` - Demo view (interactive UI, auto-generated if `component` in registry)
+-   `/:slug` - Demo view (interactive UI, auto-generated from components.ts)
 -   `/:slug/readme` - README documentation (auto-available for all recipes)
 -   `/:slug/code` - Source code view (auto-available for all recipes)
 
@@ -424,15 +497,16 @@ Visit: `http://localhost:8010`
 
 ### Key Files to Know
 
--   `frontend/src/recipes/registry.ts` - **SINGLE SOURCE OF TRUTH** for all recipe metadata
+-   `frontend/src/recipes/registry.ts` - Pure data - recipe metadata only (no React dependencies)
+-   `frontend/src/recipes/components.ts` - React component mapping (UI + README lazy imports)
 -   `backend/src/recipes/[recipe_name].py` - Individual recipe API routers
 -   `backend/src/main.py` - Include recipe routers, programmatic route discovery
--   `frontend/src/App.tsx` - Auto-generates routes from registry (no manual edits needed per recipe)
+-   `frontend/src/App.tsx` - Auto-generates routes (combines registry data + component mapping)
 -   `frontend/src/routing/AppProviders.tsx` - Mantine provider, Router wrapper
--   `frontend/src/routing/routeUtils.tsx` - Route generation utilities (lazyLoadDemoRoutes, lazyLoadDetailRoutes)
--   `frontend/src/lib/api.ts` - Add new API client functions
+-   `frontend/src/routing/routeUtils.tsx` - Route generation utilities (imports from both registry + components)
+-   `frontend/src/lib/api.ts` - API client functions
 -   `frontend/src/lib/hooks.ts` - Custom hooks with SWR integration
--   `frontend/src/lib/types.ts` - Add shared TypeScript types
+-   `frontend/src/lib/types.ts` - Shared TypeScript types (Recipe, Endpoint, Model, NavItem, etc.)
 -   `Dockerfile` - Demo server image (MAX + backend + frontend)
 -   `ecosystem.config.js` - PM2 process manager config for all services
 -   `.dockerignore` - Docker build exclusions
@@ -575,44 +649,59 @@ declare module '*.mdx' {
 3. README will automatically be available at `/my-recipe/readme`
 4. Code blocks in MDX are automatically syntax-highlighted with highlight.js (supports TypeScript, Python, JavaScript, JSON)
 
-## TypeScript Coding Standards
+## Path Aliases
 
-**Critical:** Never use the `any` type in TypeScript code. This project maintains strict type safety.
+The project uses TypeScript path aliases to simplify imports and avoid relative path hell.
 
-**Type Safety Guidelines:**
+**Configuration** (`vite.config.ts`):
 
--   ❌ **Never use `any`** - bypasses type checking and defeats the purpose of TypeScript
--   ✅ **Use `unknown`** - for truly dynamic data that will be validated at runtime (e.g., `body: unknown` in fetch calls)
--   ✅ **Use proper interfaces** - define explicit interfaces like `RecipeProps` for component props
--   ✅ **Use generic types** - e.g., `ComponentType<RecipeProps>` instead of `ComponentType<any>`
--   ✅ **Use type guards** - `isImplemented(recipe)` for runtime type narrowing
-
-**Examples:**
-
-```typescript
-// ❌ BAD - bypasses type checking
-function process(data: any) { ... }
-const Component: ComponentType<any> = ...
-
-// ✅ GOOD - maintains type safety
-function process(data: unknown) { ... }  // Will validate before use
-const Component: ComponentType<RecipeProps> = ...
-interface RecipeProps {
-  endpoint: Endpoint | null
-  model: Model | null
-  pathname: string
+```ts
+resolve: {
+  alias: {
+    '~/lib': path.resolve(__dirname, './src/lib'),
+    '~/components': path.resolve(__dirname, './src/components'),
+    '~/features': path.resolve(__dirname, './src/features'),
+    '~/recipes': path.resolve(__dirname, './src/recipes'),
+    '~/routing': path.resolve(__dirname, './src/routing'),
+  },
 }
 ```
 
-**Why This Matters:**
+**TypeScript** (`tsconfig.app.json`):
 
--   Catches bugs at compile time instead of runtime
--   Enables IDE autocomplete and refactoring
--   Documents expected data shapes
--   Makes code more maintainable
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~/lib/*": ["src/lib/*"],
+      "~/components/*": ["src/components/*"],
+      "~/features/*": ["src/features/*"],
+      "~/recipes/*": ["src/recipes/*"],
+      "~/routing/*": ["src/routing/*"]
+    }
+  }
+}
+```
 
-**Shared Types:**
-All shared types live in `frontend/src/lib/types.ts` for consistency across the codebase.
+**Usage:**
+
+```ts
+// Before: relative imports
+import { theme } from '../../../lib/theme'
+import { Header } from '../../components/Header'
+
+// After: path aliases
+import { theme } from '~/lib/theme'
+import { Header } from '~/components/Header'
+```
+
+**Benefits:**
+
+-   Clean, consistent imports across the entire codebase
+-   No brittle relative paths (`../../../`)
+-   Easier refactoring - imports don't break when moving files
+-   Better IDE autocomplete and navigation
 
 ## Security Model
 

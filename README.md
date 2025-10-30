@@ -1,6 +1,6 @@
 # MAX Agentic Cookbook
 
-A modern fullstack cookbook app showcasing AI recipes with Modular MAX and other AI services. Built with FastAPI (Python) and React (TypeScript) for maximum flexibility and performance.
+This repo contains a modern fullstack cookbook app showcasing the agentic AI capabilities of Modular MAX as a complete LLM serving solution. It's built with FastAPI (Python) and React (TypeScript), optimizing for developer familiarity and flexibility.
 
 <img src="./docs/screenshot.png" alt="Screenshot of the MAX Agentic Cookbook web application showing the multi-turn chat recipe demo.">
 
@@ -26,7 +26,17 @@ cd max-agentic-cookbook
 cp backend/.sample.env backend/.env.local
 ```
 
-Open .env.local in your favorite text editor and supply a valid MAX or OpenAI-compatible endpoint.
+Open `backend/.env.local` in your favorite text editor and supply a valid MAX or OpenAI-compatible endpoint:
+
+```env
+COOKBOOK_ENDPOINTS='[
+  {
+    "id": "max-local",
+    "baseUrl": "http://localhost:8000/v1",
+    "apiKey": "EMPTY"
+  }
+]'
+```
 
 ### Install dependencies
 
@@ -40,51 +50,39 @@ cd frontend && npm install
 
 #### Run with VS Code
 
+The Cookbook contains a VS Code configuration in `.vscode`, preconfigured for full-stack debugging.
+
 1. Open the `max-agentic-cookbook` folder in VS Code
 2. Open the Run & Debug panel
 3. Choose _Full-Stack Debug_
 
-#### Run in terminal
+#### Run in the terminal
 
-Run the backend and frontend separately in two terminals.
+You can run the backend and frontend separately by using two terminal sessions.
 
-Terminal 1 (Backend):
+Terminal 1 (Python Backend):
 
 ```bash
 cd backend
 uv run dev
 ```
 
-Terminal 2 (Frontend):
+You will find the FastAPI backend server running at `http://localhost:8010`.
+
+Terminal 2 (React Frontend):
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-Visit `http://localhost:5173` to see the app.
+The React frontend app will be available in your browser at `http://localhost:5173`. (Note: vite may server the frontend on a port other than 5173; always refer to your actual terminal output.)
 
-## Architecture
+#### Run with Docker
 
-FastAPI backend + React SPA with separate projects for clean separation:
+You can run the complete stack with MAX model serving + backend + frontend in a single container.
 
-```
-
-max-recipes/
-├── backend/ # FastAPI Python API (port 8010)
-├── frontend/ # Vite React TypeScript SPA (port 5173 local)
-└── docs/ # Architecture, contributing, Docker guides
-
-```
-
-**Why this architecture?**
-
--   **Separate projects** - First-class ecosystems for AI and UI development
--   **No SSR needed** - Just plain React, copy-paste into any project
-
-## Docker
-
-Run the complete stack with MAX model serving + backend + frontend:
+**Note:** For the best experience, we recommend running on a machine with a [compatible GPU](https://docs.modular.com/max/packages/#gpu-compatibility). Visit [MAX Builds](https://builds.modular.com/?category=models) to see which MAX models on available for GPU and CPU.
 
 ```bash
 # Build
@@ -109,36 +107,13 @@ docker run \
     max-cookbook
 ```
 
-Visit `http://localhost:8010` to see the app.
+Once up and running, visit `http://localhost:8010` to use the app.
 
-**Services:**
+## Architecture
 
--   **Port 8000**: MAX LLM serving (OpenAI-compatible /v1 endpoints)
--   **Port 8010**: Web app (FastAPI backend + React frontend)
+The following is a summary of the Cookbook's architeture. See the [Contributing Guide](docs/contributing.md) for more details about how its recipe system works.
 
-Behind the scenes, PM2 orchestrates startup: MAX → web app with automatic health checks and restarts.
-
-## Configuration
-
-### Backend Configuration (.env.local)
-
-The app uses `backend/.env.local` to configure LLM endpoints:
-
-```env
-COOKBOOK_ENDPOINTS='[
-  {
-    "id": "max-local",
-    "baseUrl": "http://localhost:8000/v1",
-    "apiKey": "EMPTY"
-  }
-]'
-```
-
-See `backend/.sample.env` for a template.
-
-## Development
-
-### Backend Structure
+### Python Backend
 
 ```
 backend/
@@ -154,36 +129,14 @@ backend/
 └── pyproject.toml              # Python dependencies
 ```
 
-### Frontend Structure
+#### Backend Features & Technologies
 
-```
-frontend/
-├── src/
-│   ├── recipes/                # Recipe components + registry.ts
-│   │   ├── registry.ts         # Recipe metadata
-│   │   ├── multiturn-chat/     # Multi-turn chat UI
-│   │   └── image-captioning/   # Image captioning UI
-│   ├── components/             # Shared UI (Header, Navbar, etc.)
-│   ├── routing/                # Routing infrastructure
-│   ├── lib/                    # Custom hooks, API, types
-│   └── App.tsx                 # Entry point
-└── package.json                # Frontend dependencies
-```
+-   FastAPI - Modern Python web framework
+-   uvicorn - ASGI server
+-   uv - Fast Python package manager
+-   openai - OpenAI Python client for LLM proxying
 
-### Adding a Recipe
-
-1. Add entry to `frontend/src/recipes/registry.ts` with slug, title, description, and component
-2. Create `backend/src/recipes/[recipe_name].py` with FastAPI router
-3. Include router in `backend/src/main.py`
-4. Add UI component to `frontend/src/recipes/[recipe-name]/ui.tsx`
-5. Add `README.mdx` to `frontend/src/recipes/[recipe-name]/`
-6. Routes auto-generate from registry
-
-See [Contributing Guide](docs/contributing.md) for detailed instructions.
-
-## API Endpoints
-
-**Backend routes (port 8010):**
+#### Backend Routes
 
 -   `GET /api/health` - Health check
 -   `GET /api/recipes` - List available recipe slugs
@@ -193,43 +146,45 @@ See [Contributing Guide](docs/contributing.md) for detailed instructions.
 -   `POST /api/recipes/image-captioning` - Image captioning endpoint
 -   `GET /api/recipes/{slug}/code` - Get recipe backend source code
 
-**Frontend routes (port 5173 local, 8010 Docker):**
+### React Frontend
 
--   `/` - Recipe cards grid
+```
+frontend/
+├── src/
+│   ├── recipes/                # Recipe components + data
+│   │   ├── registry.ts         # Recipe metadata (pure data)
+│   │   ├── components.ts       # React component mapping
+│   │   ├── multiturn-chat/     # Multi-turn chat UI
+│   │   └── image-captioning/   # Image captioning UI
+│   ├── components/             # Shared UI (Header, Navbar, etc.)
+│   ├── routing/                # Routing infrastructure
+│   ├── lib/                    # Custom hooks, API, types
+│   └── App.tsx                 # Entry point
+└── package.json                # Frontend dependencies
+```
+
+#### Frontend Features & Technologies
+
+-   **React 18 + TypeScript** - Type-safe component development
+-   **Vite** - Lightning-fast dev server and optimized production builds
+-   **React Router v7** - Auto-generated routing with lazy loading
+-   **Mantine v7** - Comprehensive UI component library with dark/light themes
+-   **SWR** - Lightweight data fetching with automatic caching
+-   **Vercel AI SDK** - Streaming chat UI with token-by-token responses
+-   **MDX** - Markdown documentation with JSX support
+-   **Recipe Registry** - Single source of truth for all recipes (pure data + React components)
+
+#### Frontend Routes
+
+-   `/` - Recipe index
 -   `/:slug` - Recipe demo (interactive UI)
 -   `/:slug/readme` - Recipe documentation
 -   `/:slug/code` - Recipe source code view
 
-## Technologies
-
-**Backend:**
-
--   FastAPI - Modern Python web framework
--   uvicorn - ASGI server
--   uv - Fast Python package manager
--   openai - OpenAI Python client for LLM proxying
-
-**Frontend:**
-
--   React 18 - UI library
--   TypeScript - Type safety
--   Vite - Build tool and dev server
--   React Router v7 - Client-side routing
--   Mantine v7 - UI component library
--   SWR - Lightweight data fetching with caching
--   Vercel AI SDK - Streaming chat UI (multi-turn chat recipe)
-
-**Docker:**
-
--   PM2 - Process manager for orchestrating services
--   MAX - High-performance model serving with GPU support
-
 ## Documentation
 
--   [Architecture Guide](docs/architecture.md) - Design decisions, patterns, technology choices
--   [Contributing Guide](docs/contributing.md) - How to add recipes and contribute
+-   [Contributing Guide](docs/contributing.md) - Architecture, patterns, and how to add recipes
 -   [Docker Deployment Guide](docs/docker.md) - Container deployment with MAX
--   [Project Context](.claude/project-context.md) - Comprehensive architecture reference for LLMs
 
 ## License
 

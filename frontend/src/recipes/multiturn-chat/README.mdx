@@ -12,6 +12,39 @@
 - Streams responses using AsyncOpenAI client
 - Returns SSE stream compatible with Vercel AI SDK protocol
 
+## Key Implementation Details
+
+**Message Conversion** (`multiturn_chat.py:38-57`):
+
+- Extracts text from `parts` array (filters `type === "text"`)
+- Joins multiple text parts with spaces
+- Maintains conversation history across turns
+
+**SSE Protocol** (`multiturn_chat.py:89-143`):
+
+- Header: `X-Vercel-AI-UI-Message-Stream: v1`
+- Event types: `start`, `text-start`, `text-delta`, `text-end`, `finish`, `[DONE]`
+- Compatible with Vercel AI SDK's `DefaultChatTransport`
+
+**Auto-Scroll Logic** (`ui.tsx:77-90`):
+
+- Tracks `isAutoScrolling` flag to distinguish programmatic vs. manual scroll
+- Disables auto-follow when user scrolls up >50px from bottom
+- Re-enables when user scrolls within 20px of bottom
+
+### Why This Approach
+
+- **Python backend**: Direct access to AI ecosystem (MAX, transformers, etc.)
+- **SSE streaming**: Standard protocol, production-ready, works with firewalls/proxies
+- **Vercel AI SDK**: Handles complex streaming state management out of the box
+- **No Node.js**: Pure Python backend, no server-side JS runtime required
+
+### File References
+
+- Frontend: `frontend/src/recipes/multiturn-chat/ui.tsx`
+- Backend: `backend/src/recipes/multiturn_chat.py`
+- Vercel AI SDK protocol: SSE with text-delta events
+
 ## Protocol Flow
 
 1. Frontend sends `POST /api/recipes/multiturn-chat` with:
@@ -48,35 +81,44 @@
 
 4. Frontend consumes SSE stream via `useChat` hook, updating UI token-by-token
 
-## Key Implementation Details
+## API Reference
 
-**Message Conversion** (`multiturn_chat.py:38-57`):
+**Endpoint:** `POST /api/recipes/multiturn-chat`
 
-- Extracts text from `parts` array (filters `type === "text"`)
-- Joins multiple text parts with spaces
-- Maintains conversation history across turns
+**Content-Type:** `text/event-stream`
 
-**SSE Protocol** (`multiturn_chat.py:89-143`):
+**Request Body:**
 
-- Header: `X-Vercel-AI-UI-Message-Stream: v1`
-- Event types: `start`, `text-start`, `text-delta`, `text-end`, `finish`, `[DONE]`
-- Compatible with Vercel AI SDK's `DefaultChatTransport`
+```json
+{
+    "endpointId": "max-local",
+    "modelName": "llama-3.1-8b",
+    "messages": [
+        {
+            "id": "msg-1",
+            "role": "user",
+            "parts": [{ "type": "text", "text": "Hello, how are you?" }]
+        }
+    ]
+}
+```
 
-**Auto-Scroll Logic** (`ui.tsx:77-90`):
+**Response:**
 
-- Tracks `isAutoScrolling` flag to distinguish programmatic vs. manual scroll
-- Disables auto-follow when user scrolls up >50px from bottom
-- Re-enables when user scrolls within 20px of bottom
+Server-Sent Events (SSE) stream:
 
-## Why This Approach
+```
+data: {"type": "start", "messageId": "msg-2"}
 
-- **Python backend**: Direct access to AI ecosystem (MAX, transformers, etc.)
-- **SSE streaming**: Standard protocol, production-ready, works with firewalls/proxies
-- **Vercel AI SDK**: Handles complex streaming state management out of the box
-- **No Node.js**: Pure Python backend, no server-side JS runtime required
+data: {"type": "text-delta", "id": "msg-2", "delta": "Hello"}
 
-## File References
+data: {"type": "text-delta", "id": "msg-2", "delta": "!"}
 
-- Frontend: `frontend/src/recipes/multiturn-chat/ui.tsx`
-- Backend: `backend/src/recipes/multiturn_chat.py`
-- Vercel AI SDK protocol: SSE with text-delta events
+data: {"type": "finish"}
+
+data: [DONE]
+```
+
+**Get Source Code:** `GET /api/recipes/multiturn-chat/code`
+
+Returns the Python source code for this recipe as plain text.
