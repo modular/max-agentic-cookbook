@@ -8,11 +8,9 @@
 import { Container, Paper, Text } from '@mantine/core'
 import { useParams } from 'react-router-dom'
 import { Suspense, useEffect } from 'react'
-import {
-    getReadmeComponent,
-    getRecipeBySlug,
-    type RecipeImplemented,
-} from '../recipes/registry'
+import { getRecipeBySlug } from '../recipes/registry'
+import { getReadmeComponent } from '../recipes/components'
+import type { RecipeImplemented } from '../lib/types'
 import hljs from 'highlight.js/lib/core'
 import typescript from 'highlight.js/lib/languages/typescript'
 import python from 'highlight.js/lib/languages/python'

@@ -17,9 +17,10 @@ import { SelectEndpoint } from './SelectEndpoint'
 import { SelectModel } from './SelectModel'
 import chapters from '../lib/chapters'
 import classes from './Navbar.module.css'
+import type { NavItem } from '../lib/types'
 
 interface NavItemProps {
-    item: { title: string; number: number; tags?: string[]; slug?: string }
+    item: NavItem
     currentRecipe: string | null
 }
 

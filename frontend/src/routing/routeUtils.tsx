@@ -5,7 +5,8 @@
 import { Suspense } from 'react'
 import { Route } from 'react-router-dom'
 import { Text } from '@mantine/core'
-import { getAllRecipesWithComponents, lazyComponentExport } from '../recipes/registry'
+import { getAllImplementedRecipes } from '../recipes/registry'
+import { getRecipeComponent, lazyComponentExport } from '../recipes/components'
 import { RecipeWithProps } from './RecipeWithProps'
 import { Loading } from './Loading'
 
@@ -17,8 +18,8 @@ const RecipeCodeView = lazyComponentExport(() => import('../features/RecipeCodeV
 
 // Utility function for rendering all dynamic recipe routes
 export function lazyLoadDemoRoutes() {
-    return getAllRecipesWithComponents().map((recipe) => {
-        const RecipeComponent = recipe.component
+    return getAllImplementedRecipes().map((recipe) => {
+        const RecipeComponent = getRecipeComponent(recipe.slug)
 
         if (!RecipeComponent) {
             return (

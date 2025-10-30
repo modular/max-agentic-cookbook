@@ -5,7 +5,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from src.core import endpoints, models
@@ -63,7 +62,7 @@ async def list_recipes():
     # Inspect registered routes to find recipe endpoints
     for route in app.routes:
         if hasattr(route, "path"):
-            path = route.path
+            path = getattr(route, "path")
             # Match routes like /api/recipes/multiturn-chat
             if path.startswith("/api/recipes/") and path != "/api/recipes":
                 slug = path.replace("/api/recipes/", "")

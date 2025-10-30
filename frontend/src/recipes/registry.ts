@@ -1,35 +1,17 @@
-// Recipe metadata organized by section
-// Order in array determines numbering (1, 2, 3...)
+/**
+ * Recipe metadata registry - Pure data structures only, no React dependencies
+ * Order in array determines numbering (1, 2, 3...)
+ */
 
-import { lazy, type ComponentType, type LazyExoticComponent } from 'react'
-import type { RecipeProps } from '../lib/types'
+import type {
+    RecipeItem,
+    RecipeImplemented,
+    RecipeMetadata,
+    NavItem,
+    NavSection,
+} from '../lib/types'
 
-interface RecipePlaceholder {
-    title: string
-}
-
-export interface RecipeImplemented {
-    title: string
-    slug: string
-    tags: string[]
-    description: string
-    component?: LazyExoticComponent<ComponentType<RecipeProps>>
-}
-
-export type Recipe = RecipePlaceholder | RecipeImplemented
-
-export interface RecipeMetadata {
-    [sectionName: string]: Recipe[]
-}
-
-// Helper: Create a lazy-loaded component that maps named 'Component' export to default
-export function lazyComponentExport<T = unknown>(
-    factory: () => Promise<{ Component: ComponentType<T> }>
-): LazyExoticComponent<ComponentType<T>> {
-    return lazy(() => factory().then((module) => ({ default: module.Component })))
-}
-
-// Single source of truth for all recipes
+// Single source of truth for all recipe metadata
 export const recipes: RecipeMetadata = {
     Foundations: [
         { title: 'Batch Text Classification' },
@@ -39,7 +21,6 @@ export const recipes: RecipeMetadata = {
             tags: ['NDJSON', 'Async'],
             description:
                 'Generate captions for multiple images with progressive NDJSON streaming. Upload images, customize the prompt, and watch captions appear instantly. Includes parallel processing and performance metrics (TTFT and duration).',
-            component: lazyComponentExport(() => import('./image-captioning/ui')),
         },
         {
             slug: 'multiturn-chat',
@@ -47,7 +28,6 @@ export const recipes: RecipeMetadata = {
             tags: ['Vercel AI SDK', 'SSE'],
             description:
                 'Streaming chat interface with multi-turn conversation support. Messages stream token-by-token with automatic scroll-follow and markdown rendering with syntax highlighting.',
-            component: lazyComponentExport(() => import('./multiturn-chat/ui')),
         },
     ],
     'Data, Tools & Reasoning': [
@@ -77,7 +57,7 @@ export const recipes: RecipeMetadata = {
 }
 
 // Helper: Check if a recipe is implemented (has a slug)
-export function isImplemented(recipe: Recipe): recipe is RecipeImplemented {
+export function isImplemented(recipe: RecipeItem): recipe is RecipeImplemented {
     return 'slug' in recipe
 }
 
@@ -94,18 +74,6 @@ export function getRecipeBySlug(slug: string): RecipeImplemented | null {
 }
 
 // Helper: Build navigation structure with auto-numbering
-export interface NavItem {
-    number: number
-    title: string
-    tags?: string[]
-    slug?: string
-}
-
-export interface NavSection {
-    title: string
-    items: NavItem[]
-}
-
 export function buildNavigation(): NavSection[] {
     const sections: NavSection[] = []
     let currentNumber = 1
@@ -144,11 +112,6 @@ export function getAllImplementedRecipes(): RecipeImplemented[] {
     return implemented
 }
 
-// Helper: Get all recipes with interactive components
-export function getAllRecipesWithComponents(): RecipeImplemented[] {
-    return getAllImplementedRecipes().filter((recipe) => recipe.component !== undefined)
-}
-
 // Helper: Check if a slug corresponds to an implemented recipe
 export function isRecipeImplemented(slug: string | undefined): boolean {
     if (!slug) return false
@@ -163,20 +126,4 @@ for (const section of Object.values(recipes)) {
             recipeMetadata[recipe.slug] = recipe
         }
     }
-}
-
-// README components: Lazy-loaded MDX components for recipe documentation
-export const readmeComponents: Record<
-    string,
-    React.LazyExoticComponent<React.ComponentType>
-> = {
-    'multiturn-chat': lazy(() => import('./multiturn-chat/README.mdx')),
-    'image-captioning': lazy(() => import('./image-captioning/README.mdx')),
-}
-
-// Helper: Get README component for a recipe slug
-export function getReadmeComponent(
-    slug: string
-): React.LazyExoticComponent<React.ComponentType> | null {
-    return readmeComponents[slug] || null
 }
