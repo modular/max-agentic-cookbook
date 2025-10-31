@@ -423,8 +423,10 @@ export const readmeComponents: Record<string, LazyExoticComponent<ComponentType>
 **Backend Implementation:**
 
 -   Parallel batch processing using `asyncio.gather()` for all items at once
+-   Rate limiting with semaphore: Max 10 concurrent requests to avoid API limits
+-   Timeout protection: 5-minute timeout for entire batch processing
 -   Flexible schema support: extract text from any JSON field specified by user
--   AsyncOpenAI client for API calls to OpenAI-compatible endpoints
+-   AsyncOpenAI client for API calls (non-streaming for batch completion)
 -   Performance metrics: Track duration per item in milliseconds
 -   Complete JSON array response (not streaming)
 -   Route: `POST /api/recipes/batch-text-classification`
@@ -433,8 +435,10 @@ export const readmeComponents: Record<string, LazyExoticComponent<ComponentType>
 **Frontend Implementation:**
 
 -   Dropzone file upload component for `.jsonl` files with client-side parsing
+-   File size validation: 10MB limit to prevent browser crashes
 -   Preview table showing extracted text from configurable field (first 20 items with pagination)
 -   Textarea for custom classification prompts with full user control
+-   SWR mutation (`useSWRMutation`) for batch classification state management
 -   Batch processing with loading spinner during API request
 -   Results table with Original Text | Classification | Duration columns
 -   Performance summary: total items, average/min/max duration
@@ -446,7 +450,9 @@ export const readmeComponents: Record<string, LazyExoticComponent<ComponentType>
 
 -   Flexible JSONL schema support (user specifies which field contains text)
 -   Custom prompts for maximum flexibility (sentiment, intent, toxicity, labels, etc.)
--   Parallel batch processing (all items processed simultaneously)
+-   Parallel batch processing with rate limiting (max 10 concurrent requests)
+-   File size validation (10MB limit) prevents large file crashes
+-   Timeout protection (5-minute limit) prevents hanging requests
 -   Performance metrics per item for analysis
 -   Pagination for both preview and results tables (20 items per page)
 -   Complete results available at once for downloading
@@ -454,7 +460,7 @@ export const readmeComponents: Record<string, LazyExoticComponent<ComponentType>
 **Dependencies:**
 
 -   Backend: `openai` (AsyncOpenAI), `asyncio` (stdlib), FastAPI
--   Frontend: `nanoid` (ID generation), `@mantine/dropzone` (file upload)
+-   Frontend: `swr` (useSWRMutation for state management), `nanoid` (ID generation), `@mantine/dropzone` (file upload)
 -   No streaming SDK needed - pure batch response
 
 **Why This Approach:**
