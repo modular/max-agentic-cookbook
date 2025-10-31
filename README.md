@@ -143,6 +143,7 @@ backend/
 -   `GET /api/endpoints` - List configured LLM endpoints
 -   `GET /api/models?endpointId=xxx` - List models for endpoint
 -   `POST /api/recipes/multiturn-chat` - Multi-turn chat endpoint
+-   `POST /api/recipes/batch-text-classification` - Batch text classification endpoint
 -   `POST /api/recipes/image-captioning` - Image captioning endpoint
 -   `GET /api/recipes/{slug}/code` - Get recipe backend source code
 
