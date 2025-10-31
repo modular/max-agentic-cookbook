@@ -1,6 +1,21 @@
+The following is sample data you can use with this recipe. Simply copy-paste into an empty text file,
+and save it with a `.jsonl` file extension.
+
+```json
+  {"id": "tweet-1", "text": "I absolutely love this product! Best purchase ever!", "author": "alice", "timestamp": "2024-01-15"}
+  {"id": "tweet-2", "text": "This is the worst experience I've had. Completely disappointed.", "author": "bob", "timestamp": "2024-01-16"}
+  {"id": "tweet-3", "text": "The product is okay. Nothing special but does the job.", "author": "charlie", "timestamp": "2024-01-17"}
+  {"id": "review-1", "text": "Excellent quality and fast shipping! Highly recommend!", "author": "diana", "timestamp": "2024-01-18"}
+  {"id": "review-2", "text": "Poor quality and terrible customer service. Would not buy again.", "author": "eve", "timestamp": "2024-01-19"}
+  {"id": "review-3", "text": "It's fine. Average product at average price.", "author": "frank", "timestamp": "2024-01-20"}
+  {"id": "comment-1", "text": "Amazing innovation! This will change everything!", "author": "grace", "timestamp": "2024-01-21"}
+  {"id": "comment-2", "text": "I hate everything about this.", "author": "henry", "timestamp": "2024-01-22"}
+  {"id": "comment-3", "text": "Neutral observation: the product exists and functions.", "author": "iris", "timestamp": "2024-01-23"}
+```
+
 ## Architecture
 
-**Frontend** (`ui.tsx`): React component with JSONL file handling and batch processing UI
+**Frontend** (`ui.tsx`): React component with [JSONL](https://jsonlines.org/) file handling and batch processing UI
 
 - Dropzone for `.jsonl` file upload with client-side parsing
 - Preview table showing extracted text from configurable field
