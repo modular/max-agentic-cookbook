@@ -34,6 +34,7 @@ Response Format:
 
 import asyncio
 import time
+from asyncio import Semaphore
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
@@ -186,25 +187,16 @@ async def batch_text_classification(request: BatchClassificationRequest) -> list
                 {"role": "user", "content": text}
             ]
 
-            # Create a streaming chat completion request. The stream=True parameter
-            # tells OpenAI to return an async iterator of chunks rather than waiting
-            # for the complete response.
-            stream = await client.chat.completions.create(
+            # Create a chat completion request. Since we need the complete response
+            # for batch processing, we don't use streaming here.
+            response = await client.chat.completions.create(
                 model=request.modelName,
                 messages=messages,
-                stream=True,
+                stream=False,
             )
 
-            # Accumulate response text from chunks as they arrive.
-            # This pattern handles the streaming properly while still collecting
-            # the complete response for the batch result.
-            text_chunks = []
-            async for chunk in stream:
-                if chunk.choices and chunk.choices[0].delta.content:
-                    text_chunks.append(chunk.choices[0].delta.content)
-
-            # Join all chunks into the final classification result
-            classification = "".join(text_chunks)
+            # Extract classification from response
+            classification = response.choices[0].message.content or ""
 
             # Calculate duration in milliseconds for performance tracking.
             # This gives the frontend visibility into classification speed.
@@ -231,17 +223,36 @@ async def batch_text_classification(request: BatchClassificationRequest) -> list
                 duration=-1
             )
 
-    # Process all items in parallel using asyncio.gather().
+    # Process all items in parallel using asyncio.gather() with rate limiting.
     # This is the key difference from streaming approaches:
     # - gather() waits for ALL tasks to complete before returning
     # - Results are returned as a complete array (not progressive NDJSON)
     # - Frontend gets a loading spinner for the entire batch
     # - All data is available at once for download/export
     #
-    # Why not asyncio.as_completed()? Because we want all results at once,
-    # not progressive streaming. This is simpler and matches the use case.
-    tasks = [process_item(item) for item in request.batch]
-    results = await asyncio.gather(*tasks)
+    # Rate limiting with semaphore prevents overwhelming the API:
+    # - Max 10 concurrent requests to avoid rate limits
+    # - Timeout of 300 seconds (5 minutes) for the entire batch
+    # - If a request fails, other items continue processing
+    semaphore = Semaphore(10)
+
+    async def process_with_limit(item: TextItem) -> ClassificationResult:
+        """Process item with concurrency limit to avoid rate limits."""
+        async with semaphore:
+            return await process_item(item)
+
+    tasks = [process_with_limit(item) for item in request.batch]
+
+    try:
+        results = await asyncio.wait_for(
+            asyncio.gather(*tasks, return_exceptions=False),
+            timeout=300.0
+        )
+    except asyncio.TimeoutError:
+        raise HTTPException(
+            status_code=504,
+            detail="Batch processing timed out after 5 minutes"
+        )
 
     # Return complete JSON array. FastAPI automatically serializes the
     # ClassificationResult objects to JSON using Pydantic's serialization.

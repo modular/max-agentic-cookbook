@@ -10,6 +10,7 @@
 import { useCallback, useState } from 'react'
 import { nanoid } from 'nanoid'
 import prettyMilliseconds from 'pretty-ms'
+import useSWRMutation from 'swr/mutation'
 import {
     Stack,
     Textarea,
@@ -53,6 +54,17 @@ interface TextItem {
 }
 
 /**
+ * Request body for batch classification mutation
+ */
+interface BatchClassificationRequestBody {
+    endpointId: string
+    modelName: string
+    systemPrompt: string
+    textField: string
+    batch: Array<{ itemId: string; originalData: unknown }>
+}
+
+/**
  * Response from the backend after classification
  */
 interface ClassificationResult {
@@ -66,6 +78,31 @@ interface RecipeProps {
     endpoint: Endpoint | null
     model: Model | null
     pathname: string
+}
+
+// ============================================================================
+// API fetchers
+// ============================================================================
+
+/**
+ * Fetcher function for batch classification mutation
+ */
+async function classifyBatch(
+    url: string,
+    { arg }: { arg: BatchClassificationRequestBody }
+): Promise<ClassificationResult[]> {
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(arg),
+    })
+
+    if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(errorText || 'Classification failed')
+    }
+
+    return response.json()
 }
 
 // ============================================================================
@@ -83,12 +120,18 @@ export function Component({ endpoint, model }: RecipeProps) {
     const [systemPrompt, setSystemPrompt] = useState(
         'Classify the following text. Respond with only the classification label.'
     )
-    const [isProcessing, setIsProcessing] = useState(false)
     const [error, setError] = useState<Error | null>(null)
     const [previewPage, setPreviewPage] = useState(1)
     const [resultsPage, setResultsPage] = useState(1)
 
     const itemsPerPage = 20
+
+    // Use SWR mutation for batch classification
+    const {
+        trigger: triggerClassification,
+        isMutating: isProcessing,
+        error: mutationError,
+    } = useSWRMutation('/api/recipes/batch-text-classification', classifyBatch)
 
     // Parse JSONL file on drop
     const onFileDropped = useCallback(async (newFiles: File[]) => {
@@ -97,6 +140,15 @@ export function Component({ endpoint, model }: RecipeProps) {
         try {
             setError(null)
             const file = newFiles[0] // Only accept one file at a time
+
+            // Validate file size (max 10MB to prevent browser crashes)
+            const maxSizeBytes = 10 * 1024 * 1024 // 10MB
+            if (file.size > maxSizeBytes) {
+                throw new Error(
+                    `File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum size is 10MB.`
+                )
+            }
+
             const text = await file.text()
 
             // Parse JSONL: split by newlines, parse each line as JSON
@@ -156,7 +208,6 @@ export function Component({ endpoint, model }: RecipeProps) {
     const onClassifyClicked = useCallback(async () => {
         if (!endpoint || !model || uploadedItems.length === 0) return
 
-        setIsProcessing(true)
         setError(null)
 
         try {
@@ -179,24 +230,14 @@ export function Component({ endpoint, model }: RecipeProps) {
                 originalData: item.originalData,
             }))
 
-            const response = await fetch('/api/recipes/batch-text-classification', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    endpointId: endpoint.id,
-                    modelName: model.id,
-                    systemPrompt,
-                    textField,
-                    batch,
-                }),
+            // Trigger the classification mutation
+            const classificationResults = await triggerClassification({
+                endpointId: endpoint.id,
+                modelName: model.id,
+                systemPrompt,
+                textField,
+                batch,
             })
-
-            if (!response.ok) {
-                const errorText = await response.text()
-                throw new Error(errorText || 'Classification failed')
-            }
-
-            const classificationResults: ClassificationResult[] = await response.json()
 
             // Update items with results
             const updatedItems = itemsWithText.map((item) => {
@@ -214,10 +255,16 @@ export function Component({ endpoint, model }: RecipeProps) {
             setResultsPage(1)
         } catch (err) {
             setError(err as Error)
-        } finally {
-            setIsProcessing(false)
         }
-    }, [endpoint, model, uploadedItems, systemPrompt, textField, extractText])
+    }, [
+        endpoint,
+        model,
+        uploadedItems,
+        systemPrompt,
+        textField,
+        extractText,
+        triggerClassification,
+    ])
 
     // Calculate performance summary
     const performanceSummary = () => {
@@ -265,7 +312,7 @@ export function Component({ endpoint, model }: RecipeProps) {
 
     return (
         <Stack flex={1} h="100%" style={{ overflow: 'hidden', minHeight: 0 }}>
-            <ErrorAlert error={error} />
+            <ErrorAlert error={error || mutationError} />
 
             <ScrollArea flex={1} h="100%" w="100%">
                 <Stack p="md">
@@ -462,13 +509,15 @@ function FormActions({
 // ============================================================================
 
 /** Shows error banner when classification fails */
-function ErrorAlert({ error }: { error: Error | null }) {
+function ErrorAlert({ error }: { error: Error | unknown | null }) {
     const errorIcon = <IconExclamationCircle />
 
     if (error) {
+        const errorMessage =
+            error instanceof Error ? error.message : String(error)
         return (
             <Alert variant="light" color="red" title="Error" icon={errorIcon}>
-                {error.message}
+                {errorMessage}
             </Alert>
         )
     } else {
