@@ -41,6 +41,7 @@ backend/
 │   │   ├── models.py           # Model listing proxy
 │   │   └── code_reader.py      # Source code reading utility
 │   └── recipes/                # Recipe API routers
+│       ├── batch_text_classification.py # Batch classification with parallel processing
 │       ├── multiturn_chat.py   # Multi-turn chat with SSE streaming
 │       └── image_captioning.py # Image captioning with NDJSON streaming
 ├── pyproject.toml              # Python dependencies (uv format)
@@ -80,6 +81,19 @@ curl http://localhost:8010/api/recipes
 
 # Get recipe code
 curl http://localhost:8010/api/recipes/multiturn-chat/code
+
+# Batch text classification (requires endpoint configured in .env.local)
+curl -X POST http://localhost:8010/api/recipes/batch-text-classification \
+  -H "Content-Type: application/json" \
+  -d '{
+    "endpointId": "max-local",
+    "modelName": "llama-3.1-8b",
+    "systemPrompt": "Classify as positive or negative",
+    "textField": "text",
+    "batch": [
+      {"itemId": "1", "originalData": {"text": "This is great!"}}
+    ]
+  }'
 ```
 
 ## Documentation

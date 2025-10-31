@@ -126,8 +126,9 @@ Recipes consist of multiple files in specific frontend and backend locations:
 
 **Example recipes to reference:**
 
--   Simple: [`multiturn-chat`](../frontend/src/recipes/multiturn-chat/) (frontend) + [`multiturn_chat.py`](../backend/src/recipes/multiturn_chat.py) (backend)
--   Advanced: [`image-captioning`](../frontend/src/recipes/image-captioning/) (frontend) + [`image_captioning.py`](../backend/src/recipes/image_captioning.py) (backend)
+-   **SSE Streaming**: [`multiturn-chat`](../frontend/src/recipes/multiturn-chat/) (frontend) + [`multiturn_chat.py`](../backend/src/recipes/multiturn_chat.py) (backend)
+-   **NDJSON Progressive Streaming**: [`image-captioning`](../frontend/src/recipes/image-captioning/) (frontend) + [`image_captioning.py`](../backend/src/recipes/image_captioning.py) (backend)
+-   **Batch Processing**: [`batch-text-classification`](../frontend/src/recipes/batch-text-classification/) (frontend) + [`batch_text_classification.py`](../backend/src/recipes/batch_text_classification.py) (backend)
 
 **Registration steps:**
 
@@ -441,7 +442,18 @@ Two main streaming formats:
     )
     ```
 
-See [`multiturn_chat.py`](../backend/src/recipes/multiturn_chat.py) for SSE and [`image_captioning.py`](../backend/src/recipes/image_captioning.py) for NDJSON examples.
+3. **Batch Response (Non-Streaming)** - For complete results all at once:
+
+    ```python
+    # Process all items in parallel using asyncio.gather()
+    tasks = [process_item(item) for item in request.batch]
+    results = await asyncio.gather(*tasks)
+
+    # Return complete JSON array (not streaming)
+    return results  # FastAPI serializes to JSON automatically
+    ```
+
+See [`multiturn_chat.py`](../backend/src/recipes/multiturn_chat.py) for SSE, [`image_captioning.py`](../backend/src/recipes/image_captioning.py) for NDJSON, and [`batch_text_classification.py`](../backend/src/recipes/batch_text_classification.py) for batch processing examples.
 
 **Required Code Endpoint:**
 

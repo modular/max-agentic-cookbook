@@ -416,6 +416,58 @@ export const readmeComponents: Record<string, LazyExoticComponent<ComponentType>
 -   Fits our Python-first backend architecture
 -   Simple, clean, no unnecessary dependencies
 
+#### Batch Text Classification Recipe
+
+**Architecture:** Python Parallel Batch Processing + React JSONL Upload UI
+
+**Backend Implementation:**
+
+-   Parallel batch processing using `asyncio.gather()` for all items at once
+-   Flexible schema support: extract text from any JSON field specified by user
+-   AsyncOpenAI client for API calls to OpenAI-compatible endpoints
+-   Performance metrics: Track duration per item in milliseconds
+-   Complete JSON array response (not streaming)
+-   Route: `POST /api/recipes/batch-text-classification`
+-   Code endpoint: `GET /api/recipes/batch-text-classification/code` (returns source as plain text)
+
+**Frontend Implementation:**
+
+-   Dropzone file upload component for `.jsonl` files with client-side parsing
+-   Preview table showing extracted text from configurable field (first 20 items with pagination)
+-   Textarea for custom classification prompts with full user control
+-   Batch processing with loading spinner during API request
+-   Results table with Original Text | Classification | Duration columns
+-   Performance summary: total items, average/min/max duration
+-   Download functionality to export results as JSONL with timestamp filename
+-   Component exports `Component` function for lazy loading via registry
+-   README.mdx with documentation and example use cases
+
+**Key Features:**
+
+-   Flexible JSONL schema support (user specifies which field contains text)
+-   Custom prompts for maximum flexibility (sentiment, intent, toxicity, labels, etc.)
+-   Parallel batch processing (all items processed simultaneously)
+-   Performance metrics per item for analysis
+-   Pagination for both preview and results tables (20 items per page)
+-   Complete results available at once for downloading
+
+**Dependencies:**
+
+-   Backend: `openai` (AsyncOpenAI), `asyncio` (stdlib), FastAPI
+-   Frontend: `nanoid` (ID generation), `@mantine/dropzone` (file upload)
+-   No streaming SDK needed - pure batch response
+
+**Why This Approach:**
+
+-   Batch processing simpler than streaming for first version
+-   Clear loading state with single spinner
+-   All results available at once for download and analysis
+-   Flexible schema allows supporting diverse JSONL formats (tweets, reviews, emails, etc.)
+-   Custom prompts give users full control over classification logic
+-   Parallel asyncio.gather() demonstrates efficient concurrent processing
+-   Non-streaming approach makes pagination and data export straightforward
+-   Can add progressive streaming later as enhancement
+
 ## Adding a New Recipe
 
 1. Add entry to `frontend/src/recipes/registry.ts`:

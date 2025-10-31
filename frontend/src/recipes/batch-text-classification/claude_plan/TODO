@@ -1,0 +1,280 @@
+# TODO: Batch Text Classification Recipe
+
+## Project Context
+
+Adding a new recipe to the MAX Agentic Cookbook for **Batch Text Classification**.
+
+### User Requirements
+
+-   Upload JSONL files (https://jsonlines.org)
+-   Display first 20 records in a table with pagination
+-   Text box for user to customize classification prompt
+-   Button to upload and process entire JSONL file
+-   Backend processes everything (loading spinner on frontend)
+-   Return processed JSONL with classifications back to frontend
+-   Display results in table
+
+### Architecture Decisions (from user clarification)
+
+-   **JSONL Format**: Flexible schema - support any JSON object, extract text from configurable field name
+-   **Classification Method**: Custom prompt box - user has full control over prompt
+-   **Processing Style**: Batch processing - all at once with loading spinner (simpler than streaming)
+-   **Output Format**: Include original text + classification result + performance metrics (duration/TTFT)
+-   **Features**: Download button to export results as JSONL file
+
+### Key Patterns from Existing Recipes
+
+-   **Frontend**: React component exporting `Component` function with `RecipeProps`
+-   **Backend**: FastAPI router with Pydantic models and a single response when batch is done
+-   **Registration**: Add to `registry.ts` (pure data) and `components.ts` (React mapping)
+-   **Web UI Layout**: Same layout as image-captioning recipe, just a table instead of gallery
+-   **File Upload**: Use Mantine Dropzone component (see image-captioning recipe)
+-   **Batch Processing**: Similar to image-captioning but without NDJSON streaming
+-   **Code Viewing**: Every recipe needs `/code` endpoint using `read_source_file(__file__)`
+
+---
+
+## Task List
+
+### PHASE 1: Documentation (DO FIRST)
+
+-   [ ] Create `frontend/src/recipes/batch-text-classification/README.mdx`
+    -   Follow exact structure of multiturn-chat/README.mdx and image-captioning/README.mdx
+    -   Sections: Architecture, Key Implementation Details, Why This Approach, File References, Protocol Flow, API Reference
+    -   Document flexible JSONL schema approach
+    -   Document custom prompt functionality
+    -   Document batch processing (non-streaming) approach
+    -   Include request/response examples
+
+### PHASE 2: Backend Implementation
+
+-   [ ] Create `backend/src/recipes/batch_text_classification.py`
+
+    -   [ ] Add comprehensive module docstring explaining recipe purpose and features
+    -   [ ] Define Pydantic request models:
+        -   `TextItem`: `{ itemId: str, originalData: dict }` (stores raw JSON)
+        -   `BatchClassificationRequest`: `{ endpointId: str, modelName: str, systemPrompt: str, textField: str, batch: list[TextItem] }`
+    -   [ ] Implement `POST /api/recipes/batch-text-classification` endpoint:
+        -   Validate endpoint exists using `get_cached_endpoint()`
+        -   Extract text from each item using `textField` parameter
+        -   Build messages array using custom `systemPrompt`
+        -   Process ALL items in parallel using `asyncio.gather()` (not streaming)
+        -   Track performance metrics (duration per item)
+        -   Return complete JSON array response (not NDJSON)
+    -   [ ] Implement `GET /api/recipes/batch-text-classification/code` endpoint
+        -   Use `read_source_file(__file__)` to return source code
+        -   Return as `Response(content=..., media_type="text/plain")`
+    -   [ ] Add comprehensive inline comments for educational purposes
+    -   [ ] Use modern Python type hints (PEP 604 style: `str | None`)
+    -   [ ] Use AsyncOpenAI for async LLM calls
+
+-   [ ] Register backend router in `backend/src/main.py`
+    -   Import: `from .recipes import batch_text_classification`
+    -   Include router: `app.include_router(batch_text_classification.router)`
+
+### PHASE 3: Frontend Implementation
+
+-   [ ] Create `frontend/src/recipes/batch-text-classification/ui.tsx`
+    -   [ ] Define TypeScript interfaces:
+        -   `TextItem`: `{ id: string, originalData: unknown, text: string | null, classification: string | null, duration: number | null }`
+        -   `ClassificationResult`: matches backend response format
+    -   [ ] Implement main `Component` function accepting `RecipeProps`
+    -   [ ] State management:
+        -   `uploadedItems: TextItem[]` - parsed JSONL items
+        -   `results: ClassificationResult[]` - processed results
+        -   `textField: string` - field name to extract (default: "text")
+        -   `systemPrompt: string` - custom classification prompt
+        -   `isProcessing: boolean` - loading state
+        -   `error: Error | null` - error state
+        -   `currentPage: number` - pagination state
+    -   [ ] Implement JSONL file upload section:
+        -   Use Mantine `Dropzone` accepting `.jsonl` files
+        -   Parse on drop: split by `\n`, parse each line as JSON
+        -   Auto-generate IDs using `nanoid()`
+        -   Store parsed items in state
+    -   [ ] Implement configuration section:
+        -   `TextInput` for field name (placeholder: "text, content, message, etc.")
+        -   `Textarea` for system prompt (placeholder: "Enter classification instructions...")
+    -   [ ] Implement preview table (before processing):
+        -   Mantine `Table` showing first 20 records from uploadedItems
+        -   Show extracted text (using textField) or raw JSON preview
+        -   Pagination controls (simple page 1, 2, 3...)
+    -   [ ] Implement "Classify All" button:
+        -   Disabled when: no file, no endpoint, no model, or no prompt
+        -   onClick: call API with all items, show loading spinner
+    -   [ ] Implement results section (after processing):
+        -   Mantine `Table` with columns: Original Text | Classification | Duration (ms)
+        -   Pagination for results
+        -   Performance summary: total items, avg/min/max duration
+        -   Download button to export results as JSONL
+    -   [ ] Implement download functionality:
+        -   Convert results array to JSONL (JSON.stringify each, join with \n)
+        -   Create blob and download link
+        -   Trigger download with filename: `classified-${Date.now()}.jsonl`
+    -   [ ] Error handling:
+        -   Show Alert component at top when error occurs
+        -   Display helpful error messages
+    -   [ ] Layout using Mantine components:
+        -   Use `Stack` for main layout
+        -   Use `ScrollArea` for scrollable sections
+        -   Use `Group` for action buttons
+        -   Use `Paper` for section containers
+
+### PHASE 4: Recipe Registration
+
+-   [ ] Update `frontend/src/recipes/registry.ts`
+
+    -   Add to `Foundations` section (replace placeholder at line 17):
+        ```typescript
+        {
+          slug: 'batch-text-classification',
+          title: 'Batch Text Classification',
+          tags: ['JSONL', 'Batch Processing'],
+          description: 'Upload JSONL files and classify text in bulk with custom prompts. Supports flexible schemas, parallel processing, and downloadable results.'
+        }
+        ```
+
+-   [ ] Update `frontend/src/recipes/components.ts`
+    -   Add UI component mapping:
+        `'batch-text-classification': lazyComponentExport(() => import('./batch-text-classification/ui'))`
+    -   Add README component mapping:
+        `'batch-text-classification': lazy(() => import('./batch-text-classification/README.mdx'))`
+
+### PHASE 5: Testing & Validation
+
+-   [ ] Create sample JSONL test file with various schemas
+-   [ ] Test file upload and parsing
+-   [ ] Test text field extraction with different field names
+-   [ ] Test custom prompt functionality
+-   [ ] Test batch classification with actual LLM endpoint
+-   [ ] Test pagination (both preview and results)
+-   [ ] Test download functionality
+-   [ ] Test error handling (invalid JSONL, missing fields, API errors)
+-   [ ] Verify code view endpoint works for both backend and frontend
+-   [ ] Test responsive layout on different screen sizes
+-   [ ] Run `npm run format` in frontend directory
+
+---
+
+## File Locations
+
+### New Files to Create
+
+-   `frontend/src/recipes/batch-text-classification/README.mdx`
+-   `frontend/src/recipes/batch-text-classification/ui.tsx`
+-   `backend/src/recipes/batch_text_classification.py`
+
+### Files to Modify
+
+-   `frontend/src/recipes/registry.ts` (line ~17: replace placeholder)
+-   `frontend/src/recipes/components.ts` (add to both maps)
+-   `backend/src/main.py` (import and include router)
+
+---
+
+## API Specification
+
+### Request Format
+
+```json
+POST /api/recipes/batch-text-classification
+
+{
+  "endpointId": "max-local",
+  "modelName": "llama-3.1-8b",
+  "systemPrompt": "Classify the sentiment as positive, negative, or neutral. Respond with only one word.",
+  "textField": "content",
+  "batch": [
+    {
+      "itemId": "1",
+      "originalData": {
+        "id": "tweet-123",
+        "content": "This is amazing!",
+        "user": "john"
+      }
+    },
+    {
+      "itemId": "2",
+      "originalData": {
+        "id": "tweet-456",
+        "content": "I hate this product.",
+        "user": "jane"
+      }
+    }
+  ]
+}
+```
+
+### Response Format
+
+```json
+[
+    {
+        "itemId": "1",
+        "originalText": "This is amazing!",
+        "classification": "positive",
+        "duration": 234
+    },
+    {
+        "itemId": "2",
+        "originalText": "I hate this product.",
+        "classification": "negative",
+        "duration": 189
+    }
+]
+```
+
+---
+
+## Notes & Decisions
+
+### Why Batch Processing (not streaming)?
+
+-   Simpler implementation for first version
+-   Clear loading state with spinner
+-   All results available at once for download
+-   Can add progressive streaming later if needed
+
+### Why Flexible Schema?
+
+-   Support various JSONL formats (tweets, reviews, messages, etc.)
+-   User specifies field name to extract text from
+-   More versatile than hardcoded structure
+-   Original data preserved for context
+
+### Why Custom Prompt?
+
+-   Maximum flexibility for different classification tasks
+-   Users can specify categories, output format, reasoning, etc.
+-   Example prompts can be provided in README
+-   More powerful than predefined category list
+
+### Performance Considerations
+
+-   Parallel processing using `asyncio.gather()` for all items
+-   Track duration metrics for each item
+-   Display average/min/max performance stats
+-   Consider batching large files in future (100+ items)
+
+---
+
+## Progress Tracking
+
+**Status**: Planning complete, ready to implement
+
+**Current Phase**: Phase 1 - Documentation
+
+**Last Updated**: 2025-10-30
+
+**Assigned To**: (can be filled in when distributing work)
+
+---
+
+## References
+
+-   JSONL spec: https://jsonlines.org
+-   Existing recipe patterns: `multiturn-chat` and `image-captioning`
+-   Mantine Dropzone: https://mantine.dev/x/dropzone/
+-   Mantine Table: https://mantine.dev/core/table/
+-   Contributing guide: `docs/contributing.md`
+-   Project context: `AGENTS.md`
