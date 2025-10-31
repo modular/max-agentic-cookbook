@@ -1,0 +1,232 @@
+## Architecture
+
+**Frontend** (`ui.tsx`): React component with JSONL file handling and batch processing UI
+
+- Dropzone for `.jsonl` file upload with client-side parsing
+- Preview table showing extracted text from configurable field
+- Custom prompt textarea for user-defined classification instructions
+- Batch API request with loading state and results display
+- Download functionality to export classified results as JSONL
+
+**Backend** (`batch_text_classification.py`): FastAPI with parallel processing
+
+- Flexible schema support: extracts text from any JSON field
+- Parallel processing using `asyncio.gather()` for all items
+- Tracks performance metrics (duration per item)
+- Returns complete JSON array response (not streaming)
+
+## Key Implementation Details
+
+**JSONL Upload & Parsing** (`ui.tsx:parseJsonlFile`):
+
+- Split file by newlines, parse each line as JSON
+- Store raw data in `originalData` field for context preservation
+- Auto-generate unique IDs using `nanoid()`
+- Extract text using configurable `textField` parameter
+- Handle invalid JSON gracefully with error messages
+
+**Batch Processing** (`batch_text_classification.py`):
+
+- Accept `textField` parameter to support flexible schemas
+- Extract text from each item using the specified field
+- Build OpenAI-compatible messages with custom system prompt
+- Process all items in parallel using `asyncio.gather()`
+- Track duration per item for performance analysis
+- Return complete results array in single response
+
+**Result Display & Export** (`ui.tsx`):
+
+- Show results in table with Original Text | Classification | Duration columns
+- Calculate and display performance summary (total items, avg/min/max duration)
+- Generate JSONL download combining all results with timestamp filename
+- Support pagination for large datasets (20 items per page)
+
+### Why Batch Processing (not Streaming)
+
+- **Simpler implementation**: All results available at once
+- **Clear loading state**: Single spinner instead of progressive updates
+- **Better for downloads**: All results ready before export
+- **Easier pagination**: No partial results complicating state management
+- **Future-ready**: Can add streaming/progressive updates later
+
+### Why Flexible Schema
+
+- **Supports various formats**: tweets, reviews, messages, emails, etc.
+- **User control**: Specify which field contains text to classify
+- **Preserves context**: Original data kept for reference
+- **More versatile**: Single component handles multiple JSONL structures
+
+### Why Custom Prompts
+
+- **Maximum flexibility**: Users define categories, output format, reasoning
+- **Domain-specific**: Customize for sentiment, intent, toxicity, labels, etc.
+- **More powerful**: Template-based classification with examples and instructions
+- **Educational**: Shows how to structure effective classification prompts
+
+### File References
+
+- Frontend component: `frontend/src/recipes/batch-text-classification/ui.tsx`
+- Backend router: `backend/src/recipes/batch_text_classification.py`
+- File upload: Dropzone integration (lines ~TBD in ui.tsx)
+- Result export: `exportResultsAsJsonl()` function in ui.tsx
+
+## Protocol Flow
+
+1. Frontend sends `POST /api/recipes/batch-text-classification` with:
+
+    ```json
+    {
+        "endpointId": "max-local",
+        "modelName": "llama-3.1-8b",
+        "systemPrompt": "Classify the sentiment as positive, negative, or neutral. Respond with only one word.",
+        "textField": "content",
+        "batch": [
+            {
+                "itemId": "1",
+                "originalData": {
+                    "id": "tweet-123",
+                    "content": "This is amazing!",
+                    "user": "john"
+                }
+            },
+            {
+                "itemId": "2",
+                "originalData": {
+                    "id": "tweet-456",
+                    "content": "I hate this product.",
+                    "user": "jane"
+                }
+            }
+        ]
+    }
+    ```
+
+2. Backend extracts text from `originalData[textField]` for each item
+
+3. Backend creates OpenAI messages:
+
+    ```python
+    [
+        { "role": "system", "content": "Classify the sentiment..." },
+        { "role": "user", "content": "This is amazing!" }
+    ]
+    ```
+
+4. Backend processes all items in parallel using `asyncio.gather()`
+
+5. Backend returns complete JSON array response:
+
+    ```json
+    [
+        {
+            "itemId": "1",
+            "originalText": "This is amazing!",
+            "classification": "positive",
+            "duration": 234
+        },
+        {
+            "itemId": "2",
+            "originalText": "I hate this product.",
+            "classification": "negative",
+            "duration": 189
+        }
+    ]
+    ```
+
+6. Frontend displays results in table with pagination and download option
+
+## API Reference
+
+**Endpoint:** `POST /api/recipes/batch-text-classification`
+
+**Content-Type:** `application/json`
+
+**Request Body:**
+
+```json
+{
+    "endpointId": "max-local",
+    "modelName": "llama-3.1-8b",
+    "systemPrompt": "You are a text classifier. Classify the following text into one of these categories: positive, negative, neutral. Respond with only the category name.",
+    "textField": "content",
+    "batch": [
+        {
+            "itemId": "item-1",
+            "originalData": {
+                "id": "123",
+                "content": "This product is fantastic!",
+                "timestamp": "2024-01-15"
+            }
+        },
+        {
+            "itemId": "item-2",
+            "originalData": {
+                "id": "456",
+                "content": "Terrible experience, would not recommend.",
+                "timestamp": "2024-01-15"
+            }
+        }
+    ]
+}
+```
+
+**Response:**
+
+```json
+[
+    {
+        "itemId": "item-1",
+        "originalText": "This product is fantastic!",
+        "classification": "positive",
+        "duration": 287
+    },
+    {
+        "itemId": "item-2",
+        "originalText": "Terrible experience, would not recommend.",
+        "classification": "negative",
+        "duration": 312
+    }
+]
+```
+
+**Get Source Code:** `GET /api/recipes/batch-text-classification/code`
+
+Returns the Python source code for this recipe as plain text.
+
+## Example Use Cases
+
+**Sentiment Analysis**
+
+```json
+{
+    "systemPrompt": "Analyze the sentiment of the text. Respond with: positive, negative, or neutral.",
+    "textField": "review"
+}
+```
+
+**Intent Classification**
+
+```json
+{
+    "systemPrompt": "Classify the user intent. Respond with one of: order, complaint, question, feedback.",
+    "textField": "message"
+}
+```
+
+**Toxicity Detection**
+
+```json
+{
+    "systemPrompt": "Determine if the text is toxic or safe. Respond with: toxic or safe.",
+    "textField": "comment"
+}
+```
+
+**Label Extraction**
+
+```json
+{
+    "systemPrompt": "Extract the main topic from the document. Respond with one topic label only.",
+    "textField": "content"
+}
+```

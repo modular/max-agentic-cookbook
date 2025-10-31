@@ -23,13 +23,17 @@ function HighlightJsThemeLoader() {
 
         // Import the appropriate theme CSS file as a URL
         if (colorScheme === 'dark') {
-            import('highlight.js/styles/base16/material-darker.css?url').then((module) => {
-                if (themeLink) themeLink.href = module.default
-            })
+            import('highlight.js/styles/base16/material-darker.css?url').then(
+                (module) => {
+                    if (themeLink) themeLink.href = module.default
+                }
+            )
         } else {
-            import('highlight.js/styles/base16/papercolor-light.css?url').then((module) => {
-                if (themeLink) themeLink.href = module.default
-            })
+            import('highlight.js/styles/base16/papercolor-light.css?url').then(
+                (module) => {
+                    if (themeLink) themeLink.href = module.default
+                }
+            )
         }
     }, [colorScheme])
 
