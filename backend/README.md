@@ -82,7 +82,7 @@ curl http://localhost:8010/api/recipes
 # Get recipe code
 curl http://localhost:8010/api/recipes/multiturn-chat/code
 
-# Batch text classification (requires endpoint configured in .env.local)
+# Text Classification (requires endpoint configured in .env.local)
 curl -X POST http://localhost:8010/api/recipes/batch-text-classification \
   -H "Content-Type: application/json" \
   -d '{

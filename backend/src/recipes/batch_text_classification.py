@@ -1,5 +1,5 @@
 """
-Batch Text Classification with Parallel Processing
+Text Classification with Parallel Processing
 
 This recipe demonstrates how to classify multiple text items in parallel using
 OpenAI-compatible endpoints. All items are processed concurrently for maximum
@@ -67,7 +67,7 @@ class TextItem(BaseModel):
 
 class BatchClassificationRequest(BaseModel):
     """
-    Request body for batch text classification.
+    Request body for Text Classification.
 
     The frontend sends the endpoint ID and model name along with a batch array
     of items to classify. The backend looks up the actual API credentials from
@@ -101,7 +101,7 @@ class ClassificationResult(BaseModel):
 @router.post("/batch-text-classification")
 async def batch_text_classification(request: BatchClassificationRequest) -> list[ClassificationResult]:
     """
-    Batch text classification endpoint with parallel processing.
+    Text Classification endpoint with parallel processing.
 
     Accepts multiple text items and classifies them all in parallel using
     a custom classification prompt. Results are returned as a complete JSON

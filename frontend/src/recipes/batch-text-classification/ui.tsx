@@ -1,7 +1,7 @@
 /**
- * Batch Text Classification with JSONL Support and Custom Prompts
+ * Text Classification with JSONL Support and Custom Prompts
  *
- * This recipe demonstrates batch text classification using OpenAI-compatible endpoints
+ * This recipe demonstrates Text Classification using OpenAI-compatible endpoints
  * with flexible JSONL schema support. Users upload JSONL files, specify which field
  * contains the text to classify, provide a custom prompt, and get back classified
  * results with performance metrics.
@@ -513,8 +513,7 @@ function ErrorAlert({ error }: { error: Error | unknown | null }) {
     const errorIcon = <IconExclamationCircle />
 
     if (error) {
-        const errorMessage =
-            error instanceof Error ? error.message : String(error)
+        const errorMessage = error instanceof Error ? error.message : String(error)
         return (
             <Alert variant="light" color="red" title="Error" icon={errorIcon}>
                 {errorMessage}

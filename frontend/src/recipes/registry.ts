@@ -22,16 +22,16 @@ export const recipes: RecipeMetadata = {
                 'Streaming chat interface with multi-turn conversation support. Messages stream token-by-token with automatic scroll-follow and markdown rendering with syntax highlighting.',
         },
         {
-            slug: 'batch-text-classification',
-            title: 'Batch Text Classification',
-            tags: ['JSONL', 'Batch Processing'],
+            slug: 'text-classification',
+            title: 'Text Classification',
+            tags: ['JSONL', 'Batch Input'],
             description:
                 'Upload JSONL files and classify text in bulk with custom prompts. Supports flexible schemas, parallel processing, and downloadable results.',
         },
         {
             slug: 'image-captioning',
-            title: 'Streaming Image Captions',
-            tags: ['NDJSON', 'Multi-modal'],
+            title: 'Image Captioning',
+            tags: ['NDJSON', 'Multi-modal', 'Streaming'],
             description:
                 'Generate captions for multiple images with progressive NDJSON streaming. Upload images, customize the prompt, and watch captions appear instantly. Includes parallel processing and performance metrics (TTFT and duration).',
         },
