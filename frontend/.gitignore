@@ -15,6 +15,11 @@ dist-ssr
 # Generated code files
 public/code
 
+# E2E test artifacts
+e2e/screenshots
+e2e/test-results
+.playwright
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

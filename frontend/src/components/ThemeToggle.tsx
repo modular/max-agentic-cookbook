@@ -1,14 +1,8 @@
-import { useEffect, useState } from 'react'
 import { ActionIcon, Tooltip, useMantineColorScheme } from '@mantine/core'
 import { IconMoon, IconSun } from '@tabler/icons-react'
 
 export function ThemeToggle({ stroke }: { stroke: number }) {
     const { setColorScheme, colorScheme } = useMantineColorScheme()
-    const [mounted, setMounted] = useState(false)
-
-    useEffect(() => {
-        setMounted(true)
-    }, [])
 
     function toggleColorScheme() {
         const result = colorScheme === 'dark' ? 'light' : 'dark'
@@ -16,9 +10,8 @@ export function ThemeToggle({ stroke }: { stroke: number }) {
         return setColorScheme(result)
     }
 
-    const resolvedScheme = mounted ? colorScheme : 'light'
     const label =
-        resolvedScheme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
+        colorScheme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
 
     return (
         <Tooltip label={label}>
@@ -27,7 +20,7 @@ export function ThemeToggle({ stroke }: { stroke: number }) {
                 aria-label={label}
                 variant="transparent"
             >
-                {resolvedScheme === 'dark' ? (
+                {colorScheme === 'dark' ? (
                     <IconMoon stroke={stroke} />
                 ) : (
                     <IconSun stroke={stroke} />

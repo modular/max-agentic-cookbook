@@ -64,7 +64,40 @@ npm run format
 
 Runs Prettier on all TypeScript/JavaScript files.
 
+### Testing
+
+```bash
+# Unit tests
+npm test                  # Run unit tests in watch mode
+npm run test:ui          # Run with interactive UI
+npm run test:coverage    # Run with coverage report
+
+# E2E tests
+npm run test:e2e         # Run end-to-end tests
+npm run test:e2e:ui      # Run with interactive UI (great for debugging)
+npm run test:e2e:headed  # Run in headed mode (see the browser)
+npm run test:e2e:debug   # Debug tests step-by-step
+
+# First time only: Install Playwright browsers
+npm run playwright:install
+```
+
+**Running in Linux containers (Docker, CI/CD):**
+
+Playwright is configured for headless operation in containerized environments. Use `xvfb-run` if available:
+
+```bash
+# Run E2E tests in container
+xvfb-run -a npm run test:e2e
+
+# Or use standalone screenshot script
+xvfb-run -a node capture-screenshots.cjs
+```
+
+For detailed testing documentation, including how to use Playwright in containers and how Claude can interact with your app for debugging, see **[TESTING.md](./TESTING.md)**.
+
 ## Documentation
 
+- **[Testing Guide](./TESTING.md)** - How to test and debug with Claude using Playwright and Vitest
 - **[Contributing Guide](../docs/contributing.md)** - How to add recipes, code standards, and patterns
 - **[Project Context](../AGENTS.md)** - Architecture details and frontend patterns
