@@ -70,37 +70,43 @@ backend/
 
 The backend provides reusable utilities in `src/core/` for recipe development:
 
-- **endpoints.py** - Endpoint configuration management with caching:
-  ```python
-  from ..core.endpoints import get_cached_endpoint
+-   **endpoints.py** - Endpoint configuration management with caching:
 
-  endpoint = get_cached_endpoint(endpoint_id)
-  if not endpoint:
-      raise HTTPException(status_code=404, detail="Endpoint not found")
+    ```python
+    from ..core.endpoints import get_cached_endpoint
 
-  client = AsyncOpenAI(
-      base_url=endpoint.base_url,
-      api_key=endpoint.api_key
-  )
-  ```
-  - Loads from `COOKBOOK_ENDPOINTS` environment variable
-  - In-memory caching for fast lookups
-  - Never exposes API keys to client
+    endpoint = get_cached_endpoint(endpoint_id)
+    if not endpoint:
+        raise HTTPException(status_code=404, detail="Endpoint not found")
 
-- **models.py** - Proxies OpenAI-compatible `/v1/models` endpoint:
-  ```python
-  GET /api/models?endpointId={id}
-  ```
-  - Returns available models for the specified endpoint
+    client = AsyncOpenAI(
+        base_url=endpoint.base_url,
+        api_key=endpoint.api_key
+    )
+    ```
 
-- **code_reader.py** - Utility for reading recipe source code:
-  ```python
-  from ..core.code_reader import read_source_file
+    -   Loads from `COOKBOOK_ENDPOINTS` environment variable
+    -   In-memory caching for fast lookups
+    -   Never exposes API keys to client
 
-  source_code = read_source_file(__file__)
-  ```
-  - Returns Python source code as a string
-  - Enables the code viewer feature in the frontend
+-   **models.py** - Proxies OpenAI-compatible `/v1/models` endpoint:
+
+    ```python
+    GET /api/models?endpointId={id}
+    ```
+
+    -   Returns available models for the specified endpoint
+
+-   **code_reader.py** - Utility for reading recipe source code:
+
+    ```python
+    from ..core.code_reader import read_source_file
+
+    source_code = read_source_file(__file__)
+    ```
+
+    -   Returns Python source code as a string
+    -   Enables the code viewer feature in the frontend
 
 See [API Reference](../docs/api.md) for complete endpoint documentation.
 
@@ -237,7 +243,7 @@ const { data: endpoints, isLoading, error } = useSWR('/api/endpoints', fetchEndp
 ```ts
 export const recipes = {
   "Foundations": [
-    { title: 'Batch Text Classification' },  // placeholder (no slug)
+    { title: 'Text Classification' },  // placeholder (no slug)
     {
       slug: 'multiturn-chat',
       title: 'Multi-Turn Chat',
@@ -246,7 +252,7 @@ export const recipes = {
     },
     {
       slug: 'image-captioning',
-      title: 'Streaming Image Captions',
+      title: 'Image Captioning',
       tags: ['NDJSON', 'Async Coroutines'],
       description: 'Generate captions for multiple images with progressive NDJSON streaming...'
     }
@@ -264,7 +270,7 @@ export const recipes = {
 -   Implemented recipes have `slug` + `tags` + `description` (clickable in nav + shown as cards)
 -   `tags` array displays technology/pattern labels (e.g., 'SSE', 'NDJSON', 'Vercel AI SDK')
 -   Numbers auto-derived from array position (just reorder to renumber)
--   Display format auto-generated ("1: Batch Text Classification", "2: Streaming Image Captions")
+-   Display format auto-generated ("1: Text Classification", "2: Image Captioning")
 -   Component mapping is in separate `components.ts` file
 
 **Helper functions:**
@@ -416,15 +422,17 @@ export const readmeComponents: Record<string, LazyExoticComponent<ComponentType>
 -   Fits our Python-first backend architecture
 -   Simple, clean, no unnecessary dependencies
 
-#### Batch Text Classification Recipe
+#### Text Classification Recipe
 
 **Architecture:** Python Parallel Batch Processing + React JSONL Upload UI
 
 **Backend Implementation:**
 
 -   Parallel batch processing using `asyncio.gather()` for all items at once
+-   Rate limiting with semaphore: Max 10 concurrent requests to avoid API limits
+-   Timeout protection: 5-minute timeout for entire batch processing
 -   Flexible schema support: extract text from any JSON field specified by user
--   AsyncOpenAI client for API calls to OpenAI-compatible endpoints
+-   AsyncOpenAI client for API calls (non-streaming for batch completion)
 -   Performance metrics: Track duration per item in milliseconds
 -   Complete JSON array response (not streaming)
 -   Route: `POST /api/recipes/batch-text-classification`
@@ -433,8 +441,10 @@ export const readmeComponents: Record<string, LazyExoticComponent<ComponentType>
 **Frontend Implementation:**
 
 -   Dropzone file upload component for `.jsonl` files with client-side parsing
+-   File size validation: 10MB limit to prevent browser crashes
 -   Preview table showing extracted text from configurable field (first 20 items with pagination)
 -   Textarea for custom classification prompts with full user control
+-   SWR mutation (`useSWRMutation`) for batch classification state management
 -   Batch processing with loading spinner during API request
 -   Results table with Original Text | Classification | Duration columns
 -   Performance summary: total items, average/min/max duration
@@ -446,7 +456,9 @@ export const readmeComponents: Record<string, LazyExoticComponent<ComponentType>
 
 -   Flexible JSONL schema support (user specifies which field contains text)
 -   Custom prompts for maximum flexibility (sentiment, intent, toxicity, labels, etc.)
--   Parallel batch processing (all items processed simultaneously)
+-   Parallel batch processing with rate limiting (max 10 concurrent requests)
+-   File size validation (10MB limit) prevents large file crashes
+-   Timeout protection (5-minute limit) prevents hanging requests
 -   Performance metrics per item for analysis
 -   Pagination for both preview and results tables (20 items per page)
 -   Complete results available at once for downloading
@@ -454,7 +466,7 @@ export const readmeComponents: Record<string, LazyExoticComponent<ComponentType>
 **Dependencies:**
 
 -   Backend: `openai` (AsyncOpenAI), `asyncio` (stdlib), FastAPI
--   Frontend: `nanoid` (ID generation), `@mantine/dropzone` (file upload)
+-   Frontend: `swr` (useSWRMutation for state management), `nanoid` (ID generation), `@mantine/dropzone` (file upload)
 -   No streaming SDK needed - pure batch response
 
 **Why This Approach:**
@@ -723,16 +735,16 @@ resolve: {
 
 ```json
 {
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "~/lib/*": ["src/lib/*"],
-      "~/components/*": ["src/components/*"],
-      "~/features/*": ["src/features/*"],
-      "~/recipes/*": ["src/recipes/*"],
-      "~/routing/*": ["src/routing/*"]
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "~/lib/*": ["src/lib/*"],
+            "~/components/*": ["src/components/*"],
+            "~/features/*": ["src/features/*"],
+            "~/recipes/*": ["src/recipes/*"],
+            "~/routing/*": ["src/routing/*"]
+        }
     }
-  }
 }
 ```
 

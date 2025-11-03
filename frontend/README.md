@@ -19,7 +19,7 @@ frontend/
 │   ├── recipes/                # Recipe components and data
 │   │   ├── registry.ts         # Recipe metadata (pure data)
 │   │   ├── components.ts       # React component mapping
-│   │   ├── batch-text-classification/ # Example: Batch text classification
+│   │   ├── batch-text-classification/ # Example: Text Classification
 │   │   ├── multiturn-chat/     # Example: Multi-turn chat recipe
 │   │   └── image-captioning/   # Example: Image captioning recipe
 │   ├── routing/                # Routing infrastructure

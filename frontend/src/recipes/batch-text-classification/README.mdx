@@ -17,23 +17,27 @@ and save it with a `.jsonl` file extension.
 
 **Frontend** (`ui.tsx`): React component with [JSONL](https://jsonlines.org/) file handling and batch processing UI
 
-- Dropzone for `.jsonl` file upload with client-side parsing
+- Dropzone for `.jsonl` file upload with client-side parsing and 10MB size validation
 - Preview table showing extracted text from configurable field
 - Custom prompt textarea for user-defined classification instructions
-- Batch API request with loading state and results display
+- SWR mutation (`useSWRMutation`) for batch API request with loading state management
+- Results display with performance metrics
 - Download functionality to export classified results as JSONL
 
-**Backend** (`batch_text_classification.py`): FastAPI with parallel processing
+**Backend** (`batch_text_classification.py`): FastAPI with parallel processing and rate limiting
 
 - Flexible schema support: extracts text from any JSON field
-- Parallel processing using `asyncio.gather()` for all items
-- Tracks performance metrics (duration per item)
+- Parallel processing using `asyncio.gather()` with semaphore-based rate limiting (max 10 concurrent)
+- Timeout protection: 5-minute timeout for entire batch processing
+- Non-streaming API calls for batch completion (simpler and more efficient)
+- Tracks performance metrics (duration per item in milliseconds)
 - Returns complete JSON array response (not streaming)
 
 ## Key Implementation Details
 
-**JSONL Upload & Parsing** (`ui.tsx:parseJsonlFile`):
+**JSONL Upload & Parsing** (`ui.tsx:onFileDropped`):
 
+- Validate file size (10MB limit) to prevent browser crashes
 - Split file by newlines, parse each line as JSON
 - Store raw data in `originalData` field for context preservation
 - Auto-generate unique IDs using `nanoid()`
@@ -45,12 +49,15 @@ and save it with a `.jsonl` file extension.
 - Accept `textField` parameter to support flexible schemas
 - Extract text from each item using the specified field
 - Build OpenAI-compatible messages with custom system prompt
-- Process all items in parallel using `asyncio.gather()`
+- Process items in parallel using `asyncio.gather()` with semaphore rate limiting (max 10 concurrent)
+- Use non-streaming API calls (more efficient for batch completion)
+- Timeout protection: 5-minute timeout for entire batch, returns 504 on timeout
 - Track duration per item for performance analysis
 - Return complete results array in single response
 
 **Result Display & Export** (`ui.tsx`):
 
+- SWR mutation manages loading state and error handling
 - Show results in table with Original Text | Classification | Duration columns
 - Calculate and display performance summary (total items, avg/min/max duration)
 - Generate JSONL download combining all results with timestamp filename
@@ -59,9 +66,11 @@ and save it with a `.jsonl` file extension.
 ### Why Batch Processing (not Streaming)
 
 - **Simpler implementation**: All results available at once
-- **Clear loading state**: Single spinner instead of progressive updates
+- **Clear loading state**: Single spinner (managed by SWR) instead of progressive updates
 - **Better for downloads**: All results ready before export
 - **Easier pagination**: No partial results complicating state management
+- **Rate limiting**: Semaphore-based concurrency control prevents API limits (max 10 concurrent)
+- **Timeout protection**: 5-minute timeout prevents hanging requests
 - **Future-ready**: Can add streaming/progressive updates later
 
 ### Why Flexible Schema
@@ -82,8 +91,10 @@ and save it with a `.jsonl` file extension.
 
 - Frontend component: `frontend/src/recipes/batch-text-classification/ui.tsx`
 - Backend router: `backend/src/recipes/batch_text_classification.py`
-- File upload: Dropzone integration (lines ~TBD in ui.tsx)
-- Result export: `exportResultsAsJsonl()` function in ui.tsx
+- File upload with validation: `onFileDropped()` callback (lines 94-147 in ui.tsx)
+- SWR mutation: `useSWRMutation` hook usage (lines 129-134 in ui.tsx)
+- Batch classification: `onClassifyClicked()` function (lines 208-267 in ui.tsx)
+- Result export: `exportResults()` function (lines 236-250 in ui.tsx)
 
 ## Protocol Flow
 

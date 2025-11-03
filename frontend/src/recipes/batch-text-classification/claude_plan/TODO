@@ -1,8 +1,8 @@
-# TODO: Batch Text Classification Recipe
+# TODO: Text Classification Recipe
 
 ## Project Context
 
-Adding a new recipe to the MAX Agentic Cookbook for **Batch Text Classification**.
+Adding a new recipe to the MAX Agentic Cookbook for **Text Classification**.
 
 ### User Requirements
 
@@ -128,7 +128,7 @@ Adding a new recipe to the MAX Agentic Cookbook for **Batch Text Classification*
         ```typescript
         {
           slug: 'batch-text-classification',
-          title: 'Batch Text Classification',
+          title: 'Text Classification',
           tags: ['JSONL', 'Batch Processing'],
           description: 'Upload JSONL files and classify text in bulk with custom prompts. Supports flexible schemas, parallel processing, and downloadable results.'
         }

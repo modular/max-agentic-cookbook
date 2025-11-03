@@ -28,7 +28,7 @@ export function Header({ mobileOpened, toggleMobile, toggleDesktop }: HeaderProp
                 />
                 <Title order={4}>
                     <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        Modular Agentic Cookbook
+                        MAX Agentic Cookbook
                     </Link>
                 </Title>
             </Group>
