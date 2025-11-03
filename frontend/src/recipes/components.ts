@@ -21,8 +21,8 @@ export const recipeComponents: Record<
     string,
     LazyExoticComponent<ComponentType<RecipeProps>>
 > = {
-    'batch-text-classification': lazyComponentExport(
-        () => import('./batch-text-classification/ui')
+    'text-classification': lazyComponentExport(
+        () => import('./text-classification/ui')
     ),
     'multiturn-chat': lazyComponentExport(() => import('./multiturn-chat/ui')),
     'image-captioning': lazyComponentExport(() => import('./image-captioning/ui')),
@@ -32,9 +32,7 @@ export const recipeComponents: Record<
  * Map of recipe slugs to their README documentation components
  */
 export const readmeComponents: Record<string, LazyExoticComponent<ComponentType>> = {
-    'batch-text-classification': lazy(
-        () => import('./batch-text-classification/README.mdx')
-    ),
+    'text-classification': lazy(() => import('./text-classification/README.mdx')),
     'multiturn-chat': lazy(() => import('./multiturn-chat/README.mdx')),
     'image-captioning': lazy(() => import('./image-captioning/README.mdx')),
 }
