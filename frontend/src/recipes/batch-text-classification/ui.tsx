@@ -513,8 +513,7 @@ function ErrorAlert({ error }: { error: Error | unknown | null }) {
     const errorIcon = <IconExclamationCircle />
 
     if (error) {
-        const errorMessage =
-            error instanceof Error ? error.message : String(error)
+        const errorMessage = error instanceof Error ? error.message : String(error)
         return (
             <Alert variant="light" color="red" title="Error" icon={errorIcon}>
                 {errorMessage}
