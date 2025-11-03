@@ -48,19 +48,30 @@ Thanks for your interest in contributing! This guide covers the basics of adding
     npm run format
     ```
 
-4. **Commit with clear messages:**
+4. **Run tests** (optional but recommended):
+
+    ```bash
+    cd frontend
+    # Run unit tests
+    npm run test:run
+
+    # Run E2E tests (requires browser installation: npm run playwright:install)
+    npm run test:e2e
+    ```
+
+5. **Commit with clear messages:**
 
     ```bash
     git commit -m "Add RAG recipe"
     ```
 
-5. **Push to your fork:**
+6. **Push to your fork:**
 
     ```bash
     git push origin feature/your-feature-name
     ```
 
-6. **Create PR** from your fork to upstream `main` branch
+7. **Create PR** from your fork to upstream `main` branch
 
 ### Pull Requests
 

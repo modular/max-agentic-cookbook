@@ -11,30 +11,33 @@ function HighlightJsThemeLoader() {
     const { colorScheme } = useMantineColorScheme()
 
     useEffect(() => {
-        // Get or create the theme link element
-        let themeLink = document.getElementById('hljs-theme') as HTMLLinkElement | null
+        // Function to load the appropriate theme
+        const loadTheme = async () => {
+            // Get or create the theme link element
+            let themeLink = document.getElementById('hljs-theme') as HTMLLinkElement | null
 
-        if (!themeLink) {
-            themeLink = document.createElement('link')
-            themeLink.id = 'hljs-theme'
-            themeLink.rel = 'stylesheet'
-            document.head.appendChild(themeLink)
-        }
+            if (!themeLink) {
+                themeLink = document.createElement('link')
+                themeLink.id = 'hljs-theme'
+                themeLink.rel = 'stylesheet'
+                document.head.appendChild(themeLink)
+            }
 
-        // Import the appropriate theme CSS file as a URL
-        if (colorScheme === 'dark') {
-            import('highlight.js/styles/base16/material-darker.css?url').then(
-                (module) => {
+            // Import and set the appropriate theme CSS file
+            try {
+                if (colorScheme === 'dark') {
+                    const module = await import('highlight.js/styles/base16/material-darker.css?url')
+                    if (themeLink) themeLink.href = module.default
+                } else {
+                    const module = await import('highlight.js/styles/base16/papercolor-light.css?url')
                     if (themeLink) themeLink.href = module.default
                 }
-            )
-        } else {
-            import('highlight.js/styles/base16/papercolor-light.css?url').then(
-                (module) => {
-                    if (themeLink) themeLink.href = module.default
-                }
-            )
+            } catch (error) {
+                console.error('Failed to load highlight.js theme:', error)
+            }
         }
+
+        loadTheme()
     }, [colorScheme])
 
     return null

@@ -813,6 +813,322 @@ import { Header } from '~/components/Header'
 -   **NDJSON**: Batch operations with progressive updates for image captioning
 -   See `backend/src/recipes/multiturn_chat.py` and `backend/src/recipes/image_captioning.py`
 
+## Testing
+
+### Overview
+
+The frontend includes comprehensive testing infrastructure with **Vitest** for unit/component tests and **Playwright** for end-to-end (E2E) testing. This setup enables testing React components in isolation and full browser-based testing of user flows.
+
+**Testing frameworks:**
+
+-   **Vitest** - Fast unit test runner built on Vite, for testing components and hooks
+-   **Playwright** - Browser automation for E2E testing, supports Chromium, Firefox, WebKit
+-   **Testing Library** - React component testing utilities with user-centric queries
+-   **jsdom** - DOM simulation for unit tests
+
+### Test Structure
+
+```
+frontend/
+├── src/
+│   ├── components/
+│   │   └── *.test.tsx           # Component unit tests
+│   ├── test/
+│   │   └── setup.ts             # Global test configuration
+│   └── ...
+├── scripts/
+│   ├── copy-recipe-code.js      # Build script - copies recipe source to public/code/
+│   └── capture-screenshots.cjs  # Standalone screenshot utility
+├── e2e/
+│   ├── *.spec.ts                # E2E test files
+│   └── screenshots/             # Captured screenshots
+├── vitest.config.ts             # Vitest configuration
+└── playwright.config.ts         # Playwright configuration
+```
+
+### Running Tests
+
+**Unit Tests (Vitest):**
+
+```bash
+cd frontend
+
+# Run in watch mode (development)
+npm test
+
+# Run once (CI)
+npm run test:run
+
+# Interactive UI
+npm run test:ui
+
+# With coverage report
+npm run test:coverage
+```
+
+**E2E Tests (Playwright):**
+
+```bash
+cd frontend
+
+# First time only: Install browsers
+npm run playwright:install
+
+# Run tests headless
+npm run test:e2e
+
+# Interactive UI (great for debugging)
+npm run test:e2e:ui
+
+# Run in headed mode (see browser)
+npm run test:e2e:headed
+
+# Debug step-by-step
+npm run test:e2e:debug
+```
+
+### Playwright in Linux Containers
+
+The Playwright configuration is optimized for containerized environments (Docker, CI/CD) where GUI display isn't available.
+
+**Container-Specific Configuration:**
+
+`playwright.config.ts` includes browser flags for headless operation:
+
+```typescript
+launchOptions: {
+  args: [
+    '--no-sandbox',              // Required in containers
+    '--disable-setuid-sandbox',  // Security sandbox not needed
+    '--disable-dev-shm-usage',   // Use /tmp instead of /dev/shm
+    '--disable-gpu',             // No GPU acceleration needed
+  ],
+}
+```
+
+**Running in Containers:**
+
+```bash
+# Use xvfb-run for virtual display (if xvfb is installed)
+xvfb-run -a npm run test:e2e
+
+# Or use the standalone screenshot script
+xvfb-run -a node scripts/capture-screenshots.cjs
+```
+
+**Standalone Screenshot Capture:**
+
+The `scripts/capture-screenshots.cjs` script provides a simple way to capture screenshots in containerized environments:
+
+```bash
+# Starts dev server and captures screenshots
+node scripts/capture-screenshots.cjs
+```
+
+This script:
+-   Launches Chromium in headless mode with container-friendly flags
+-   Navigates to the app and waits for content to render
+-   Captures screenshots to `e2e/screenshots/`
+-   Works without display or GPU support
+
+**Key Settings for Containers:**
+
+-   `headless: true` - Runs without visible browser window
+-   `--single-process` - Prevents multi-process issues in containers
+-   `--no-zygote` - Disables Chrome's process spawning optimization
+-   Screenshots save to disk even without display
+
+### Test Configuration
+
+**Vitest (`vitest.config.ts`):**
+
+-   Uses jsdom environment for DOM simulation
+-   Loads `src/test/setup.ts` for global test setup
+-   Configured with React plugin for JSX support
+-   Coverage reporting with v8 provider
+
+**Playwright (`playwright.config.ts`):**
+
+-   Tests in `e2e/` directory
+-   Automatic dev server startup (`webServer` config)
+-   Multi-browser testing (Chromium, Firefox, WebKit, mobile emulation)
+-   Screenshots on failure, video on retry
+-   Traces for debugging failed tests
+
+**Test Setup (`src/test/setup.ts`):**
+
+-   Imports `@testing-library/jest-dom` for DOM assertions
+-   Mocks `window.matchMedia` for Mantine compatibility
+-   Automatic cleanup after each test
+
+### Writing Tests
+
+**Unit Test Example:**
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
+import { MyComponent } from './MyComponent';
+
+describe('MyComponent', () => {
+  it('renders correctly', () => {
+    render(<MyComponent />);
+    expect(screen.getByText('Hello')).toBeInTheDocument();
+  });
+
+  it('handles user interaction', async () => {
+    const user = userEvent.setup();
+    render(<MyComponent />);
+
+    await user.click(screen.getByRole('button'));
+    expect(screen.getByText('Clicked')).toBeInTheDocument();
+  });
+});
+```
+
+**E2E Test Example:**
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('user can navigate to recipe', async ({ page }) => {
+  await page.goto('/');
+
+  // Find and click a recipe link
+  await page.click('a[href*="/recipes/"]');
+
+  // Verify navigation
+  expect(page.url()).toContain('/recipes/');
+
+  // Take screenshot
+  await page.screenshot({ path: 'e2e/screenshots/recipe-page.png' });
+});
+```
+
+### CI/CD Integration
+
+**GitHub Actions Example:**
+
+```yaml
+- name: Install Playwright browsers
+  run: cd frontend && npx playwright install --with-deps chromium
+
+- name: Run unit tests
+  run: cd frontend && npm run test:run
+
+- name: Run E2E tests
+  run: cd frontend && npm run test:e2e
+
+- name: Upload screenshots on failure
+  if: failure()
+  uses: actions/upload-artifact@v3
+  with:
+    name: test-screenshots
+    path: frontend/e2e/screenshots/
+```
+
+### Testing Best Practices
+
+**Unit Tests:**
+
+-   Test user behavior, not implementation details
+-   Use semantic queries (`getByRole`, `getByLabelText`)
+-   Keep tests focused and independent
+-   Mock external dependencies (API calls, etc.)
+
+**E2E Tests:**
+
+-   Test critical user journeys
+-   Use data-testid sparingly (prefer semantic queries)
+-   Handle async operations with proper waits
+-   Clean up test data between runs
+-   Take screenshots for visual verification
+
+**Container Testing:**
+
+-   Always use headless mode in CI/CD
+-   Include container-friendly browser flags
+-   Use xvfb-run if GUI tests are needed
+-   Save artifacts (screenshots, videos) for debugging
+
+### Test Coverage
+
+Test coverage reports are generated with:
+
+```bash
+npm run test:coverage
+```
+
+Coverage reports include:
+-   Line, branch, function, and statement coverage
+-   HTML report in `coverage/` directory
+-   Terminal summary
+-   Excludes test files, config files, and build artifacts
+
+### Debugging Tests
+
+**Vitest UI:**
+
+```bash
+npm run test:ui
+```
+
+Provides interactive test runner with:
+-   Test file browser
+-   Real-time test execution
+-   Coverage visualization
+-   Console output inspection
+
+**Playwright Debug Mode:**
+
+```bash
+npm run test:e2e:debug
+```
+
+Opens Playwright Inspector with:
+-   Step-by-step test execution
+-   DOM snapshot at each step
+-   Network requests
+-   Console logs
+-   Screenshot preview
+
+**Playwright UI Mode:**
+
+```bash
+npm run test:e2e:ui
+```
+
+Interactive test interface with:
+-   Time travel through test execution
+-   DOM inspection at any point
+-   Screenshot and video playback
+-   Network activity monitoring
+
+### Common Issues
+
+**Playwright browser crashes in containers:**
+-   Ensure container-friendly flags are in `playwright.config.ts`
+-   Use `xvfb-run` for virtual display
+-   Try `--single-process` flag
+-   Check available memory (increase if needed)
+
+**matchMedia not defined:**
+-   Mock added in `src/test/setup.ts`
+-   Required for Mantine components
+-   Automatically applied to all tests
+
+**Tests timeout:**
+-   Increase timeout in test: `test.setTimeout(60000)`
+-   Check if dev server is starting correctly
+-   Verify network connectivity to localhost
+
+### Related Documentation
+
+-   [Testing Guide](../frontend/TESTING.md) - Detailed testing documentation
+-   [Playwright Demo](../frontend/PLAYWRIGHT_DEMO.md) - Screenshot examples and capabilities
+-   [Dark Mode Fix Summary](../frontend/DARK_MODE_FIX_SUMMARY.md) - Example of using Playwright for debugging
+
 ## Important Implementation Notes
 
 -   **Recipe Registry:** Single source of truth in `registry.ts` - edit to add/reorder recipes, routes auto-generate

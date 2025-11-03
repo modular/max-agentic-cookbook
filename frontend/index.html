@@ -1,13 +1,43 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <link rel="icon" type="image/x-icon" href="/icon.ico" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>MAX Agentic Cookbook</title>
-    </head>
-    <body>
-        <div id="root"></div>
-        <script type="module" src="/src/main.tsx"></script>
-    </body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/x-icon" href="/icon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MAX Agentic Cookbook</title>
+    <script>
+      // Mantine ColorSchemeScript - prevents flash and syncs theme before React loads
+      (function() {
+        try {
+          var storageKey = 'mantine-color-scheme-value';
+          var localStorageValue = window.localStorage.getItem(storageKey);
+          var computedColorScheme;
+
+          if (!localStorageValue) {
+            // First visit - detect from system and store the resolved value
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            computedColorScheme = prefersDark ? 'dark' : 'light';
+            // Store the resolved value (not 'auto') so Mantine reads it correctly
+            window.localStorage.setItem(storageKey, computedColorScheme);
+          } else if (localStorageValue === 'auto' || !['light', 'dark'].includes(localStorageValue)) {
+            // Handle 'auto' or invalid values by resolving to actual preference
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            computedColorScheme = prefersDark ? 'dark' : 'light';
+            window.localStorage.setItem(storageKey, computedColorScheme);
+          } else {
+            // Use stored preference directly
+            computedColorScheme = localStorageValue;
+          }
+
+          document.documentElement.setAttribute('data-mantine-color-scheme', computedColorScheme);
+        } catch (e) {
+          // Silently fail if localStorage is not available
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
