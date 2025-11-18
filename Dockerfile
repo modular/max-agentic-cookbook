@@ -10,8 +10,8 @@ ARG MAX_GPU=universal
 ARG MAX_TAG=latest
 
 FROM modular/max-full:${MAX_TAG} AS base-universal
-FROM modular/max-amd:${MAX_TAG} AS base-amd
-FROM modular/max-nvidia-full:${MAX_TAG} AS base-nvidia
+FROM modular/max-amd-base:${MAX_TAG} AS base-amd
+FROM modular/max-nvidia-base:${MAX_TAG} AS base-nvidia
 
 FROM base-${MAX_GPU} AS final
 
