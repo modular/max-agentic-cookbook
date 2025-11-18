@@ -20,7 +20,7 @@ WORKDIR /app
 # //////////////////////////////////////////////////////////////////////
 # INSTALL NODE.JS
 
-RUN wget -qO- https://deb.nodesource.com/setup_22.x | bash - \
+RUN DEBIAN_FRONTEND=noninteractive wget -qO- https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
