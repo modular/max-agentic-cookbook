@@ -98,7 +98,7 @@ class ClassificationResult(BaseModel):
 # ============================================================================
 
 
-@router.post("/batch-text-classification")
+@router.post("/text-classification")
 async def batch_text_classification(request: BatchClassificationRequest) -> list[ClassificationResult]:
     """
     Text Classification endpoint with parallel processing.
@@ -259,7 +259,7 @@ async def batch_text_classification(request: BatchClassificationRequest) -> list
     return results
 
 
-@router.get("/batch-text-classification/code")
+@router.get("/text-classification/code")
 async def get_batch_text_classification_code():
     """
     Get the source code for the batch-text-classification recipe.

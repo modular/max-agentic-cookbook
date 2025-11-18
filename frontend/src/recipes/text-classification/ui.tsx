@@ -131,7 +131,7 @@ export function Component({ endpoint, model }: RecipeProps) {
         trigger: triggerClassification,
         isMutating: isProcessing,
         error: mutationError,
-    } = useSWRMutation('/api/recipes/batch-text-classification', classifyBatch)
+    } = useSWRMutation('/api/recipes/text-classification', classifyBatch)
 
     // Parse JSONL file on drop
     const onFileDropped = useCallback(async (newFiles: File[]) => {
