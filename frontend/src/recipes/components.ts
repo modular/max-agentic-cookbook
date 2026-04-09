@@ -26,6 +26,7 @@ export const recipeComponents: Record<
     ),
     'multiturn-chat': lazyComponentExport(() => import('./multiturn-chat/ui')),
     'image-captioning': lazyComponentExport(() => import('./image-captioning/ui')),
+    'image-generation': lazyComponentExport(() => import('./image-generation/ui')),
 }
 
 /**
@@ -35,6 +36,7 @@ export const readmeComponents: Record<string, LazyExoticComponent<ComponentType>
     'text-classification': lazy(() => import('./text-classification/README.mdx')),
     'multiturn-chat': lazy(() => import('./multiturn-chat/README.mdx')),
     'image-captioning': lazy(() => import('./image-captioning/README.mdx')),
+    'image-generation': lazy(() => import('./image-generation/README.mdx')),
 }
 
 /**

@@ -35,6 +35,13 @@ export const recipes: RecipeMetadata = {
             description:
                 'Generate captions for multiple images with progressive NDJSON streaming. Upload images, customize the prompt, and watch captions appear instantly. Includes parallel processing and performance metrics (TTFT and duration).',
         },
+        {
+            slug: 'image-generation',
+            title: 'Image Generation',
+            tags: ['Diffusion', 'Text-to-Image'],
+            description:
+                'Generate images from text prompts using FLUX.2 diffusion models. Configure resolution, inference steps, and guidance scale with real-time generation metrics.',
+        },
     ],
     'Data, Tools & Reasoning': [
         { title: 'Structured Data Generation' },

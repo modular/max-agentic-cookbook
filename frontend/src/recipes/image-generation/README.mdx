@@ -1,0 +1,131 @@
+## Architecture
+
+**Frontend** (`ui.tsx`): Form-based UI with `useSWRMutation` for non-streaming POST
+
+- Text prompt input with configurable generation parameters
+- Collapsible advanced settings (resolution, steps, guidance scale, negative prompt)
+- Displays generated image with performance metrics and download option
+
+**Backend** (`image_generation.py`): FastAPI with OpenAI-compatible images API
+
+- Uses `AsyncOpenAI.images.generate()` for image generation
+- Passes MAX-specific parameters (steps, guidance_scale) via `extra_body`
+- Returns base64-encoded image data with generation duration
+
+## Key Implementation Details
+
+**Image Generation** (`image_generation.py:88-128`):
+
+- Creates `AsyncOpenAI` client with cached endpoint credentials
+- Calls `client.images.generate()` with `response_format="b64_json"`
+- MAX-specific params (steps, guidance_scale, negative_prompt) sent via `extra_body`
+- Measures total generation duration in milliseconds
+
+**Frontend State** (`ui.tsx:88-99`):
+
+- Prompt and parameter state managed with `useState` hooks
+- `useSWRMutation` handles the POST request lifecycle (loading, error, result)
+- Result contains base64 image data displayed inline
+
+**Download** (`ui.tsx:119-126`):
+
+- Creates a data URL from the base64 response
+- Triggers browser download as PNG file
+
+### Why Non-Streaming
+
+- **Complete result**: Image generation returns a single image, not progressive data
+- **Simple protocol**: Standard JSON request/response, no streaming complexity
+- **Clear loading state**: Spinner while generating, then full image appears
+- **Framework-standard**: Uses `useSWRMutation` like text classification recipe
+
+### Generation Parameters
+
+- **Steps** (default 28): Number of denoising iterations. More steps = higher quality but slower
+- **Guidance Scale** (default 3.5): How closely to follow the prompt. Higher = more literal
+- **Width/Height** (default 1024x1024): Output dimensions in pixels, multiples of 16
+- **Negative Prompt**: Describes what to avoid in the generated image
+
+### File References
+
+- Frontend: `frontend/src/recipes/image-generation/ui.tsx`
+- Backend: `backend/src/recipes/image_generation.py`
+- API fetcher: `generateImage` function in ui.tsx
+- Parameter handling: `extra_body` in image_generation.py
+
+## Protocol Flow
+
+1. Frontend sends `POST /api/recipes/image-generation` with:
+
+    ```json
+    {
+        "endpointId": "max-local",
+        "modelName": "flux2-dev-fp4",
+        "prompt": "A serene mountain landscape at sunset",
+        "width": 1024,
+        "height": 1024,
+        "steps": 28,
+        "guidance_scale": 3.5,
+        "negative_prompt": ""
+    }
+    ```
+
+2. Backend generates image (`image_generation.py:108-118`):
+
+    ```python
+    response = await client.images.generate(
+        model=request.modelName,
+        prompt=request.prompt,
+        n=1,
+        size=f"{request.width}x{request.height}",
+        response_format="b64_json",
+        extra_body=extra_body,
+    )
+    ```
+
+3. Backend returns JSON with base64 image and metrics:
+
+    ```json
+    {
+        "image_b64": "/9j/4AAQSkZJRg...",
+        "width": 1024,
+        "height": 1024,
+        "duration": 823
+    }
+    ```
+
+4. Frontend displays the generated image with duration badge
+
+## API Reference
+
+**Endpoint:** `POST /api/recipes/image-generation`
+
+**Content-Type:** `application/json`
+
+**Request Body:**
+
+```json
+{
+    "endpointId": "max-local",
+    "modelName": "flux2-dev-fp4",
+    "prompt": "A photorealistic image of a golden retriever playing in autumn leaves",
+    "width": 1024,
+    "height": 1024,
+    "steps": 28,
+    "guidance_scale": 3.5,
+    "negative_prompt": "blurry, low quality"
+}
+```
+
+**Response:**
+
+JSON object with base64-encoded image data and metrics:
+
+```json
+{
+    "image_b64": "<base64-encoded PNG data>",
+    "width": 1024,
+    "height": 1024,
+    "duration": 823
+}
+```
