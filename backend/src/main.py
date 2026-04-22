@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from src.core import endpoints, models
-from src.recipes import batch_text_classification, image_captioning, multiturn_chat
+from src.recipes import batch_text_classification, image_captioning, image_generation, multiturn_chat
 
 # Load environment variables from .env.local
 env_path = Path(__file__).parent.parent / ".env.local"
@@ -38,6 +38,7 @@ app.include_router(models.router)
 app.include_router(batch_text_classification.router)
 app.include_router(multiturn_chat.router)
 app.include_router(image_captioning.router)
+app.include_router(image_generation.router)
 
 
 @app.get("/api/health")

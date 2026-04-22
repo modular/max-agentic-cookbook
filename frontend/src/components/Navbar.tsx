@@ -1,6 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
 import {
-    Accordion,
     Anchor,
     AppShell,
     Box,
@@ -9,14 +8,13 @@ import {
     Stack,
     Text,
 } from '@mantine/core'
-import { IconChevronRight, IconPlus } from '@tabler/icons-react'
+import { IconChevronRight } from '@tabler/icons-react'
 import { iconStroke } from '~/lib/theme'
 import { isRecipeImplemented } from '~/recipes/registry'
 import { useEndpointFromQuery } from '~/lib/hooks'
 import { SelectEndpoint } from './SelectEndpoint'
 import { SelectModel } from './SelectModel'
 import chapters from '~/lib/chapters'
-import classes from './Navbar.module.css'
 import type { NavItem } from '~/lib/types'
 
 interface NavItemProps {
@@ -27,8 +25,8 @@ interface NavItemProps {
 function NavItem({ item, currentRecipe }: NavItemProps) {
     if (isRecipeImplemented(item.slug)) {
         return (
-            <Group justify="space-between" align="start">
-                <li>
+            <li>
+                <Group justify="space-between" align="start" wrap="nowrap">
                     <Stack gap={0}>
                         <Anchor component={Link} to={`/${item.slug}`} underline="never">
                             <Text size="sm">{item.title}</Text>
@@ -39,13 +37,13 @@ function NavItem({ item, currentRecipe }: NavItemProps) {
                             </Text>
                         )}
                     </Stack>
-                </li>
-                {currentRecipe === item.slug && (
-                    <Box mt={1}>
-                        <IconChevronRight size={16} opacity={0.8} stroke={iconStroke} />
-                    </Box>
-                )}
-            </Group>
+                    {currentRecipe === item.slug && (
+                        <Box mt={1} style={{ flexShrink: 0 }}>
+                            <IconChevronRight size={16} opacity={0.8} stroke={iconStroke} />
+                        </Box>
+                    )}
+                </Group>
+            </li>
         )
     }
     return (
@@ -71,31 +69,16 @@ export function Navbar() {
                     <SelectModel endpointId={selectedEndpoint?.id ?? null} />
                 </Stack>
             </AppShell.Section>
-            <AppShell.Section grow component={ScrollArea}>
-                <Accordion
-                    multiple
-                    chevronPosition="left"
-                    defaultValue={['Foundations']}
-                    chevron={<IconPlus size={16} stroke={iconStroke} />}
-                    classNames={{ chevron: classes.chevron }}
-                >
-                    {chapters.sections.map((section) => (
-                        <Accordion.Item key={section.title} value={section.title}>
-                            <Accordion.Control>{section.title}</Accordion.Control>
-                            <Accordion.Panel bg="">
-                                <ol start={section.items[0].number ?? 1}>
-                                    {section.items.map((item) => (
-                                        <NavItem
-                                            key={item.slug || item.title}
-                                            item={item}
-                                            currentRecipe={currentRecipe}
-                                        />
-                                    ))}
-                                </ol>
-                            </Accordion.Panel>
-                        </Accordion.Item>
+            <AppShell.Section grow component={ScrollArea} p="md">
+                <ol>
+                    {chapters.sections[0].items.map((item) => (
+                        <NavItem
+                            key={item.slug || item.title}
+                            item={item}
+                            currentRecipe={currentRecipe}
+                        />
                     ))}
-                </Accordion>
+                </ol>
             </AppShell.Section>
         </>
     )

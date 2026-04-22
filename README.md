@@ -8,8 +8,8 @@ This repo contains a modern fullstack cookbook app showcasing the agentic AI cap
 
 ## Requirements
 
--   **Python** 3.11 or higher; we recommend [uv 0.7+](https://github.com/astral-sh/uv) for working with Python
--   **Node.js** 22.x or higher; we recommend [pnpm 10.17+](https://pnpm.io/installation) for working with Node.js
+- **Python** 3.11 or higher; we recommend [uv 0.7+](https://github.com/astral-sh/uv) for working with Python
+- **Node.js** 22.x or higher; we recommend [pnpm 10.17+](https://pnpm.io/installation) for working with Node.js
 
 ## Quick Start
 
@@ -44,6 +44,7 @@ COOKBOOK_ENDPOINTS='[
 cd backend && uv sync
 cd ..
 cd frontend && npm install
+cd ..
 ```
 
 ### Run the app
@@ -131,21 +132,21 @@ backend/
 
 #### Backend Features & Technologies
 
--   FastAPI - Modern Python web framework
--   uvicorn - ASGI server
--   uv - Fast Python package manager
--   openai - OpenAI Python client for LLM proxying
+- FastAPI - Modern Python web framework
+- uvicorn - ASGI server
+- uv - Fast Python package manager
+- openai - OpenAI Python client for LLM proxying
 
 #### Backend Routes
 
--   `GET /api/health` - Health check
--   `GET /api/recipes` - List available recipe slugs
--   `GET /api/endpoints` - List configured LLM endpoints
--   `GET /api/models?endpointId=xxx` - List models for endpoint
--   `POST /api/recipes/multiturn-chat` - Multi-turn chat endpoint
--   `POST /api/recipes/batch-text-classification` - Text Classification endpoint
--   `POST /api/recipes/image-captioning` - Image captioning endpoint
--   `GET /api/recipes/{slug}/code` - Get recipe backend source code
+- `GET /api/health` - Health check
+- `GET /api/recipes` - List available recipe slugs
+- `GET /api/endpoints` - List configured LLM endpoints
+- `GET /api/models?endpointId=xxx` - List models for endpoint
+- `POST /api/recipes/multiturn-chat` - Multi-turn chat endpoint
+- `POST /api/recipes/batch-text-classification` - Text Classification endpoint
+- `POST /api/recipes/image-captioning` - Image captioning endpoint
+- `GET /api/recipes/{slug}/code` - Get recipe backend source code
 
 ### React Frontend
 
@@ -166,26 +167,26 @@ frontend/
 
 #### Frontend Features & Technologies
 
--   **React 18 + TypeScript** - Type-safe component development
--   **Vite** - Lightning-fast dev server and optimized production builds
--   **React Router v7** - Auto-generated routing with lazy loading
--   **Mantine v7** - Comprehensive UI component library with dark/light themes
--   **SWR** - Lightweight data fetching with automatic caching
--   **Vercel AI SDK** - Streaming chat UI with token-by-token responses
--   **MDX** - Markdown documentation with JSX support
--   **Recipe Registry** - Single source of truth for all recipes (pure data + React components)
+- **React 18 + TypeScript** - Type-safe component development
+- **Vite** - Lightning-fast dev server and optimized production builds
+- **React Router v7** - Auto-generated routing with lazy loading
+- **Mantine v7** - Comprehensive UI component library with dark/light themes
+- **SWR** - Lightweight data fetching with automatic caching
+- **Vercel AI SDK** - Streaming chat UI with token-by-token responses
+- **MDX** - Markdown documentation with JSX support
+- **Recipe Registry** - Single source of truth for all recipes (pure data + React components)
 
 #### Frontend Routes
 
--   `/` - Recipe index
--   `/:slug` - Recipe demo (interactive UI)
--   `/:slug/readme` - Recipe documentation
--   `/:slug/code` - Recipe source code view
+- `/` - Recipe index
+- `/:slug` - Recipe demo (interactive UI)
+- `/:slug/readme` - Recipe documentation
+- `/:slug/code` - Recipe source code view
 
 ## Documentation
 
--   [Contributing Guide](docs/contributing.md) - Architecture, patterns, and how to add recipes
--   [Docker Deployment Guide](docs/docker.md) - Container deployment with MAX
+- [Contributing Guide](docs/contributing.md) - Architecture, patterns, and how to add recipes
+- [Docker Deployment Guide](docs/docker.md) - Container deployment with MAX
 
 ## License
 
