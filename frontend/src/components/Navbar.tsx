@@ -25,8 +25,8 @@ interface NavItemProps {
 function NavItem({ item, currentRecipe }: NavItemProps) {
     if (isRecipeImplemented(item.slug)) {
         return (
-            <Group justify="space-between" align="start">
-                <li>
+            <li>
+                <Group justify="space-between" align="start" wrap="nowrap">
                     <Stack gap={0}>
                         <Anchor component={Link} to={`/${item.slug}`} underline="never">
                             <Text size="sm">{item.title}</Text>
@@ -37,13 +37,13 @@ function NavItem({ item, currentRecipe }: NavItemProps) {
                             </Text>
                         )}
                     </Stack>
-                </li>
-                {currentRecipe === item.slug && (
-                    <Box mt={1}>
-                        <IconChevronRight size={16} opacity={0.8} stroke={iconStroke} />
-                    </Box>
-                )}
-            </Group>
+                    {currentRecipe === item.slug && (
+                        <Box mt={1} style={{ flexShrink: 0 }}>
+                            <IconChevronRight size={16} opacity={0.8} stroke={iconStroke} />
+                        </Box>
+                    )}
+                </Group>
+            </li>
         )
     }
     return (
