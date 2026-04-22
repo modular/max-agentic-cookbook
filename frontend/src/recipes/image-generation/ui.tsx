@@ -13,7 +13,7 @@ import useSWRMutation from 'swr/mutation'
 import {
     Stack,
     Textarea,
-    NumberInput,
+    Select,
     ScrollArea,
     Button,
     Group,
@@ -90,6 +90,29 @@ async function generateImage(
 }
 
 // ============================================================================
+// Presets
+// ============================================================================
+
+const SIZE_PRESETS = [
+    { value: '512x512', label: '512 × 512 — Small' },
+    { value: '768x768', label: '768 × 768 — Medium' },
+    { value: '1024x1024', label: '1024 × 1024 — Large (default)' },
+    { value: '1024x576', label: '1024 × 576 — Landscape' },
+    { value: '576x1024', label: '576 × 1024 — Portrait' },
+]
+
+const STEPS_PRESETS = [
+    { value: '10', label: '10 — Fast' },
+    { value: '20', label: '20 — Balanced' },
+    { value: '28', label: '28 — Quality (default)' },
+]
+
+function parseSizePreset(value: string): { width: number; height: number } {
+    const [w, h] = value.split('x').map(Number)
+    return { width: w, height: h }
+}
+
+// ============================================================================
 // Main recipe component
 // ============================================================================
 
@@ -99,10 +122,8 @@ async function generateImage(
  */
 export function Component({ endpoint, model }: RecipeProps) {
     const [prompt, setPrompt] = useState('')
-    const [width, setWidth] = useState(1024)
-    const [height, setHeight] = useState(1024)
-    const [steps, setSteps] = useState(28)
-    const [guidanceScale, setGuidanceScale] = useState(3.5)
+    const [sizePreset, setSizePreset] = useState('1024x1024')
+    const [stepsPreset, setStepsPreset] = useState('28')
     const [negativePrompt, setNegativePrompt] = useState('')
     const [showAdvanced, setShowAdvanced] = useState(false)
     const [result, setResult] = useState<ImageGenerationResult | null>(null)
@@ -121,14 +142,15 @@ export function Component({ endpoint, model }: RecipeProps) {
         setError(null)
 
         try {
+            const { width, height } = parseSizePreset(sizePreset)
             const generationResult = await trigger({
                 endpointId: endpoint.id,
                 modelName: model.id,
                 prompt: prompt.trim(),
                 width,
                 height,
-                steps,
-                guidance_scale: guidanceScale,
+                steps: Number(stepsPreset),
+                guidance_scale: 3.5,
                 negative_prompt: negativePrompt,
             })
 
@@ -198,55 +220,22 @@ export function Component({ endpoint, model }: RecipeProps) {
                         <Collapse in={showAdvanced}>
                             <Stack mt="md" gap="md">
                                 <Group grow>
-                                    <NumberInput
-                                        label="Width"
-                                        value={width}
-                                        onChange={(v) =>
-                                            setWidth(typeof v === 'number' ? v : 1024)
-                                        }
-                                        min={256}
-                                        max={2048}
-                                        step={16}
+                                    <Select
+                                        label="Size"
+                                        data={SIZE_PRESETS}
+                                        value={sizePreset}
+                                        onChange={(v) => setSizePreset(v ?? '1024x1024')}
                                         disabled={isMutating}
+                                        allowDeselect={false}
                                     />
-                                    <NumberInput
-                                        label="Height"
-                                        value={height}
-                                        onChange={(v) =>
-                                            setHeight(typeof v === 'number' ? v : 1024)
-                                        }
-                                        min={256}
-                                        max={2048}
-                                        step={16}
+                                    <Select
+                                        label="Quality"
+                                        description="Number of denoising steps"
+                                        data={STEPS_PRESETS}
+                                        value={stepsPreset}
+                                        onChange={(v) => setStepsPreset(v ?? '28')}
                                         disabled={isMutating}
-                                    />
-                                </Group>
-                                <Group grow>
-                                    <NumberInput
-                                        label="Steps"
-                                        description="Number of denoising iterations"
-                                        value={steps}
-                                        onChange={(v) =>
-                                            setSteps(typeof v === 'number' ? v : 28)
-                                        }
-                                        min={1}
-                                        max={50}
-                                        disabled={isMutating}
-                                    />
-                                    <NumberInput
-                                        label="Guidance Scale"
-                                        description="Prompt adherence strength"
-                                        value={guidanceScale}
-                                        onChange={(v) =>
-                                            setGuidanceScale(
-                                                typeof v === 'number' ? v : 3.5
-                                            )
-                                        }
-                                        min={0}
-                                        max={20}
-                                        step={0.5}
-                                        decimalScale={1}
-                                        disabled={isMutating}
+                                        allowDeselect={false}
                                     />
                                 </Group>
                                 <Textarea
@@ -320,6 +309,9 @@ export function Component({ endpoint, model }: RecipeProps) {
                         setResult(null)
                         setError(null)
                         setPrompt('')
+                        setSizePreset('1024x1024')
+                        setStepsPreset('28')
+                        setNegativePrompt('')
                     }}
                 >
                     Reset

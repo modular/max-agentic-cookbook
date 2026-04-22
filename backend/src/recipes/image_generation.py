@@ -15,8 +15,8 @@ Key features:
 
 Architecture:
 - FastAPI endpoint: Receives generation requests with prompt and parameters
-- AsyncOpenAI client: Handles image generation via client.images.generate()
-- MAX-specific parameters: Passed via extra_body for steps, guidance_scale
+- AsyncOpenAI client: Handles image generation via client.responses.create()
+- MAX-specific parameters: Passed via extra_body.provider_options.image
 - Performance tracking: Measures total generation time in milliseconds
 
 Request Format:
@@ -35,9 +35,9 @@ Response Format:
 
 import time
 
+import httpx
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
-from openai import AsyncOpenAI
 from pydantic import BaseModel
 
 from ..core.endpoints import get_cached_endpoint
@@ -95,9 +95,9 @@ async def image_generation(request: ImageGenerationRequest) -> ImageGenerationRe
     Accepts a text prompt and generation parameters, then returns a
     base64-encoded image along with performance metrics.
 
-    The endpoint uses client.images.generate() from the OpenAI SDK,
-    which maps to the /v1/images/generations API. MAX-specific parameters
-    like steps and guidance_scale are passed via extra_body.
+    The endpoint uses client.responses.create() from the OpenAI SDK,
+    which maps to the /v1/responses API (Modular Open Responses standard).
+    MAX-specific parameters are passed via extra_body.provider_options.image.
 
     Args:
         request: ImageGenerationRequest with prompt and generation parameters
@@ -128,50 +128,62 @@ async def image_generation(request: ImageGenerationRequest) -> ImageGenerationRe
             detail="Invalid endpoint configuration: missing baseUrl or apiKey"
         )
 
-    # Create AsyncOpenAI client with the endpoint's baseUrl and apiKey.
-    # AsyncOpenAI is preferred over sync OpenAI for better concurrency
-    # and connection pooling in FastAPI.
-    client = AsyncOpenAI(base_url=base_url, api_key=api_key)
-
-    # Build extra_body with MAX-specific generation parameters.
-    # The OpenAI SDK's images.generate() doesn't natively support parameters
-    # like steps and guidance_scale, so we pass them via extra_body which
-    # forwards them in the request body to the MAX endpoint.
-    extra_body: dict = {
+    # Build provider_options for MAX-specific generation parameters.
+    # The Modular MAX API uses the Open Responses standard (/v1/responses)
+    # with image parameters nested under provider_options.image.
+    image_options: dict = {
+        "width": request.width,
+        "height": request.height,
         "steps": request.steps,
         "guidance_scale": request.guidance_scale,
     }
     if request.negative_prompt:
-        extra_body["negative_prompt"] = request.negative_prompt
+        image_options["negative_prompt"] = request.negative_prompt
+
+    payload = {
+        "model": request.modelName,
+        "input": request.prompt,
+        "provider_options": {"image": image_options},
+    }
 
     try:
         # Start timing for duration measurement
         start_time = time.time()
 
-        # Call the OpenAI-compatible images API. The response_format="b64_json"
-        # tells the endpoint to return the image as base64-encoded data rather
-        # than a URL. The size parameter uses "WxH" format.
-        response = await client.images.generate(
-            model=request.modelName,
-            prompt=request.prompt,
-            n=1,
-            size=f"{request.width}x{request.height}",
-            response_format="b64_json",
-            extra_body=extra_body,
-        )
+        # Use httpx directly to avoid OpenAI SDK response parsing incompatibility
+        # with the Modular Open Responses API (/v1/responses).
+        async with httpx.AsyncClient() as http_client:
+            resp = await http_client.post(
+                f"{base_url.rstrip('/')}/responses",
+                json=payload,
+                headers={"Authorization": f"Bearer {api_key}"},
+                timeout=300,
+            )
+
+        if resp.status_code != 200:
+            raise HTTPException(
+                status_code=502,
+                detail=f"Upstream error {resp.status_code}: {resp.text}",
+            )
 
         # Calculate total generation duration in milliseconds
         duration_ms = int((time.time() - start_time) * 1000)
 
-        # Extract base64 image data from the response.
-        # The images API returns a list of generated images; we take the first.
-        if not response.data or not response.data[0].b64_json:
+        # Extract base64 image data from output[0].content[0].image_data
+        data = resp.json()
+        try:
+            image_b64 = data["output"][0]["content"][0]["image_data"]
+        except (KeyError, IndexError, TypeError):
             raise HTTPException(
                 status_code=502,
                 detail="No image data in response from upstream endpoint"
             )
 
-        image_b64 = response.data[0].b64_json
+        if not image_b64:
+            raise HTTPException(
+                status_code=502,
+                detail="No image data in response from upstream endpoint"
+            )
 
         return ImageGenerationResult(
             image_b64=image_b64,
