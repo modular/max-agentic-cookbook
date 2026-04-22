@@ -103,19 +103,24 @@ docker build -t max-cookbook .
 # Run (NVIDIA GPU)
 docker run --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -e "HF_HUB_ENABLE_HF_TRANSFER=1" \
     -e "HF_TOKEN=your-huggingface-token" \
-    -e "MAX_MODEL=mistral-community/pixtral-12b" \
-    -p 8000:8000 -p 8010:8010 \
+    -e "MAX_MODEL=google/gemma-3-27b-it" \
+    -p 8000:8000 \
+    -p 8010:8010 \
     max-cookbook
 
 # Run (AMD GPU)
 docker run \
     --group-add keep-groups \
-    --device /dev/kfd --device /dev/dri \
+    --device /dev/kfd \
+    --device /dev/dri \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -e "HF_HUB_ENABLE_HF_TRANSFER=1" \
     -e "HF_TOKEN=your-huggingface-token" \
-    -e "MAX_MODEL=mistral-community/pixtral-12b" \
-    -p 8000:8000 -p 8010:8010 \
+    -e "MAX_MODEL=google/gemma-3-27b-it" \
+    -p 8000:8000 \
+    -p 8010:8010 \
     max-cookbook
 ```
 

@@ -5,7 +5,7 @@ module.exports = {
             script: '/bin/bash',
             args: [
                 '-c',
-                'exec python -m max.entrypoints.pipelines serve --model-path "${MAX_MODEL:-google/gemma-3-27b-it}" --trust-remote-code',
+                'exec max serve --model-path "${MAX_MODEL:-google/gemma-3-27b-it}" --trust-remote-code',
             ],
             interpreter: 'none',
             autorestart: true,

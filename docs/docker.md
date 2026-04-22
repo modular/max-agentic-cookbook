@@ -204,18 +204,22 @@ To serve multiple models, run separate MAX containers on different ports and con
 
 ```bash
 # Model 1 on port 8000
-docker run -d --name max-model-1 --gpus all \
-    -e "HF_TOKEN=your-token" \
-    -e "MAX_MODEL=google/gemma-3-27b-it" \
+docker run -d --name max-model-1 --gpus=1 \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
+    --env "HF_TOKEN=${HF_TOKEN}" \
     -p 8000:8000 \
-    modular/max:latest
+    modular/max-full:latest \
+    --model-path google/gemma-3-27b-it
 
 # Model 2 on port 8002
-docker run -d --name max-model-2 --gpus all \
-    -e "HF_TOKEN=your-token" \
-    -e "MAX_MODEL=mistral-community/pixtral-12b" \
+docker run -d --name max-model-2 --gpus=1 \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
+    --env "HF_TOKEN=${HF_TOKEN}" \
     -p 8002:8000 \
-    modular/max:latest
+    modular/max-full:latest \
+    --model-path mistral-community/pixtral-12b
 ```
 
 Configure in `backend/.env.local`:
