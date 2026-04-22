@@ -43,30 +43,6 @@ export const recipes: RecipeMetadata = {
                 'Generate images from text prompts using FLUX.2 diffusion models. Configure resolution, inference steps, and guidance scale with real-time generation metrics.',
         },
     ],
-    'Data, Tools & Reasoning': [
-        { title: 'Structured Data Generation' },
-        { title: 'Function Calling & Tools' },
-        { title: 'The ReAct Pattern' },
-        { title: 'Model Context Protocol (MCP)' },
-    ],
-    'Planning & Collaboration': [
-        { title: 'State & Memory Management' },
-        { title: 'Planning & Self-Correction' },
-        { title: 'Multi-Tool Agents' },
-        { title: 'Human-in-the-Loop' },
-    ],
-    'Context Engineering': [
-        { title: 'Augmented Generation (RAG)' },
-        { title: 'Coming Soon' },
-        { title: 'Coming Soon' },
-    ],
-    'Advanced Applications': [
-        { title: 'Coming Soon' },
-        { title: 'Coming Soon' },
-        { title: 'Coming Soon' },
-        { title: 'Coming Soon' },
-    ],
-    Appendix: [{ title: 'Observability & Debugging' }, { title: 'Agentic Frameworks' }],
 }
 
 // Helper: Check if a recipe is implemented (has a slug)
