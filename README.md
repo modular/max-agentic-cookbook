@@ -2,7 +2,7 @@
 
 This repo contains a modern fullstack cookbook app showcasing the agentic AI capabilities of Modular MAX as a complete LLM serving solution. It's built with FastAPI (Python) and React (TypeScript), optimizing for developer familiarity and flexibility.
 
-<img src="./docs/screenshot.png" alt="Screenshot of the MAX Agentic Cookbook web application showing the multi-turn chat recipe demo.">
+<img src="./docs/max-agentic-cookbook-screenshot.png" alt="Screenshot of the MAX Agentic Cookbook web application showing the multi-turn chat recipe demo.">
 
 > **📦 Looking for legacy recipes?** Older standalone recipes have been moved to the [`archive`](https://github.com/modular/max-agentic-cookbook/tree/archive) branch. These are provided as-is for historical reference only and are no longer maintained.
 
@@ -20,13 +20,24 @@ git clone https://github.com/modular/max-agentic-cookbook.git
 cd max-agentic-cookbook
 ```
 
+### Self-host a model with MAX
+
+The Cookbook is designed to work with any OpenAI-compatible endpoint, including models served locally with MAX. To get a model running, follow the MAX inference guides:
+
+- [Text-to-text inference](https://docs.modular.com/max/inference/text-to-text/) — serve chat and completion models (e.g. Llama, Mistral)
+- [Image generation inference](https://docs.modular.com/max/inference/image-generation/) — serve image generation models
+
+Once MAX is running, it exposes an OpenAI-compatible API at `http://localhost:8000/v1` by default — no additional configuration needed to connect it to the Cookbook.
+
+> **Not self-hosting?** You can also point the Cookbook at any other OpenAI-compatible endpoint (e.g. a hosted provider). Just supply the base URL and API key in the step below.
+
 ### Set up your LLM endpoint
 
 ```bash
 cp backend/.sample.env backend/.env.local
 ```
 
-Open `backend/.env.local` in your favorite text editor and supply a valid MAX or OpenAI-compatible endpoint:
+Open `backend/.env.local` in your favorite text editor and supply your endpoint details:
 
 ```env
 COOKBOOK_ENDPOINTS='[
