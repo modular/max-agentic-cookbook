@@ -75,7 +75,6 @@ test.describe('MAX Agentic Cookbook Navigation', () => {
     const recipeLinks = page.locator('a[href*="/recipes/"]').first();
 
     if (await recipeLinks.count() > 0) {
-      const recipePath = await recipeLinks.getAttribute('href');
       await recipeLinks.click();
 
       // Wait for navigation

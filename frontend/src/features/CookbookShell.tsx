@@ -15,7 +15,7 @@ export function CookbookShell() {
         if (mobileOpened) {
             toggleMobile()
         }
-    }, [location.pathname, toggleMobile])
+    }, [location.pathname, mobileOpened, toggleMobile])
 
     return (
         <AppShell

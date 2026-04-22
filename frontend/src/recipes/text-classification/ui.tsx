@@ -183,32 +183,23 @@ export function Component({ endpoint, model }: RecipeProps) {
         }
     }, [])
 
-    // Extract text from item using the configured textField
-    const extractText = (item: TextItem): string | null => {
-        try {
-            const data = item.originalData as Record<string, unknown>
-            const value = data[textField]
-
-            if (value === null || value === undefined) {
-                return null
-            }
-
-            if (typeof value === 'string') {
-                return value
-            }
-
-            // Try to convert to string if it's another type
-            return String(value)
-        } catch {
-            return null
-        }
-    }
-
     // Classify all items
     const onClassifyClicked = useCallback(async () => {
         if (!endpoint || !model || uploadedItems.length === 0) return
 
         setError(null)
+
+        const extractText = (item: TextItem): string | null => {
+            try {
+                const data = item.originalData as Record<string, unknown>
+                const value = data[textField]
+                if (value === null || value === undefined) return null
+                if (typeof value === 'string') return value
+                return String(value)
+            } catch {
+                return null
+            }
+        }
 
         try {
             // Extract text for all items
@@ -262,7 +253,6 @@ export function Component({ endpoint, model }: RecipeProps) {
         uploadedItems,
         systemPrompt,
         textField,
-        extractText,
         triggerClassification,
     ])
 
