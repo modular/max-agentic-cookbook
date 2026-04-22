@@ -217,7 +217,7 @@ export function Component({ endpoint, model }: RecipeProps) {
                             </Group>
                         </UnstyledButton>
 
-                        <Collapse in={showAdvanced}>
+                        <Collapse expanded={showAdvanced}>
                             <Stack mt="md" gap="md">
                                 <Group grow>
                                     <Select
