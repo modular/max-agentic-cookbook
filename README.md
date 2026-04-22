@@ -2,7 +2,7 @@
 
 This repo contains a modern fullstack cookbook app showcasing the agentic AI capabilities of Modular MAX as a complete LLM serving solution. It's built with FastAPI (Python) and React (TypeScript), optimizing for developer familiarity and flexibility.
 
-<img src="./docs/screenshot.png" alt="Screenshot of the MAX Agentic Cookbook web application showing the multi-turn chat recipe demo.">
+<img src="./docs/max-agentic-cookbook-screenshot.png" alt="Screenshot of the MAX Agentic Cookbook web application showing the multi-turn chat recipe demo.">
 
 > **📦 Looking for legacy recipes?** Older standalone recipes have been moved to the [`archive`](https://github.com/modular/max-agentic-cookbook/tree/archive) branch. These are provided as-is for historical reference only and are no longer maintained.
 
