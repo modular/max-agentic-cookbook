@@ -29,7 +29,6 @@ import {
     Grid,
     Loader,
     Paper,
-    ScrollArea,
     Stack,
     Text,
     Textarea,
@@ -399,7 +398,7 @@ function OutputPanel({ output, toolEvents, status }: OutputPanelProps) {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
         const timer = setTimeout(() => { isAutoScrolling.current = false }, 100)
         return () => clearTimeout(timer)
-    }, [output, toolEvents, followStream])
+    }, [output, followStream])
 
     return (
         <Paper
@@ -413,11 +412,20 @@ function OutputPanel({ output, toolEvents, status }: OutputPanelProps) {
                 {loading && <Loader size={12} color={color} />}
             </Box>
 
-            <ScrollArea
-                style={{ flex: 1, minHeight: 0 }}
-                type="auto"
-                viewportRef={viewportRef}
-                onScrollPositionChange={() => {
+            {/* Tool call log sits outside the ScrollArea so it's always visible
+                and never buried by auto-scroll to the output below. The maxHeight
+                prevents it from inflating the panel and pushing the left column's
+                Generate button out of position. */}
+            {toolEvents.length > 0 && (
+                <Box style={{ maxHeight: 200, overflowY: 'auto', flexShrink: 0 }}>
+                    <ToolCallLog events={toolEvents} />
+                </Box>
+            )}
+
+            <div
+                ref={viewportRef}
+                style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}
+                onScroll={() => {
                     const el = viewportRef.current
                     if (!el) return
                     const distanceToBottom = el.scrollHeight - el.scrollTop - el.clientHeight
@@ -430,29 +438,24 @@ function OutputPanel({ output, toolEvents, status }: OutputPanelProps) {
                     setFollowStream(distanceToBottom <= 20)
                 }}
             >
-                <Stack gap="sm">
-                    <ToolCallLog events={toolEvents} />
-
-                    {output ? (
-                        <Box className={styles.codeOutput}>
-                            <Streamdown
-                                controls={false}
-                                shikiTheme={['material-theme-lighter', 'material-theme-darker']}
-                            >
-                                {output}
-                            </Streamdown>
-                        </Box>
-                    ) : (
-                        toolEvents.length === 0 && (
-                            <Text c="dimmed" size="sm" style={{ padding: 8 }}>
-                                Output will appear here as tokens stream in.
-                            </Text>
-                        )
-                    )}
-
-                    <Box ref={bottomRef} />
-                </Stack>
-            </ScrollArea>
+                {output ? (
+                    <Box className={styles.codeOutput}>
+                        <Streamdown
+                            controls={false}
+                            shikiTheme={['material-theme-lighter', 'material-theme-darker']}
+                        >
+                            {output}
+                        </Streamdown>
+                    </Box>
+                ) : (
+                    toolEvents.length === 0 && (
+                        <Text c="dimmed" size="sm" style={{ padding: 8 }}>
+                            Output will appear here as tokens stream in.
+                        </Text>
+                    )
+                )}
+                <div ref={bottomRef} />
+            </div>
         </Paper>
     )
 }
