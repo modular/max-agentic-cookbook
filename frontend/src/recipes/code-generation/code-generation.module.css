@@ -1,0 +1,11 @@
+.codeOutput pre {
+    white-space: pre !important;
+    overflow-x: auto;
+}
+
+/* Streamdown uses Tailwind's `block` class on each line span, but this project
+   has no Tailwind — so those classes generate no CSS and spans default to inline,
+   collapsing all lines into one horizontal flow. Force block display directly. */
+.codeOutput pre code > span {
+    display: block;
+}
