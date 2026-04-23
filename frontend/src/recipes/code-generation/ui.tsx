@@ -1,30 +1,31 @@
 /*
  * Code Generation with Kimi K2.5 / DeepSeek V3
  *
- * Demonstrates streaming code generation with a configurable system prompt.
- * The system prompt is the primary lever for real code generation workflows:
- * it sets the language, style, and project context the model responds in.
+ * Demonstrates an agentic code generation loop with tool calling. The model can
+ * call read_file to pull in source context and run_code to execute what it writes,
+ * mirroring the behavior of coding agents like opencode.
  *
  * Key features:
  * - Two-panel layout: config/editor on the left, streaming output on the right
+ * - Tool call log: read_file and run_code calls surface distinctly above the output
  * - System prompt textarea: directly editable, pre-filled with a sensible default
  * - Model compatibility warning: alerts when the selected model wasn't trained for code
- * - Streamdown: syntax-highlighted code rendering as tokens arrive
  *
  * Architecture:
- * - useChat hook (Vercel AI SDK): manages streaming state and transport
- * - DefaultChatTransport: routes to /api/recipes/code-generation with systemPrompt in body
+ * - useCodeGenStream: custom hook that reads the raw SSE stream directly, handling
+ *   both standard text-delta events and custom tool-call / tool-result events
+ * - Streamdown: syntax-highlighted code rendering as tokens arrive
  * - Model is selected via the global model selector in the toolbar
  */
 
-import { useEffect, useRef, useState } from 'react'
-import { DefaultChatTransport } from 'ai'
-import { useChat } from '@ai-sdk/react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
+    Accordion,
     Alert,
     Badge,
     Box,
     Button,
+    Code,
     Grid,
     Loader,
     Paper,
@@ -33,8 +34,14 @@ import {
     Text,
     Textarea,
 } from '@mantine/core'
-import { IconAlertTriangle } from '@tabler/icons-react'
+import { IconAlertTriangle, IconFile, IconPlayerPlay } from '@tabler/icons-react'
+import { Streamdown } from 'streamdown'
 import type { RecipeProps } from '~/lib/types'
+import styles from './code-generation.module.css'
+
+// ============================================================================
+// Constants
+// ============================================================================
 
 function isCodeOptimizedModel(modelId: string): boolean {
     const id = modelId.toLowerCase()
@@ -51,46 +58,173 @@ const DEFAULT_SYSTEM_PROMPT = `You are an expert coding assistant. Follow these 
 - If the request is ambiguous, make a reasonable assumption and state it in a single comment at the top of the code block.`
 
 // ============================================================================
+// Types
+// ============================================================================
+
+interface ToolEvent {
+    toolCallId: string
+    toolName: 'read_file' | 'run_code'
+    args: Record<string, string>
+    result?: string
+    status: 'calling' | 'done'
+}
+
+type StreamStatus = 'idle' | 'submitted' | 'streaming' | 'error'
+
+// ============================================================================
+// Custom streaming hook
+// ============================================================================
+
+/*
+ * Reads the raw SSE stream from /api/recipes/code-generation, parsing both the
+ * standard text-delta events and the custom tool-call / tool-result events that
+ * useChat + DefaultChatTransport would silently discard.
+ */
+function useCodeGenStream({
+    endpointId,
+    modelName,
+    systemPrompt,
+}: {
+    endpointId: string | undefined
+    modelName: string
+    systemPrompt: string
+}) {
+    const [output, setOutput] = useState('')
+    const [toolEvents, setToolEvents] = useState<ToolEvent[]>([])
+    const [status, setStatus] = useState<StreamStatus>('idle')
+    const abortRef = useRef<AbortController | null>(null)
+
+    const clear = useCallback(() => {
+        abortRef.current?.abort()
+        setOutput('')
+        setToolEvents([])
+        setStatus('idle')
+    }, [])
+
+    const send = useCallback(
+        async (message: string) => {
+            abortRef.current?.abort()
+            const controller = new AbortController()
+            abortRef.current = controller
+
+            setOutput('')
+            setToolEvents([])
+            setStatus('submitted')
+
+            try {
+                const response = await fetch('/api/recipes/code-generation', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        endpointId,
+                        modelName,
+                        systemPrompt,
+                        messages: [
+                            {
+                                id: `msg-${Date.now()}`,
+                                role: 'user',
+                                parts: [{ type: 'text', text: message }],
+                            },
+                        ],
+                    }),
+                    signal: controller.signal,
+                })
+
+                if (!response.ok || !response.body) {
+                    setStatus('error')
+                    return
+                }
+
+                setStatus('streaming')
+
+                const reader = response.body.getReader()
+                const decoder = new TextDecoder()
+                let buffer = ''
+
+                while (true) {
+                    const { done, value } = await reader.read()
+                    if (done) break
+
+                    buffer += decoder.decode(value, { stream: true })
+                    const lines = buffer.split('\n')
+                    buffer = lines.pop() ?? ''
+
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ')) continue
+                        const raw = line.slice(6).trim()
+                        if (raw === '[DONE]') break
+
+                        try {
+                            const event = JSON.parse(raw)
+
+                            if (event.type === 'text-delta') {
+                                setOutput((prev) => prev + event.delta)
+                            } else if (event.type === 'tool-call') {
+                                setToolEvents((prev) => [
+                                    ...prev,
+                                    {
+                                        toolCallId: event.toolCallId,
+                                        toolName: event.toolName,
+                                        args: event.args,
+                                        status: 'calling',
+                                    },
+                                ])
+                            } else if (event.type === 'tool-result') {
+                                setToolEvents((prev) =>
+                                    prev.map((te) =>
+                                        te.toolCallId === event.toolCallId
+                                            ? { ...te, result: event.result, status: 'done' }
+                                            : te
+                                    )
+                                )
+                            } else if (event.type === 'finish') {
+                                setStatus('idle')
+                            } else if (event.type === 'error') {
+                                setStatus('error')
+                            }
+                        } catch {
+                            // Malformed JSON line — skip
+                        }
+                    }
+                }
+            } catch (err: unknown) {
+                if (err instanceof Error && err.name !== 'AbortError') {
+                    setStatus('error')
+                }
+            }
+        },
+        [endpointId, modelName, systemPrompt]
+    )
+
+    // Abort any in-flight request on unmount.
+    useEffect(() => () => abortRef.current?.abort(), [])
+
+    return { output, toolEvents, status, send, clear }
+}
+
+// ============================================================================
 // Main component
 // ============================================================================
 
-export function Component({ endpoint, model, pathname }: RecipeProps) {
+export function Component({ endpoint, model, pathname: _pathname }: RecipeProps) {
     const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT)
     const [input, setInput] = useState('')
-    const [generationKey, setGenerationKey] = useState(0)
-    // Stores the message to send after the new useChat instance mounts.
-    const pendingMessage = useRef<string | null>(null)
 
-    const modelName = model?.name ?? ''
     const isIncompatibleModel = !!model && !isCodeOptimizedModel(model.id)
 
-    // generationKey increments on each send, creating a fresh useChat instance
-    // so the output panel clears before each new generation.
-    const chatId = `${pathname}|${endpoint?.id ?? '?'}|${model?.id ?? '?'}|${generationKey}`
-
-    const { messages, sendMessage, status } = useChat({
-        id: chatId,
-        transport: new DefaultChatTransport({
-            api: '/api/recipes/code-generation',
-            body: {
-                endpointId: endpoint?.id,
-                modelName,
-                systemPrompt,
-            },
-        }),
+    const { output, toolEvents, status, send, clear } = useCodeGenStream({
+        endpointId: endpoint?.id,
+        modelName: model?.name ?? '',
+        systemPrompt,
     })
 
-    // After generationKey changes, the new useChat instance is mounted and its
-    // sendMessage is available. Fire the pending message now.
-    useEffect(() => {
-        if (generationKey === 0 || !pendingMessage.current) return
-        const text = pendingMessage.current
-        pendingMessage.current = null
-        sendMessage({ text })
-    }, [generationKey]) // eslint-disable-line react-hooks/exhaustive-deps
+    const disabled = status === 'submitted' || status === 'streaming' || !endpoint || !model
 
-    const disabled =
-        status === 'submitted' || status === 'streaming' || !endpoint || !model
+    const handleSend = (value: string) => {
+        clear()
+        send(value)
+        setInput('')
+    }
 
     return (
         <Stack gap="xs" h="100%" style={{ overflow: 'hidden' }}>
@@ -107,7 +241,6 @@ export function Component({ endpoint, model, pathname }: RecipeProps) {
             )}
 
             <Grid gutter="md" style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
-                {/* Left panel: configuration */}
                 <Grid.Col span={4} style={{ display: 'flex', flexDirection: 'column' }}>
                     <ConfigPanel
                         systemPrompt={systemPrompt}
@@ -115,16 +248,16 @@ export function Component({ endpoint, model, pathname }: RecipeProps) {
                         input={input}
                         setInput={setInput}
                         disabled={disabled}
-                        onSend={(v) => {
-                            pendingMessage.current = v
-                            setGenerationKey((k) => k + 1)
-                        }}
+                        onSend={handleSend}
                     />
                 </Grid.Col>
 
-                {/* Right panel: streaming output */}
                 <Grid.Col span={8} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                    <OutputPanel messages={messages} status={status} />
+                    <OutputPanel
+                        output={output}
+                        toolEvents={toolEvents}
+                        status={status}
+                    />
                 </Grid.Col>
             </Grid>
         </Stack>
@@ -141,26 +274,18 @@ interface ConfigPanelProps {
     input: string
     setInput: (v: string) => void
     disabled: boolean
-    onSend: (value: string) => Promise<void>
+    onSend: (value: string) => void
 }
 
-function ConfigPanel({
-    systemPrompt,
-    setSystemPrompt,
-    input,
-    setInput,
-    disabled,
-    onSend,
-}: ConfigPanelProps) {
+function ConfigPanel({ systemPrompt, setSystemPrompt, input, setInput, disabled, onSend }: ConfigPanelProps) {
     return (
         <form
             style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%' }}
-            onSubmit={async (e) => {
+            onSubmit={(e) => {
                 e.preventDefault()
                 const value = input.trim()
                 if (!value) return
-                setInput('')
-                await onSend(value)
+                onSend(value)
             }}
         >
             <Textarea
@@ -183,18 +308,12 @@ function ConfigPanel({
                         e.preventDefault()
                         const value = input.trim()
                         if (!value || disabled) return
-                        setInput('')
                         onSend(value)
                     }
                 }}
             />
 
-            <Button
-                type="submit"
-                variant="filled"
-                disabled={disabled || !input.trim()}
-                fullWidth
-            >
+            <Button type="submit" variant="filled" disabled={disabled || !input.trim()} fullWidth>
                 Generate
             </Button>
         </form>
@@ -202,16 +321,59 @@ function ConfigPanel({
 }
 
 // ============================================================================
+// Tool call log
+// ============================================================================
+
+const TOOL_ICONS: Record<string, React.ReactNode> = {
+    read_file: <IconFile size={14} />,
+    run_code: <IconPlayerPlay size={14} />,
+}
+
+function ToolCallLog({ events }: { events: ToolEvent[] }) {
+    if (events.length === 0) return null
+
+    return (
+        <Accordion variant="separated" chevronPosition="right">
+            {events.map((event) => {
+                const argSummary =
+                    event.toolName === 'read_file'
+                        ? event.args.path
+                        : (event.args.code ?? '').split('\n')[0].slice(0, 60)
+
+                return (
+                    <Accordion.Item key={event.toolCallId} value={event.toolCallId}>
+                        <Accordion.Control>
+                            <Box style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                {TOOL_ICONS[event.toolName]}
+                                <Text size="sm" fw={500}>{event.toolName}</Text>
+                                <Text size="sm" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                    {argSummary}
+                                </Text>
+                                {event.status === 'calling' && <Loader size={12} />}
+                                {event.status === 'done' && (
+                                    <Badge size="xs" color="green" variant="light">done</Badge>
+                                )}
+                            </Box>
+                        </Accordion.Control>
+                        <Accordion.Panel>
+                            {event.result !== undefined && (
+                                <Code block style={{ whiteSpace: 'pre-wrap', fontSize: 12 }}>
+                                    {event.result}
+                                </Code>
+                            )}
+                        </Accordion.Panel>
+                    </Accordion.Item>
+                )
+            })}
+        </Accordion>
+    )
+}
+
+// ============================================================================
 // Output panel
 // ============================================================================
 
-import type { UIMessage } from 'ai'
-import { Streamdown } from 'streamdown'
-import styles from './code-generation.module.css'
-
-type ChatStatus = 'idle' | 'submitted' | 'streaming' | 'error'
-
-const STATUS_PROPS: Record<ChatStatus, { label: string; color: string; loading?: boolean }> = {
+const STATUS_PROPS: Record<StreamStatus, { label: string; color: string; loading?: boolean }> = {
     idle:      { label: 'Ready',      color: 'gray' },
     submitted: { label: 'Waiting…',   color: 'blue', loading: true },
     streaming: { label: 'Generating', color: 'green', loading: true },
@@ -219,12 +381,13 @@ const STATUS_PROPS: Record<ChatStatus, { label: string; color: string; loading?:
 }
 
 interface OutputPanelProps {
-    messages: UIMessage[]
-    status: ChatStatus
+    output: string
+    toolEvents: ToolEvent[]
+    status: StreamStatus
 }
 
-function OutputPanel({ messages, status }: OutputPanelProps) {
-    const { label, color, loading } = STATUS_PROPS[status] ?? STATUS_PROPS.idle
+function OutputPanel({ output, toolEvents, status }: OutputPanelProps) {
+    const { label, color, loading } = STATUS_PROPS[status]
     const [followStream, setFollowStream] = useState(true)
     const viewportRef = useRef<HTMLDivElement>(null)
     const bottomRef = useRef<HTMLDivElement>(null)
@@ -232,25 +395,24 @@ function OutputPanel({ messages, status }: OutputPanelProps) {
 
     useEffect(() => {
         if (!followStream) return
-
         isAutoScrolling.current = true
         bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
-
-        const timer = setTimeout(() => {
-            isAutoScrolling.current = false
-        }, 100)
-
+        const timer = setTimeout(() => { isAutoScrolling.current = false }, 100)
         return () => clearTimeout(timer)
-    }, [messages, followStream])
-
-    const assistantMessages = messages.filter((m) => m.role === 'assistant')
+    }, [output, toolEvents, followStream])
 
     return (
-        <Paper h="100%" p="sm" withBorder style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <Paper
+            h="100%"
+            p="sm"
+            withBorder
+            style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 8 }}
+        >
             <Box style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Badge color={color} variant="light" size="sm">{label}</Badge>
                 {loading && <Loader size={12} color={color} />}
             </Box>
+
             <ScrollArea
                 style={{ flex: 1, minHeight: 0 }}
                 type="auto"
@@ -258,47 +420,38 @@ function OutputPanel({ messages, status }: OutputPanelProps) {
                 onScrollPositionChange={() => {
                     const el = viewportRef.current
                     if (!el) return
-
                     const distanceToBottom = el.scrollHeight - el.scrollTop - el.clientHeight
-                    const nearBottom = distanceToBottom <= 20
-
                     if (isAutoScrolling.current && distanceToBottom > 50) {
                         isAutoScrolling.current = false
                         setFollowStream(false)
                         return
                     }
-
                     if (isAutoScrolling.current) return
-
-                    setFollowStream(nearBottom)
+                    setFollowStream(distanceToBottom <= 20)
                 }}
             >
-                {assistantMessages.length === 0 ? (
-                    <Text c="dimmed" size="sm" style={{ padding: 8 }}>
-                        Output will appear here as tokens stream in.
-                    </Text>
-                ) : (
-                    <Stack gap="md">
-                        {assistantMessages.map((message) =>
-                            message.parts
-                                .filter((part) => part.type === 'text')
-                                .map((part, index) => (
-                                    <Box key={`${message.id}-${index}`} className={styles.codeOutput}>
-                                        <Streamdown
-                                            controls={false}
-                                            shikiTheme={[
-                                                'material-theme-lighter',
-                                                'material-theme-darker',
-                                            ]}
-                                        >
-                                            {part.text}
-                                        </Streamdown>
-                                    </Box>
-                                ))
-                        )}
-                    </Stack>
-                )}
-                <Box ref={bottomRef} />
+                <Stack gap="sm">
+                    <ToolCallLog events={toolEvents} />
+
+                    {output ? (
+                        <Box className={styles.codeOutput}>
+                            <Streamdown
+                                controls={false}
+                                shikiTheme={['material-theme-lighter', 'material-theme-darker']}
+                            >
+                                {output}
+                            </Streamdown>
+                        </Box>
+                    ) : (
+                        toolEvents.length === 0 && (
+                            <Text c="dimmed" size="sm" style={{ padding: 8 }}>
+                                Output will appear here as tokens stream in.
+                            </Text>
+                        )
+                    )}
+
+                    <Box ref={bottomRef} />
+                </Stack>
             </ScrollArea>
         </Paper>
     )
