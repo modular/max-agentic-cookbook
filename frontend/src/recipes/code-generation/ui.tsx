@@ -22,9 +22,11 @@ import { DefaultChatTransport } from 'ai'
 import { useChat } from '@ai-sdk/react'
 import {
     Alert,
+    Badge,
     Box,
     Button,
     Grid,
+    Loader,
     Paper,
     ScrollArea,
     Stack,
@@ -40,7 +42,7 @@ function isCodeOptimizedModel(modelId: string): boolean {
 }
 
 const DEFAULT_SYSTEM_PROMPT =
-    'You are a code assistant. Respond only with code unless asked to explain. Use the language and style of the surrounding context.'
+    'You are a code assistant. Always wrap your response in a markdown code block with the appropriate language identifier. Use the language and style of the surrounding context.'
 
 // ============================================================================
 // Main component
@@ -49,12 +51,16 @@ const DEFAULT_SYSTEM_PROMPT =
 export function Component({ endpoint, model, pathname }: RecipeProps) {
     const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT)
     const [input, setInput] = useState('')
+    const [generationKey, setGenerationKey] = useState(0)
+    // Stores the message to send after the new useChat instance mounts.
+    const pendingMessage = useRef<string | null>(null)
 
     const modelName = model?.name ?? ''
     const isIncompatibleModel = !!model && !isCodeOptimizedModel(model.id)
 
-    // Include systemPrompt in the chat id so useChat resets when the prompt changes.
-    const chatId = `${pathname}|${endpoint?.id ?? '?'}|${model?.id ?? '?'}|${systemPrompt.slice(0, 40)}`
+    // generationKey increments on each send, creating a fresh useChat instance
+    // so the output panel clears before each new generation.
+    const chatId = `${pathname}|${endpoint?.id ?? '?'}|${model?.id ?? '?'}|${generationKey}`
 
     const { messages, sendMessage, status } = useChat({
         id: chatId,
@@ -67,6 +73,15 @@ export function Component({ endpoint, model, pathname }: RecipeProps) {
             },
         }),
     })
+
+    // After generationKey changes, the new useChat instance is mounted and its
+    // sendMessage is available. Fire the pending message now.
+    useEffect(() => {
+        if (generationKey === 0 || !pendingMessage.current) return
+        const text = pendingMessage.current
+        pendingMessage.current = null
+        sendMessage({ text })
+    }, [generationKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
     const disabled =
         status === 'submitted' || status === 'streaming' || !endpoint || !model
@@ -94,13 +109,16 @@ export function Component({ endpoint, model, pathname }: RecipeProps) {
                         input={input}
                         setInput={setInput}
                         disabled={disabled}
-                        onSend={(v) => sendMessage({ text: v })}
+                        onSend={(v) => {
+                            pendingMessage.current = v
+                            setGenerationKey((k) => k + 1)
+                        }}
                     />
                 </Grid.Col>
 
                 {/* Right panel: streaming output */}
                 <Grid.Col span={8} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                    <OutputPanel messages={messages} />
+                    <OutputPanel messages={messages} status={status} />
                 </Grid.Col>
             </Grid>
         </Stack>
@@ -183,12 +201,24 @@ function ConfigPanel({
 
 import type { UIMessage } from 'ai'
 import { Streamdown } from 'streamdown'
+import styles from './code-generation.module.css'
+
+type ChatStatus = 'idle' | 'submitted' | 'streaming' | 'error'
+
+const STATUS_PROPS: Record<ChatStatus, { label: string; color: string; loading?: boolean }> = {
+    idle:      { label: 'Ready',      color: 'gray' },
+    submitted: { label: 'Waiting…',   color: 'blue', loading: true },
+    streaming: { label: 'Generating', color: 'green', loading: true },
+    error:     { label: 'Error',      color: 'red' },
+}
 
 interface OutputPanelProps {
     messages: UIMessage[]
+    status: ChatStatus
 }
 
-function OutputPanel({ messages }: OutputPanelProps) {
+function OutputPanel({ messages, status }: OutputPanelProps) {
+    const { label, color, loading } = STATUS_PROPS[status] ?? STATUS_PROPS.idle
     const [followStream, setFollowStream] = useState(true)
     const viewportRef = useRef<HTMLDivElement>(null)
     const bottomRef = useRef<HTMLDivElement>(null)
@@ -210,7 +240,11 @@ function OutputPanel({ messages }: OutputPanelProps) {
     const assistantMessages = messages.filter((m) => m.role === 'assistant')
 
     return (
-        <Paper h="100%" p="sm" withBorder style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <Paper h="100%" p="sm" withBorder style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <Box style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Badge color={color} variant="light" size="sm">{label}</Badge>
+                {loading && <Loader size={12} color={color} />}
+            </Box>
             <ScrollArea
                 h="100%"
                 type="auto"
@@ -243,16 +277,17 @@ function OutputPanel({ messages }: OutputPanelProps) {
                             message.parts
                                 .filter((part) => part.type === 'text')
                                 .map((part, index) => (
-                                    <Streamdown
-                                        key={`${message.id}-${index}`}
-                                        controls={false}
-                                        shikiTheme={[
-                                            'material-theme-lighter',
-                                            'material-theme-darker',
-                                        ]}
-                                    >
-                                        {part.text}
-                                    </Streamdown>
+                                    <Box key={`${message.id}-${index}`} className={styles.codeOutput}>
+                                        <Streamdown
+                                            controls={false}
+                                            shikiTheme={[
+                                                'material-theme-lighter',
+                                                'material-theme-darker',
+                                            ]}
+                                        >
+                                            {part.text}
+                                        </Streamdown>
+                                    </Box>
                                 ))
                         )}
                     </Stack>
