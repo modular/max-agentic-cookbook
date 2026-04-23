@@ -246,7 +246,7 @@ function OutputPanel({ messages, status }: OutputPanelProps) {
                 {loading && <Loader size={12} color={color} />}
             </Box>
             <ScrollArea
-                h="100%"
+                style={{ flex: 1, minHeight: 0 }}
                 type="auto"
                 viewportRef={viewportRef}
                 onScrollPositionChange={() => {
