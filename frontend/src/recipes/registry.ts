@@ -42,6 +42,13 @@ export const recipes: RecipeMetadata = {
             description:
                 'Generate images from text prompts using FLUX.2 diffusion models. Configure resolution, inference steps, and guidance scale with real-time generation metrics.',
         },
+        {
+            slug: 'code-generation',
+            title: 'Code Generation',
+            tags: ['SSE', 'System Prompt', 'Code Models'],
+            description:
+                'Streaming code generation with Kimi K2.5 and DeepSeek V3. Configure a system prompt to tune language and style, then stream syntax-highlighted code output token-by-token.',
+        },
     ],
 }
 
