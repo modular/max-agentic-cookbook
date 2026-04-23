@@ -1,4 +1,5 @@
-.codeOutput pre {
-    white-space: pre-wrap;
-    overflow-wrap: break-word;
+.codeOutput pre,
+.codeOutput pre code,
+.codeOutput pre span {
+    white-space: pre-wrap !important;
 }
