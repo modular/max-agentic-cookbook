@@ -26,14 +26,16 @@ import {
     Box,
     Button,
     Code,
+    Collapse,
     Grid,
     Loader,
     Paper,
     Stack,
     Text,
     Textarea,
+    UnstyledButton,
 } from '@mantine/core'
-import { IconAlertTriangle, IconFile, IconPlayerPlay } from '@tabler/icons-react'
+import { IconAlertTriangle, IconChevronRight, IconFile, IconPlayerPlay } from '@tabler/icons-react'
 import { Streamdown } from 'streamdown'
 import type { RecipeProps } from '~/lib/types'
 import styles from './code-generation.module.css'
@@ -282,6 +284,8 @@ interface ConfigPanelProps {
 }
 
 function ConfigPanel({ systemPrompt, setSystemPrompt, input, setInput, disabled, onSend }: ConfigPanelProps) {
+    const [systemPromptOpen, setSystemPromptOpen] = useState(false)
+
     return (
         <form
             style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%' }}
@@ -292,13 +296,30 @@ function ConfigPanel({ systemPrompt, setSystemPrompt, input, setInput, disabled,
                 onSend(value)
             }}
         >
-            <Textarea
-                label="System prompt"
-                value={systemPrompt}
-                onChange={(e) => setSystemPrompt(e.currentTarget.value)}
-                minRows={4}
-                autosize
-            />
+            <Box>
+                <UnstyledButton
+                    onClick={() => setSystemPromptOpen((v) => !v)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                >
+                    <IconChevronRight
+                        size={14}
+                        style={{
+                            transform: systemPromptOpen ? 'rotate(90deg)' : 'none',
+                            transition: 'transform 150ms ease',
+                        }}
+                    />
+                    <Text size="sm" fw={500}>System prompt</Text>
+                </UnstyledButton>
+                <Collapse in={systemPromptOpen}>
+                    <Textarea
+                        value={systemPrompt}
+                        onChange={(e) => setSystemPrompt(e.currentTarget.value)}
+                        minRows={4}
+                        autosize
+                        mt={6}
+                    />
+                </Collapse>
+            </Box>
 
             <Textarea
                 label="Prompt"
