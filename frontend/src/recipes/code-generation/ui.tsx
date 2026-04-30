@@ -233,7 +233,7 @@ export function Component({ endpoint, model, pathname: _pathname }: RecipeProps)
     }
 
     return (
-        <Stack gap="xs" h="100%" style={{ overflow: 'hidden' }}>
+        <Stack gap="xs">
             {isIncompatibleModel && (
                 <Alert
                     icon={<IconAlertTriangle size={16} />}
@@ -246,8 +246,15 @@ export function Component({ endpoint, model, pathname: _pathname }: RecipeProps)
                 </Alert>
             )}
 
-            <Grid gutter="md" style={{ flex: 1, overflow: 'hidden', minHeight: 0 }}>
-                <Grid.Col span={4} style={{ display: 'flex', flexDirection: 'column' }}>
+            <Grid gutter="md">
+                {/* Left column is sticky so the form/Generate button stay visible
+                    as the page scrolls through long output. alignSelf: flex-start
+                    prevents the column from stretching to match the right column's
+                    height — required for sticky to work inside the flex grid. */}
+                <Grid.Col
+                    span={4}
+                    style={{ position: 'sticky', top: 0, alignSelf: 'flex-start' }}
+                >
                     <ConfigPanel
                         systemPrompt={systemPrompt}
                         setSystemPrompt={setSystemPrompt}
@@ -258,7 +265,7 @@ export function Component({ endpoint, model, pathname: _pathname }: RecipeProps)
                     />
                 </Grid.Col>
 
-                <Grid.Col span={8} style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <Grid.Col span={8}>
                     <OutputPanel
                         output={output}
                         toolEvents={toolEvents}
@@ -288,7 +295,7 @@ function ConfigPanel({ systemPrompt, setSystemPrompt, input, setInput, disabled,
 
     return (
         <form
-            style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%' }}
+            style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
             onSubmit={(e) => {
                 e.preventDefault()
                 const value = input.trim()
@@ -326,8 +333,9 @@ function ConfigPanel({ systemPrompt, setSystemPrompt, input, setInput, disabled,
                 placeholder="Ask for code, paste a snippet to extend, or describe what you need..."
                 value={input}
                 onChange={(e) => setInput(e.currentTarget.value)}
-                minRows={6}
-                style={{ flex: 1 }}
+                autosize
+                minRows={14}
+                maxRows={24}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                         e.preventDefault()
@@ -414,74 +422,60 @@ interface OutputPanelProps {
 function OutputPanel({ output, toolEvents, status }: OutputPanelProps) {
     const { label, color, loading } = STATUS_PROPS[status]
     const [followStream, setFollowStream] = useState(true)
-    const viewportRef = useRef<HTMLDivElement>(null)
     const bottomRef = useRef<HTMLDivElement>(null)
-    const isAutoScrolling = useRef(false)
 
+    // Track whether the bottom sentinel is currently visible. When the user
+    // scrolls away from the bottom, follow-stream turns off; when they scroll
+    // back to the bottom, it turns on again.
+    useEffect(() => {
+        const el = bottomRef.current
+        if (!el) return
+        const observer = new IntersectionObserver(
+            ([entry]) => setFollowStream(entry.isIntersecting),
+            { threshold: 0 }
+        )
+        observer.observe(el)
+        return () => observer.disconnect()
+    }, [])
+
+    // Auto-scroll the page to keep the bottom in view as tokens stream in.
+    // scrollIntoView walks up to the nearest scrollable ancestor (the recipe
+    // layout's Outlet wrapper), so the page scrolls — not an inner container.
     useEffect(() => {
         if (!followStream) return
-        isAutoScrolling.current = true
         bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
-        const timer = setTimeout(() => { isAutoScrolling.current = false }, 100)
-        return () => clearTimeout(timer)
     }, [output, followStream])
 
     return (
         <Paper
-            h="100%"
             p="sm"
             withBorder
-            style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 8 }}
+            style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
         >
             <Box style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Badge color={color} variant="light" size="sm">{label}</Badge>
                 {loading && <Loader size={12} color={color} />}
             </Box>
 
-            {/* Tool call log sits outside the ScrollArea so it's always visible
-                and never buried by auto-scroll to the output below. The maxHeight
-                prevents it from inflating the panel and pushing the left column's
-                Generate button out of position. */}
-            {toolEvents.length > 0 && (
-                <Box style={{ maxHeight: 200, overflowY: 'auto', flexShrink: 0 }}>
-                    <ToolCallLog events={toolEvents} />
-                </Box>
-            )}
+            {toolEvents.length > 0 && <ToolCallLog events={toolEvents} />}
 
-            <div
-                ref={viewportRef}
-                style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}
-                onScroll={() => {
-                    const el = viewportRef.current
-                    if (!el) return
-                    const distanceToBottom = el.scrollHeight - el.scrollTop - el.clientHeight
-                    if (isAutoScrolling.current && distanceToBottom > 50) {
-                        isAutoScrolling.current = false
-                        setFollowStream(false)
-                        return
-                    }
-                    if (isAutoScrolling.current) return
-                    setFollowStream(distanceToBottom <= 20)
-                }}
-            >
-                {output ? (
-                    <Box className={styles.codeOutput}>
-                        <Streamdown
-                            controls={false}
-                            shikiTheme={['material-theme-lighter', 'material-theme-darker']}
-                        >
-                            {output}
-                        </Streamdown>
-                    </Box>
-                ) : (
-                    toolEvents.length === 0 && (
-                        <Text c="dimmed" size="sm" style={{ padding: 8 }}>
-                            Output will appear here as tokens stream in.
-                        </Text>
-                    )
-                )}
-                <div ref={bottomRef} />
-            </div>
+            {output ? (
+                <Box className={styles.codeOutput}>
+                    <Streamdown
+                        controls={false}
+                        shikiTheme={['material-theme-lighter', 'material-theme-darker']}
+                    >
+                        {output}
+                    </Streamdown>
+                </Box>
+            ) : (
+                toolEvents.length === 0 && (
+                    <Text c="dimmed" size="sm" style={{ padding: 8 }}>
+                        Output will appear here as tokens stream in.
+                    </Text>
+                )
+            )}
+            <div ref={bottomRef} />
         </Paper>
     )
 }
