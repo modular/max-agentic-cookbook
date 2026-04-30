@@ -1,0 +1,147 @@
+## What This Recipe Demonstrates
+
+Streaming code generation via an OpenAI-compatible endpoint, with the system prompt
+surfaced as a first-class control. Real code generation workflows depend on three levers:
+the model's code training, the system prompt (language, style, repo context), and streaming
+output the developer can read as it arrives. This recipe wires all three together.
+
+## Why Kimi K2.5 / DeepSeek V3
+
+**Kimi K2.5** uses a Mixture-of-Experts architecture trained with an agentic focus —
+it handles multi-step reasoning tasks like planning and writing code more reliably than
+general-purpose chat models.
+
+**DeepSeek V3** was trained on a large, diverse corpus of code across many languages,
+giving it strong zero-shot code generation and completion capabilities out of the box.
+
+Both models are available on the [Modular Models Marketplace](https://www.modular.com/models)
+and served through the same OpenAI-compatible endpoint.
+
+## Architecture
+
+**Frontend** (`ui.tsx`): Two-panel layout — config on the left, streaming output on the right
+
+- System prompt textarea pre-filled with a code-assistant default
+- Hardcoded model selector (Kimi K2.5 / DeepSeek V3) — no catalog fetch needed
+- Streamdown renders syntax-highlighted code as tokens arrive
+- `useChat` with `DefaultChatTransport` passes `systemPrompt` in the request body
+
+**Backend** (`code_generation.py`): FastAPI with SSE streaming
+
+- Accepts `systemPrompt` in request body and prepends it as a `system` message
+- Streams completions via AsyncOpenAI client using the same SSE protocol as multiturn-chat
+
+## Using These Models with opencode
+
+[opencode](https://opencode.ai/) is an open-source AI coding agent. MAX's endpoint is
+OpenAI-compatible, so you can point opencode at it directly using a custom provider block.
+
+Add this to your `opencode.json`:
+
+```json
+{
+  "providers": {
+    "max": {
+      "name": "Modular MAX",
+      "type": "openai",
+      "baseURL": "https://model.api.modular.com/v1",
+      "models": {
+        "moonshotai/Kimi-K2.5": { "name": "Kimi K2.5" },
+        "deepseek-ai/DeepSeek-V3-0324": { "name": "DeepSeek V3" }
+      }
+    }
+  }
+}
+```
+
+Set your API key as the `OPENAI_API_KEY` environment variable (or the provider-specific
+key if opencode supports it). You can get a MAX API key from
+[console.modular.com](https://console.modular.com).
+
+**The `/init` workflow:** Running `opencode /init` analyzes your repository and generates
+an `AGENTS.md` file. opencode passes that file's content to the model on every request —
+it's the mechanism that makes the model aware of your project structure, conventions, and
+dependencies without manual copy-paste.
+
+## Protocol Flow
+
+1. Frontend sends `POST /api/recipes/code-generation` with:
+
+    ```json
+    {
+        "endpointId": "max-local",
+        "modelName": "moonshotai/Kimi-K2.5",
+        "systemPrompt": "You are a code assistant. Respond only with code unless asked to explain.",
+        "messages": [
+            {
+                "id": "...",
+                "role": "user",
+                "parts": [{ "type": "text", "text": "Write a Python function to parse ISO 8601 dates" }]
+            }
+        ]
+    }
+    ```
+
+2. Backend builds OpenAI messages array:
+
+    ```python
+    [
+        { "role": "system", "content": "You are a code assistant..." },
+        { "role": "user", "content": "Write a Python function..." }
+    ]
+    ```
+
+3. Backend streams SSE events:
+
+    ```
+    data: {"type": "start", "messageId": "msg-abc123"}
+    data: {"type": "text-start", "id": "text-xyz"}
+    data: {"type": "text-delta", "id": "text-xyz", "delta": "```python\n"}
+    data: {"type": "text-delta", "id": "text-xyz", "delta": "from datetime"}
+    ...
+    data: {"type": "finish"}
+    data: [DONE]
+    ```
+
+4. Frontend consumes the stream via `useChat`, rendering each delta through Streamdown
+
+## API Reference
+
+**Endpoint:** `POST /api/recipes/code-generation`
+
+**Content-Type:** `text/event-stream`
+
+**Request Body:**
+
+```json
+{
+    "endpointId": "max-local",
+    "modelName": "moonshotai/Kimi-K2.5",
+    "systemPrompt": "You are a code assistant. Respond only with code unless asked to explain. Use the language and style of the surrounding context.",
+    "messages": [
+        {
+            "id": "msg-1",
+            "role": "user",
+            "parts": [{ "type": "text", "text": "Write a binary search in TypeScript" }]
+        }
+    ]
+}
+```
+
+**Response:** Server-Sent Events (SSE) stream — same protocol as multiturn-chat
+
+```
+data: {"type": "start", "messageId": "msg-2"}
+
+data: {"type": "text-delta", "id": "text-1", "delta": "```typescript\n"}
+
+data: {"type": "text-delta", "id": "text-1", "delta": "function binarySearch"}
+
+data: {"type": "finish"}
+
+data: [DONE]
+```
+
+**Get Source Code:** `GET /api/recipes/code-generation/code`
+
+Returns the Python source code for this recipe as plain text.
