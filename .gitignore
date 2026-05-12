@@ -43,6 +43,7 @@ next-env.d.ts
 .pnpm-store/
 
 # claude
+.claude
 **/.claude/settings.local.json
 
 # pixi

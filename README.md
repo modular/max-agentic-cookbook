@@ -103,6 +103,7 @@ docker build -t max-cookbook .
 # Run (NVIDIA GPU)
 docker run --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
     -e "HF_HUB_ENABLE_HF_TRANSFER=1" \
     -e "HF_TOKEN=your-huggingface-token" \
     -e "MAX_MODEL=google/gemma-3-27b-it" \
@@ -116,6 +117,7 @@ docker run \
     --device /dev/kfd \
     --device /dev/dri \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
     -e "HF_HUB_ENABLE_HF_TRANSFER=1" \
     -e "HF_TOKEN=your-huggingface-token" \
     -e "MAX_MODEL=google/gemma-3-27b-it" \

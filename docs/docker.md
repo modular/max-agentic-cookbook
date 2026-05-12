@@ -19,7 +19,7 @@ See [`Dockerfile`](../Dockerfile) and [`ecosystem.config.js`](../ecosystem.confi
 Build the container image:
 
 ```bash
-docker build -t max-recipes .
+docker build -t max-cookbook .
 ```
 
 ### Build Arguments
@@ -33,8 +33,10 @@ Selects the base MAX image (default: `universal`):
 | Value       | Image                     | Description                                         |
 | ----------- | ------------------------- | --------------------------------------------------- |
 | `universal` | `modular/max-full`        | Larger image supporting all GPU types (NVIDIA, AMD) |
-| `nvidia`    | `modular/max-nvidia-full` | Smaller NVIDIA-specific image                       |
-| `amd`       | `modular/max-amd`         | Smaller AMD-specific image                          |
+| `nvidia`    | `modular/max-nvidia-full` | Smaller NVIDIA-specific image (recommended)         |
+| `amd`       | `modular/max-amd`         | Smaller AMD-specific image (recommended)            |
+
+> **Note:** The official [MAX Container guide](https://docs.modular.com/max/container/) recommends the GPU-specific images (`modular/max-nvidia-full`, `modular/max-amd`) for best release cadence and image size. Build with `--build-arg MAX_GPU=nvidia` or `--build-arg MAX_GPU=amd` whenever your target hardware is known.
 
 #### MAX_TAG
 
@@ -50,13 +52,13 @@ Selects the MAX version (default: `latest`):
 **AMD-specific container:**
 
 ```bash
-docker build --build-arg MAX_GPU=amd -t max-recipes:amd .
+docker build --build-arg MAX_GPU=amd -t max-cookbook:amd .
 ```
 
 **NVIDIA-specific container with nightly builds:**
 
 ```bash
-docker build --build-arg MAX_GPU=nvidia --build-arg MAX_TAG=nightly -t max-recipes:nvidia-nightly .
+docker build --build-arg MAX_GPU=nvidia --build-arg MAX_TAG=nightly -t max-cookbook:nvidia-nightly .
 ```
 
 ## Running the Container
@@ -66,12 +68,13 @@ docker build --build-arg MAX_GPU=nvidia --build-arg MAX_TAG=nightly -t max-recip
 ```bash
 docker run --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
     -e "HF_HUB_ENABLE_HF_TRANSFER=1" \
     -e "HF_TOKEN=your-huggingface-token" \
-    -e "MAX_MODEL=mistral-community/pixtral-12b" \
+    -e "MAX_MODEL=google/gemma-3-27b-it" \
     -p 8000:8000 \
     -p 8010:8010 \
-    max-recipes
+    max-cookbook
 ```
 
 ### AMD GPU
@@ -82,13 +85,16 @@ docker run \
     --device /dev/kfd \
     --device /dev/dri \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
     -e "HF_HUB_ENABLE_HF_TRANSFER=1" \
     -e "HF_TOKEN=your-huggingface-token" \
-    -e "MAX_MODEL=mistral-community/pixtral-12b" \
+    -e "MAX_MODEL=google/gemma-3-27b-it" \
     -p 8000:8000 \
     -p 8010:8010 \
-    max-recipes
+    max-cookbook
 ```
+
+> **Tip:** Mounting `~/.cache/max_cache` persists MAX's Mojo compilation cache, dramatically speeding up subsequent cold starts. See the [MAX Container guide](https://docs.modular.com/max/container/) for the official reference.
 
 ## Configuration
 
@@ -119,6 +125,14 @@ docker run \
 
 Caches downloaded models between container restarts, significantly speeding up subsequent launches.
 
+**MAX compilation cache** (recommended):
+
+```bash
+-v ~/.cache/max_cache:/opt/venv/share/max/.max_cache
+```
+
+Persists MAX's Mojo compilation artifacts so subsequent starts skip the multi-minute compile step. Matches the official [MAX Container guide](https://docs.modular.com/max/container/).
+
 ## Service Orchestration
 
 PM2 manages service startup order (see [`ecosystem.config.js`](../ecosystem.config.js)):
@@ -134,15 +148,16 @@ The cookbook works with any model supported by MAX. Popular choices:
 
 ### Multimodal Models
 
+-   `google/gemma-3-27b-it`
 -   `mistral-community/pixtral-12b`
 -   `OpenGVLab/InternVL3-14B-Instruct`
 -   `meta-llama/Llama-3.2-11B-Vision-Instruct`
 
 ### Text-Only Models
 
--   `google/gemma-3-27b-it`
 -   `meta-llama/Llama-3.1-8B-Instruct`
 -   `mistralai/Mistral-Small-24B-Instruct-2501`
+-   `Qwen/Qwen3-30B-A3B-Instruct-2507`
 
 See [MAX Builds](https://builds.modular.com/?category=models) for the full list of supported models.
 
@@ -164,11 +179,12 @@ Pass additional arguments to `max serve`:
 ```bash
 docker run --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
     -e "HF_TOKEN=your-token" \
-    -e "MAX_MODEL=mistral-community/pixtral-12b" \
+    -e "MAX_MODEL=google/gemma-3-27b-it" \
     -e "MAX_ARGS=--max-batch-size 32 --max-cache-size 8192" \
     -p 8000:8000 -p 8010:8010 \
-    max-recipes
+    max-cookbook
 ```
 
 ### Running in Detached Mode
@@ -177,25 +193,26 @@ Run the container in the background:
 
 ```bash
 docker run -d \
-    --name max-recipes \
+    --name max-cookbook \
     --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
     -e "HF_TOKEN=your-token" \
-    -e "MAX_MODEL=mistral-community/pixtral-12b" \
+    -e "MAX_MODEL=google/gemma-3-27b-it" \
     -p 8000:8000 -p 8010:8010 \
-    max-recipes
+    max-cookbook
 ```
 
 View logs:
 
 ```bash
-docker logs -f max-recipes
+docker logs -f max-cookbook
 ```
 
 Stop container:
 
 ```bash
-docker stop max-recipes
+docker stop max-cookbook
 ```
 
 ### Multiple Models (External MAX Containers)
@@ -209,8 +226,8 @@ docker run -d --name max-model-1 --gpus=1 \
     -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
     --env "HF_TOKEN=${HF_TOKEN}" \
     -p 8000:8000 \
-    modular/max-full:latest \
-    --model-path google/gemma-3-27b-it
+    modular/max-nvidia-full:latest \
+    --model google/gemma-3-27b-it
 
 # Model 2 on port 8002
 docker run -d --name max-model-2 --gpus=1 \
@@ -218,8 +235,8 @@ docker run -d --name max-model-2 --gpus=1 \
     -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
     --env "HF_TOKEN=${HF_TOKEN}" \
     -p 8002:8000 \
-    modular/max-full:latest \
-    --model-path mistral-community/pixtral-12b
+    modular/max-nvidia-full:latest \
+    --model mistral-community/pixtral-12b
 ```
 
 Configure in `backend/.env.local`:
@@ -253,7 +270,7 @@ docker run --rm --device /dev/kfd --device /dev/dri rocm/rocm-terminal rocm-smi
 **Check service logs:**
 
 ```bash
-docker logs max-recipes
+docker logs max-cookbook
 # Look for PM2 startup messages and any errors
 ```
 
@@ -282,7 +299,7 @@ lsof -i :8000
 **Check container logs:**
 
 ```bash
-docker logs max-recipes
+docker logs max-cookbook
 # Look for PM2 errors or service crashes
 ```
 
@@ -311,5 +328,6 @@ docker logs max-recipes
 
 -   [API Reference](./api.md) - Complete endpoint specifications and request/response formats
 -   [Contributing Guide](./contributing.md) - Add your own recipes
+-   [MAX Container Guide](https://docs.modular.com/max/container/) - Official reference for self-hosting MAX in Docker
 -   [MAX Documentation](https://docs.modular.com/max/) - Learn more about MAX
 -   [Project Context](../AGENTS.md) - Comprehensive architecture reference

@@ -246,7 +246,7 @@ export function Component({ endpoint, model, pathname: _pathname }: RecipeProps)
                 </Alert>
             )}
 
-            <Grid gutter="md">
+            <Grid gap="md">
                 {/* Left column is sticky so the form/Generate button stay visible
                     as the page scrolls through long output. alignSelf: flex-start
                     prevents the column from stretching to match the right column's
@@ -317,7 +317,7 @@ function ConfigPanel({ systemPrompt, setSystemPrompt, input, setInput, disabled,
                     />
                     <Text size="sm" fw={500}>System prompt</Text>
                 </UnstyledButton>
-                <Collapse in={systemPromptOpen}>
+                <Collapse expanded={systemPromptOpen}>
                     <Textarea
                         value={systemPrompt}
                         onChange={(e) => setSystemPrompt(e.currentTarget.value)}
