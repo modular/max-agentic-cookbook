@@ -105,7 +105,7 @@ docker run --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     -e "HF_HUB_ENABLE_HF_TRANSFER=1" \
     -e "HF_TOKEN=your-huggingface-token" \
-    -e "MAX_MODEL=google/gemma-3-27b-it" \
+    -e "MAX_MODEL=google/gemma-4-31B-it" \
     -p 8000:8000 \
     -p 8010:8010 \
     max-cookbook
@@ -118,7 +118,7 @@ docker run \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     -e "HF_HUB_ENABLE_HF_TRANSFER=1" \
     -e "HF_TOKEN=your-huggingface-token" \
-    -e "MAX_MODEL=google/gemma-3-27b-it" \
+    -e "MAX_MODEL=google/gemma-4-31B-it" \
     -p 8000:8000 \
     -p 8010:8010 \
     max-cookbook

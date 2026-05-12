@@ -68,7 +68,7 @@ docker run --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     -e "HF_HUB_ENABLE_HF_TRANSFER=1" \
     -e "HF_TOKEN=your-huggingface-token" \
-    -e "MAX_MODEL=google/gemma-3-27b-it" \
+    -e "MAX_MODEL=google/gemma-4-31B-it" \
     -p 8000:8000 \
     -p 8010:8010 \
     max-cookbook
@@ -84,7 +84,7 @@ docker run \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     -e "HF_HUB_ENABLE_HF_TRANSFER=1" \
     -e "HF_TOKEN=your-huggingface-token" \
-    -e "MAX_MODEL=google/gemma-3-27b-it" \
+    -e "MAX_MODEL=google/gemma-4-31B-it" \
     -p 8000:8000 \
     -p 8010:8010 \
     max-cookbook
@@ -134,15 +134,15 @@ The cookbook works with any model supported by MAX. Popular choices:
 
 ### Multimodal Models
 
--   `mistral-community/pixtral-12b`
--   `OpenGVLab/InternVL3-14B-Instruct`
--   `meta-llama/Llama-3.2-11B-Vision-Instruct`
+-   `google/gemma-4-31B-it`
+-   `moonshotai/Kimi-K2.6`
 
 ### Text-Only Models
 
--   `google/gemma-3-27b-it`
--   `meta-llama/Llama-3.1-8B-Instruct`
--   `mistralai/Mistral-Small-24B-Instruct-2501`
+-   `deepseek-ai/DeepSeek-V4-Flash`
+-   `deepseek-ai/DeepSeek-V4-Pro`
+-   `zai-org/GLM-5.1`
+-   `MiniMaxAI/MiniMax-M2.7`
 
 See [MAX Builds](https://builds.modular.com/?category=models) for the full list of supported models.
 
@@ -165,7 +165,7 @@ Pass additional arguments to `max serve`:
 docker run --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     -e "HF_TOKEN=your-token" \
-    -e "MAX_MODEL=google/gemma-3-27b-it" \
+    -e "MAX_MODEL=google/gemma-4-31B-it" \
     -e "MAX_ARGS=--max-batch-size 32 --max-cache-size 8192" \
     -p 8000:8000 -p 8010:8010 \
     max-cookbook
@@ -181,7 +181,7 @@ docker run -d \
     --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     -e "HF_TOKEN=your-token" \
-    -e "MAX_MODEL=google/gemma-3-27b-it" \
+    -e "MAX_MODEL=google/gemma-4-31B-it" \
     -p 8000:8000 -p 8010:8010 \
     max-cookbook
 ```
@@ -210,7 +210,7 @@ docker run -d --name max-model-1 --gpus=1 \
     --env "HF_TOKEN=${HF_TOKEN}" \
     -p 8000:8000 \
     modular/max-full:latest \
-    --model-path google/gemma-3-27b-it
+    --model-path deepseek-ai/DeepSeek-V4-Flash
 
 # Model 2 on port 8002
 docker run -d --name max-model-2 --gpus=1 \
@@ -219,15 +219,15 @@ docker run -d --name max-model-2 --gpus=1 \
     --env "HF_TOKEN=${HF_TOKEN}" \
     -p 8002:8000 \
     modular/max-full:latest \
-    --model-path mistral-community/pixtral-12b
+    --model-path moonshotai/Kimi-K2.6
 ```
 
 Configure in `backend/.env.local`:
 
 ```env
 COOKBOOK_ENDPOINTS='[
-  {"id": "gemma", "baseUrl": "http://localhost:8000/v1", "apiKey": "EMPTY"},
-  {"id": "pixtral", "baseUrl": "http://localhost:8002/v1", "apiKey": "EMPTY"}
+  {"id": "deepseek", "baseUrl": "http://localhost:8000/v1", "apiKey": "EMPTY"},
+  {"id": "kimi", "baseUrl": "http://localhost:8002/v1", "apiKey": "EMPTY"}
 ]'
 ```
 
