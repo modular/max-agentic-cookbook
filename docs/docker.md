@@ -33,8 +33,10 @@ Selects the base MAX image (default: `universal`):
 | Value       | Image                     | Description                                         |
 | ----------- | ------------------------- | --------------------------------------------------- |
 | `universal` | `modular/max-full`        | Larger image supporting all GPU types (NVIDIA, AMD) |
-| `nvidia`    | `modular/max-nvidia-full` | Smaller NVIDIA-specific image                       |
-| `amd`       | `modular/max-amd`         | Smaller AMD-specific image                          |
+| `nvidia`    | `modular/max-nvidia-full` | Smaller NVIDIA-specific image (recommended)         |
+| `amd`       | `modular/max-amd`         | Smaller AMD-specific image (recommended)            |
+
+> **Note:** The official [MAX Container guide](https://docs.modular.com/max/container/) recommends the GPU-specific images (`modular/max-nvidia-full`, `modular/max-amd`) for best release cadence and image size. Build with `--build-arg MAX_GPU=nvidia` or `--build-arg MAX_GPU=amd` whenever your target hardware is known.
 
 #### MAX_TAG
 
@@ -66,9 +68,10 @@ docker build --build-arg MAX_GPU=nvidia --build-arg MAX_TAG=nightly -t max-cookb
 ```bash
 docker run --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
     -e "HF_HUB_ENABLE_HF_TRANSFER=1" \
     -e "HF_TOKEN=your-huggingface-token" \
-    -e "MAX_MODEL=google/gemma-4-31B-it" \
+    -e "MAX_MODEL=google/gemma-3-27b-it" \
     -p 8000:8000 \
     -p 8010:8010 \
     max-cookbook
@@ -82,13 +85,16 @@ docker run \
     --device /dev/kfd \
     --device /dev/dri \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
     -e "HF_HUB_ENABLE_HF_TRANSFER=1" \
     -e "HF_TOKEN=your-huggingface-token" \
-    -e "MAX_MODEL=google/gemma-4-31B-it" \
+    -e "MAX_MODEL=google/gemma-3-27b-it" \
     -p 8000:8000 \
     -p 8010:8010 \
     max-cookbook
 ```
+
+> **Tip:** Mounting `~/.cache/max_cache` persists MAX's Mojo compilation cache, dramatically speeding up subsequent cold starts. See the [MAX Container guide](https://docs.modular.com/max/container/) for the official reference.
 
 ## Configuration
 
@@ -119,6 +125,14 @@ docker run \
 
 Caches downloaded models between container restarts, significantly speeding up subsequent launches.
 
+**MAX compilation cache** (recommended):
+
+```bash
+-v ~/.cache/max_cache:/opt/venv/share/max/.max_cache
+```
+
+Persists MAX's Mojo compilation artifacts so subsequent starts skip the multi-minute compile step. Matches the official [MAX Container guide](https://docs.modular.com/max/container/).
+
 ## Service Orchestration
 
 PM2 manages service startup order (see [`ecosystem.config.js`](../ecosystem.config.js)):
@@ -134,15 +148,16 @@ The cookbook works with any model supported by MAX. Popular choices:
 
 ### Multimodal Models
 
--   `google/gemma-4-31B-it`
--   `moonshotai/Kimi-K2.6`
+-   `google/gemma-3-27b-it`
+-   `mistral-community/pixtral-12b`
+-   `OpenGVLab/InternVL3-14B-Instruct`
+-   `meta-llama/Llama-3.2-11B-Vision-Instruct`
 
 ### Text-Only Models
 
--   `deepseek-ai/DeepSeek-V4-Flash`
--   `deepseek-ai/DeepSeek-V4-Pro`
--   `zai-org/GLM-5.1`
--   `MiniMaxAI/MiniMax-M2.7`
+-   `meta-llama/Llama-3.1-8B-Instruct`
+-   `mistralai/Mistral-Small-24B-Instruct-2501`
+-   `Qwen/Qwen3-30B-A3B-Instruct-2507`
 
 See [MAX Builds](https://builds.modular.com/?category=models) for the full list of supported models.
 
@@ -164,8 +179,9 @@ Pass additional arguments to `max serve`:
 ```bash
 docker run --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
     -e "HF_TOKEN=your-token" \
-    -e "MAX_MODEL=google/gemma-4-31B-it" \
+    -e "MAX_MODEL=google/gemma-3-27b-it" \
     -e "MAX_ARGS=--max-batch-size 32 --max-cache-size 8192" \
     -p 8000:8000 -p 8010:8010 \
     max-cookbook
@@ -180,8 +196,9 @@ docker run -d \
     --name max-cookbook \
     --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
+    -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
     -e "HF_TOKEN=your-token" \
-    -e "MAX_MODEL=google/gemma-4-31B-it" \
+    -e "MAX_MODEL=google/gemma-3-27b-it" \
     -p 8000:8000 -p 8010:8010 \
     max-cookbook
 ```
@@ -209,8 +226,8 @@ docker run -d --name max-model-1 --gpus=1 \
     -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
     --env "HF_TOKEN=${HF_TOKEN}" \
     -p 8000:8000 \
-    modular/max-full:latest \
-    --model-path deepseek-ai/DeepSeek-V4-Flash
+    modular/max-nvidia-full:latest \
+    --model google/gemma-3-27b-it
 
 # Model 2 on port 8002
 docker run -d --name max-model-2 --gpus=1 \
@@ -218,16 +235,16 @@ docker run -d --name max-model-2 --gpus=1 \
     -v ~/.cache/max_cache:/opt/venv/share/max/.max_cache \
     --env "HF_TOKEN=${HF_TOKEN}" \
     -p 8002:8000 \
-    modular/max-full:latest \
-    --model-path moonshotai/Kimi-K2.6
+    modular/max-nvidia-full:latest \
+    --model mistral-community/pixtral-12b
 ```
 
 Configure in `backend/.env.local`:
 
 ```env
 COOKBOOK_ENDPOINTS='[
-  {"id": "deepseek", "baseUrl": "http://localhost:8000/v1", "apiKey": "EMPTY"},
-  {"id": "kimi", "baseUrl": "http://localhost:8002/v1", "apiKey": "EMPTY"}
+  {"id": "gemma", "baseUrl": "http://localhost:8000/v1", "apiKey": "EMPTY"},
+  {"id": "pixtral", "baseUrl": "http://localhost:8002/v1", "apiKey": "EMPTY"}
 ]'
 ```
 
@@ -311,5 +328,6 @@ docker logs max-cookbook
 
 -   [API Reference](./api.md) - Complete endpoint specifications and request/response formats
 -   [Contributing Guide](./contributing.md) - Add your own recipes
+-   [MAX Container Guide](https://docs.modular.com/max/container/) - Official reference for self-hosting MAX in Docker
 -   [MAX Documentation](https://docs.modular.com/max/) - Learn more about MAX
 -   [Project Context](../AGENTS.md) - Comprehensive architecture reference
