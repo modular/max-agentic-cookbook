@@ -19,7 +19,7 @@ See [`Dockerfile`](../Dockerfile) and [`ecosystem.config.js`](../ecosystem.confi
 Build the container image:
 
 ```bash
-docker build -t max-recipes .
+docker build -t max-cookbook .
 ```
 
 ### Build Arguments
@@ -50,13 +50,13 @@ Selects the MAX version (default: `latest`):
 **AMD-specific container:**
 
 ```bash
-docker build --build-arg MAX_GPU=amd -t max-recipes:amd .
+docker build --build-arg MAX_GPU=amd -t max-cookbook:amd .
 ```
 
 **NVIDIA-specific container with nightly builds:**
 
 ```bash
-docker build --build-arg MAX_GPU=nvidia --build-arg MAX_TAG=nightly -t max-recipes:nvidia-nightly .
+docker build --build-arg MAX_GPU=nvidia --build-arg MAX_TAG=nightly -t max-cookbook:nvidia-nightly .
 ```
 
 ## Running the Container
@@ -68,10 +68,10 @@ docker run --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     -e "HF_HUB_ENABLE_HF_TRANSFER=1" \
     -e "HF_TOKEN=your-huggingface-token" \
-    -e "MAX_MODEL=mistral-community/pixtral-12b" \
+    -e "MAX_MODEL=google/gemma-3-27b-it" \
     -p 8000:8000 \
     -p 8010:8010 \
-    max-recipes
+    max-cookbook
 ```
 
 ### AMD GPU
@@ -84,10 +84,10 @@ docker run \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     -e "HF_HUB_ENABLE_HF_TRANSFER=1" \
     -e "HF_TOKEN=your-huggingface-token" \
-    -e "MAX_MODEL=mistral-community/pixtral-12b" \
+    -e "MAX_MODEL=google/gemma-3-27b-it" \
     -p 8000:8000 \
     -p 8010:8010 \
-    max-recipes
+    max-cookbook
 ```
 
 ## Configuration
@@ -165,10 +165,10 @@ Pass additional arguments to `max serve`:
 docker run --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     -e "HF_TOKEN=your-token" \
-    -e "MAX_MODEL=mistral-community/pixtral-12b" \
+    -e "MAX_MODEL=google/gemma-3-27b-it" \
     -e "MAX_ARGS=--max-batch-size 32 --max-cache-size 8192" \
     -p 8000:8000 -p 8010:8010 \
-    max-recipes
+    max-cookbook
 ```
 
 ### Running in Detached Mode
@@ -177,25 +177,25 @@ Run the container in the background:
 
 ```bash
 docker run -d \
-    --name max-recipes \
+    --name max-cookbook \
     --gpus all \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     -e "HF_TOKEN=your-token" \
-    -e "MAX_MODEL=mistral-community/pixtral-12b" \
+    -e "MAX_MODEL=google/gemma-3-27b-it" \
     -p 8000:8000 -p 8010:8010 \
-    max-recipes
+    max-cookbook
 ```
 
 View logs:
 
 ```bash
-docker logs -f max-recipes
+docker logs -f max-cookbook
 ```
 
 Stop container:
 
 ```bash
-docker stop max-recipes
+docker stop max-cookbook
 ```
 
 ### Multiple Models (External MAX Containers)
@@ -253,7 +253,7 @@ docker run --rm --device /dev/kfd --device /dev/dri rocm/rocm-terminal rocm-smi
 **Check service logs:**
 
 ```bash
-docker logs max-recipes
+docker logs max-cookbook
 # Look for PM2 startup messages and any errors
 ```
 
@@ -282,7 +282,7 @@ lsof -i :8000
 **Check container logs:**
 
 ```bash
-docker logs max-recipes
+docker logs max-cookbook
 # Look for PM2 errors or service crashes
 ```
 
